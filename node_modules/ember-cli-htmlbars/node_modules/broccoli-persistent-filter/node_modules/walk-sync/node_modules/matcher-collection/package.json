@@ -1,0 +1,58 @@
+{
+  "name": "matcher-collection",
+  "version": "1.0.4",
+  "main": "index.js",
+  "dependencies": {
+    "minimatch": "^3.0.2"
+  },
+  "devDependencies": {
+    "tap": "^1.4.1"
+  },
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "test": "tap --timeout 2 test.js",
+    "test:debug": "tap --debug-brk --timeout 9999 test.js"
+  },
+  "author": {
+    "name": "Stefan Penner"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefanpenner/matcher-collection.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stefanpenner/matcher-collection/issues"
+  },
+  "homepage": "https://github.com/stefanpenner/matcher-collection#readme",
+  "description": "Minimatch but for collections of minimatcher matchers.",
+  "gitHead": "ac504815adea4da91c48ba375841949fe1f42728",
+  "_id": "matcher-collection@1.0.4",
+  "_shasum": "2f66ae0869996f29e43d0b62c83dd1d43e581755",
+  "_from": "matcher-collection@>=1.0.0 <2.0.0",
+  "_npmVersion": "3.10.5",
+  "_nodeVersion": "6.2.2",
+  "_npmUser": {
+    "name": "stefanpenner",
+    "email": "stefan.penner@gmail.com"
+  },
+  "dist": {
+    "shasum": "2f66ae0869996f29e43d0b62c83dd1d43e581755",
+    "tarball": "https://registry.npmjs.org/matcher-collection/-/matcher-collection-1.0.4.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "stefanpenner",
+      "email": "stefan.penner@gmail.com"
+    }
+  ],
+  "_npmOperationalInternal": {
+    "host": "packages-16-east.internal.npmjs.com",
+    "tmp": "tmp/matcher-collection-1.0.4.tgz_1470414128257_0.829856917494908"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/matcher-collection/-/matcher-collection-1.0.4.tgz",
+  "readme": "ERROR: No README data found!"
+}
