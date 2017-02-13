@@ -32,6 +32,170 @@ define('dummy/components/app-version', ['exports', 'ember-cli-app-version/compon
     name: name
   });
 });
+define('dummy/components/column-chart/component', ['exports', 'ember-data-visualizations/components/column-chart/component'], function (exports, _emberDataVisualizationsComponentsColumnChartComponent) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberDataVisualizationsComponentsColumnChartComponent['default'];
+    }
+  });
+});
+define('dummy/components/ember-tether', ['exports', 'ember-tether/components/ember-tether'], function (exports, _emberTetherComponentsEmberTether) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberTetherComponentsEmberTether['default'];
+    }
+  });
+});
+define('dummy/controllers/application', ['exports', 'ember'], function (exports, _ember) {
+    exports['default'] = _ember['default'].Controller.extend({
+        metrics: [{ value: 'sighting', label: 'Sightings' }],
+
+        dimensions: [],
+        domainString: '',
+        groups: [],
+        colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+        xAxis: {
+            domain: [moment("10/31/2016"), moment("12/03/2016")],
+            ticks: 5
+        },
+        yAxis: {
+            ticks: 3
+        },
+
+        series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+
+        onClick: function onClick(datum) {
+            this.set('domainString', datum.x);
+        },
+
+        /**
+         * @method _createDimensions
+         * Create the defined dimensions from the controller.
+         * @return {void}
+         * @private
+         */
+        _createDimensions: function _createDimensions() {
+            var content = _ember['default'].get(this, 'content');
+
+            content.forEach(function (d) {
+                d.date = moment(d.date, 'YYYYMMDD').toDate();
+            });
+
+            this._crossfilter = crossfilter(content);
+
+            this.set('dimensions', this._crossfilter.dimension(function (d) {
+                return d.date;
+            }));
+        },
+
+        /**
+         * @method _createGroups
+         * Create the defined groups from the controller.
+         * @return {void}
+         * @private
+         */
+        _createGroups: function _createGroups() {
+            var groups = [];
+            var dim = this.get('dimensions');
+
+            var createAddDataFunc = function createAddDataFunc(key) {
+                return function () {
+                    var grouping = dim.group().reduceSum(function (d) {
+                        return d[key];
+                    });
+                    groups.push(grouping);
+                };
+            };
+
+            createAddDataFunc('calls')();
+            createAddDataFunc('chats')();
+            createAddDataFunc('emails')();
+
+            this.set('groups', groups);
+
+            // Ember.run.later(this, (function() {
+            //     var groups = [];
+            //     var dim = this.get('dimensions');
+
+            //     var createAddDataFunc = function(key) {
+            //         return function() {
+            //             var grouping = dim.group().reduceSum(function (d) {
+            //                 return d[key] * 2;
+            //             });
+            //             groups.push(grouping);
+            //         };
+            //     };
+
+            //     createAddDataFunc('calls')();
+            //     createAddDataFunc('chats')();
+            //     createAddDataFunc('emails')();
+
+            //     this.set('groups', groups);
+
+            //     Ember.run.later(this, (function() {
+            //       var groups = [];
+            //       var dim = this.get('dimensions');
+
+            //       var createAddDataFunc = function(key) {
+            //           return function() {
+            //               var grouping = dim.group().reduceSum(function (d) {
+            //                   return d[key] * 3;
+            //               });
+            //               groups.push(grouping);
+            //           };
+            //       };
+
+            //       createAddDataFunc('calls')();
+            //       createAddDataFunc('chats')();
+            //       createAddDataFunc('emails')();
+
+            //       this.set('groups', groups);
+
+            //       Ember.run.later(this, (function() {
+            //         var groups = [];
+            //         var dim = this.get('dimensions');
+
+            //         var createAddDataFunc = function(key) {
+            //             return function() {
+            //                 var grouping = dim.group().reduceSum(function (d) {
+            //                     return d[key];
+            //                 });
+            //                 groups.push(grouping);
+            //             };
+            //         };
+
+            //         createAddDataFunc('calls')();
+            //         createAddDataFunc('chats')();
+            //         createAddDataFunc('emails')();
+
+            //         this.set('groups', groups);
+
+            //     }), 10000);
+
+            //   }), 10000);       
+
+            // }), 10000);
+        },
+
+        init: function init() {
+            // this.set('content', {});
+            var self = this;
+            d3.json("data.json", function (error, json) {
+                if (error) {
+                    return console.log(error);
+                }
+                self.set('content', json);
+                self._createDimensions();
+                self._createGroups();
+            });
+
+            this.set('domainString', moment("10/31/2016").toISOString() + ' - ' + moment("12/03/2016").toISOString());
+        }
+    });
+});
+/* global moment, d3, crossfilter */
 define('dummy/controllers/array', ['exports', 'ember'], function (exports, _ember) {
   exports['default'] = _ember['default'].Controller;
 });
@@ -240,7 +404,7 @@ define("dummy/templates/application", ["exports"], function (exports) {
       meta: {
         "fragmentReason": {
           "name": "missing-wrapper",
-          "problems": ["multiple-nodes", "wrong-type"]
+          "problems": ["wrong-type", "multiple-nodes"]
         },
         "revision": "Ember@2.4.6",
         "loc": {
@@ -250,7 +414,7 @@ define("dummy/templates/application", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 4,
+            "line": 19,
             "column": 0
           }
         },
@@ -262,10 +426,11 @@ define("dummy/templates/application", ["exports"], function (exports) {
       hasRendered: false,
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createElement("h2");
-        dom.setAttribute(el1, "id", "title");
-        var el2 = dom.createTextNode("Welcome to Ember");
-        dom.appendChild(el1, el2);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
@@ -276,11 +441,14 @@ define("dummy/templates/application", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(1);
-        morphs[0] = dom.createMorphAt(fragment, 2, 2, contextualElement);
+        var morphs = new Array(3);
+        morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+        morphs[1] = dom.createMorphAt(fragment, 2, 2, contextualElement);
+        morphs[2] = dom.createMorphAt(fragment, 4, 4, contextualElement);
+        dom.insertBoundary(fragment, 0);
         return morphs;
       },
-      statements: [["content", "outlet", ["loc", [null, [3, 0], [3, 10]]]]],
+      statements: [["content", "domainString", ["loc", [null, [1, 0], [1, 16]]]], ["inline", "column-chart", [], ["dimension", ["subexpr", "@mut", [["get", "dimensions", ["loc", [null, [4, 14], [4, 24]]]]], [], []], "group", ["subexpr", "@mut", [["get", "groups", ["loc", [null, [5, 10], [5, 16]]]]], [], []], "seriesData", ["subexpr", "@mut", [["get", "content", ["loc", [null, [6, 15], [6, 22]]]]], [], []], "type", "LAYERED", "seriesMaxMin", 2, "showMaxMin", true, "series", ["subexpr", "@mut", [["get", "series", ["loc", [null, [10, 11], [10, 17]]]]], [], []], "colors", ["subexpr", "@mut", [["get", "colors", ["loc", [null, [11, 11], [11, 17]]]]], [], []], "height", 200, "xAxis", ["subexpr", "@mut", [["get", "xAxis", ["loc", [null, [13, 10], [13, 15]]]]], [], []], "yAxis", ["subexpr", "@mut", [["get", "yAxis", ["loc", [null, [14, 10], [14, 15]]]]], [], []], "onClick", ["subexpr", "action", [["get", "onClick", ["loc", [null, [15, 20], [15, 27]]]]], [], ["loc", [null, [15, 12], [15, 28]]]]], ["loc", [null, [3, 0], [16, 2]]]], ["content", "outlet", ["loc", [null, [18, 0], [18, 10]]]]],
       locals: [],
       templates: []
     };
@@ -318,7 +486,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("dummy/app")["default"].create({"name":"ember-data-visualizations","version":"0.0.0+304c2560"});
+  require("dummy/app")["default"].create({"name":"ember-data-visualizations","version":"0.0.1+6b33ce8c"});
 }
 
 /* jshint ignore:end */

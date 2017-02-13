@@ -1,3 +1,18 @@
-<h2 id="title">Welcome to Ember</h2>
+{{domainString}}
+
+{{column-chart
+    dimension=dimensions
+    group=groups
+    seriesData=content
+    type='LAYERED'
+    seriesMaxMin=2
+    showMaxMin=true
+    series=series
+    colors=colors
+    height=200
+    xAxis=xAxis
+    yAxis=yAxis
+    onClick=(action onClick)
+}}
 
 {{outlet}}

@@ -1,0 +1,131 @@
+.chart {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+
+    .chart-header,
+    .axis-title,
+    .x.axis {
+        flex-grow: 0;
+        flex-shrink: 0;
+    }
+
+    .chart-canvas {
+        flex-grow: 1;
+        flex-shrink: 1;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    .chart-canvas svg {
+        display: block;
+    }
+
+    .axis-title {
+        font-weight: bold;
+    }
+
+    .x.axis {
+        margin-bottom: 5px;
+        overflow: visible;
+        width: 100%;
+    }
+
+    .x.axis line,
+    .x.axis path {
+        fill: none;
+        stroke: #d1d1d1;
+        stroke-width: 1px;
+        shape-rendering: crispEdges;
+    }
+
+    .axes {
+        overflow: visible;
+        opacity: 1;
+    }
+
+    .y.axis,
+    .yr.axis {
+        overflow: visible;
+        opacity: 1;
+    }
+
+    .y.axis line,
+    .y.axis path,
+    .yr.axis line,
+    .yr.axis path {
+        fill: none;
+        stroke: #d1d1d1;
+        stroke-width: 1px;
+        shape-rendering: crispEdges;
+    }
+
+    .grid-line {
+        fill: none;
+        stroke: #ccc;
+        opacity: .5;
+        shape-rendering: crispEdges;
+    }
+
+    .grid-line line {
+        fill: none;
+        stroke: #ccc;
+        opacity: .5;
+        shape-rendering: crispEdges;
+    }
+
+    .brush rect.background {
+        z-index: -999;
+    }
+
+    .brush rect.extent {
+        fill: steelblue;
+        fill-opacity: .125;
+    }
+
+    .brush .resize path {
+        fill: #eee;
+        stroke: #666;
+    }
+
+    .legend text,
+    .legend rect{
+        cursor: pointer;
+    }
+
+
+
+}
+
+
+.d3-tip {
+          line-height: 1;
+          font-weight: bold;
+          padding: 12px;
+          background: rgba(0, 0, 0, 0.8);
+          color: #fff;
+          border-radius: 2px;
+        }
+
+        /* Creates a small triangle extender for the tooltip */
+        .d3-tip:after {
+          box-sizing: border-box;
+          display: inline;
+          font-size: 10px;
+          width: 100%;
+          line-height: 1;
+          color: rgba(0, 0, 0, 0.8);
+          content: "\25BC";
+          position: absolute;
+          text-align: center;
+        }
+
+        /* Style northward tooltips differently */
+        .d3-tip.n:after {
+          margin: -1px 0 0 0;
+          top: 100%;
+          left: 0;
+        }
