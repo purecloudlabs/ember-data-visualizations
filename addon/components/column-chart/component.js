@@ -82,7 +82,7 @@ export default Ember.Component.extend({
 
     tooltipDateFormat: 'L LT',
 
-    type: 'GROUPED', // GROUPED, STACKED, LAYERED (overlapping, first series in back -- should only be used for propoprtions)
+    type: 'GROUPED', // GROUPED, LAYERED (overlapping, first series in back -- should only be used for propoprtions), TODO: add STACKED
 
     // REQUIRED: group, dimension, xAxis.domain
     createChart: function() {
