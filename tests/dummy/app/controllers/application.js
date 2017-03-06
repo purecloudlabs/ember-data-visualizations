@@ -51,100 +51,36 @@ export default Ember.Controller.extend({
    * @private
    */
   _createGroups: function() {
-    var groups = [];
-    var dim = this.get('dimensions');
+      var groups = [];
+      var dim = this.get('dimensions');
 
-    var createAddDataFunc = function(key) {
-        return function() {
-            var grouping = dim.group().reduceSum(function (d) {
-                return d[key];
-            });
-            groups.push(grouping);
-        };
-    };
+     var createAddDataFunc = function(key) {
+         return function() {
+              var grouping = dim.group().reduceSum(function (d) {
+                  return d[key];
+              });
+              groups.push(grouping);
+         };
+      };
 
-    createAddDataFunc('calls')();
-    createAddDataFunc('chats')();
-    createAddDataFunc('emails')();
+      createAddDataFunc('calls')();
+      createAddDataFunc('chats')();
+      createAddDataFunc('emails')();
 
-    this.set('groups', groups);
-
-    // Ember.run.later(this, (function() {
-    //     var groups = [];
-    //     var dim = this.get('dimensions');
-
-    //     var createAddDataFunc = function(key) {
-    //         return function() {
-    //             var grouping = dim.group().reduceSum(function (d) {
-    //                 return d[key] * 2;
-    //             });
-    //             groups.push(grouping);
-    //         };
-    //     };
-
-    //     createAddDataFunc('calls')();
-    //     createAddDataFunc('chats')();
-    //     createAddDataFunc('emails')();
-
-    //     this.set('groups', groups);
-
-    //     Ember.run.later(this, (function() {
-    //       var groups = [];
-    //       var dim = this.get('dimensions');
-
-    //       var createAddDataFunc = function(key) {
-    //           return function() {
-    //               var grouping = dim.group().reduceSum(function (d) {
-    //                   return d[key] * 3;
-    //               });
-    //               groups.push(grouping);
-    //           };
-    //       };
-
-    //       createAddDataFunc('calls')();
-    //       createAddDataFunc('chats')();
-    //       createAddDataFunc('emails')();
-
-    //       this.set('groups', groups);
-
-    //       Ember.run.later(this, (function() {
-    //         var groups = [];
-    //         var dim = this.get('dimensions');
-
-    //         var createAddDataFunc = function(key) {
-    //             return function() {
-    //                 var grouping = dim.group().reduceSum(function (d) {
-    //                     return d[key];
-    //                 });
-    //                 groups.push(grouping);
-    //             };
-    //         };
-
-    //         createAddDataFunc('calls')();
-    //         createAddDataFunc('chats')();
-    //         createAddDataFunc('emails')();
-
-    //         this.set('groups', groups);
-            
-    //     }), 10000);
-          
-    //   }), 10000);        
-
-    // }), 10000);
+      this.set('groups', groups);
   },
 
   init: function() {
-      // this.set('content', {});
-    var self = this;
-    d3.json("data.json", function(error, json) {
-      if (error) {
-        return console.log(error);
-      } 
-      self.set('content', json);
-      self._createDimensions();
-      self._createGroups();
-    });
+      var self = this;
+      d3.json("data.json", function(error, json) {
+        if (error) {
+          return console.log(error);
+        } 
+        self.set('content', json);
+        self._createDimensions();
+        self._createGroups();
+      });
 
-    this.set('domainString', moment("10/31/2016").toISOString() + ' - ' + moment("12/03/2016").toISOString());
+      this.set('domainString', moment("10/31/2016").toISOString() + ' - ' + moment("12/03/2016").toISOString());
   }
 });
