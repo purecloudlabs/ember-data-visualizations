@@ -24,22 +24,13 @@ module.exports = {
 
         return new TreeMerger([defaultTree, compiledLessTree]);
     },
-    included(app) {
-        debugger;
-        if (typeof app.import !== 'function' && app.app) {
-            app = app.app;
-        }
+    included() {
+        this._super.included(...arguments);
 
-        app.options = app.options || {};
-        app.import = app.import || function () {};
-        this.app = app;
-
-        this._super.included(app);
-
-        app.import('bower_components/crossfilter/crossfilter.js');
-        app.import('bower_components/d3/d3.js');
-        app.import('bower_components/d3-tip/index.js');
-        app.import('bower_components/dcjs/dc.js');
-        app.import('bower_components/lodash/lodash.js');
+        this.import('bower_components/crossfilter/crossfilter.js');
+        this.import('bower_components/d3/d3.js');
+        this.import('bower_components/d3-tip/index.js');
+        this.import('bower_components/dcjs/dc.js');
+        this.import('bower_components/lodash/lodash.js');
     }
 };
