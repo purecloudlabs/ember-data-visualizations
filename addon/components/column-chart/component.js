@@ -87,7 +87,7 @@ export default Ember.Component.extend({
     // REQUIRED: group, dimension, xAxis.domain
     createChart: function() {
         if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
-            this.$().parents().find('.d3-tip').remove()
+            this.$().parents().find('.d3-tip').remove();
         }
 
         if(!this.get('group') || !this.get('group.0.all') || !this.get('dimension')){
@@ -373,7 +373,7 @@ export default Ember.Component.extend({
 
         $(window).resize(function(){
             if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
-                this.$().parents().find('.d3-tip').remove()
+                this.$().parents().find('.d3-tip').remove();
             }
             Ember.run.debounce(self, self.createChart, 500);
         });
