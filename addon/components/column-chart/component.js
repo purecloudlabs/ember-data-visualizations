@@ -82,15 +82,15 @@ export default Ember.Component.extend({
 
     tooltipDateFormat: 'L LT',
 
-    type: 'GROUPED', // GROUPED, LAYERED (overlapping, first series in back -- should only be used for propoprtions), TODO: add STACKED
+    type: 'GROUPED', // GROUPED, LAYERED (overlapping, first series in back -- should only be used for proportions), TODO: add STACKED
 
     // REQUIRED: group, dimension, xAxis.domain
-    createChart: function() {
+    createChart() {
         if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
             this.$().parents().find('.d3-tip').remove();
         }
 
-        if(!this.get('group') || !this.get('group.0.all') || !this.get('dimension')){
+        if (!this.get('group') || !this.get('group.0.all') || !this.get('dimension')){
             return false;
         }
 
@@ -107,7 +107,7 @@ export default Ember.Component.extend({
         };
 
         let columnCharts = [], columnChart, title;
-        let compositeChart = dc.compositeChart('#' + this.$().context.id);
+        let compositeChart = dc.compositeChart(`#${this.$().context.id}`);
 
         const colors = this.get('colors');
         const showMaxMin = this.get('showMaxMin');
@@ -124,9 +124,9 @@ export default Ember.Component.extend({
         const tooltipDateFormat = this.get('tooltipDateFormat');
         const format = this.get('xAxis.format');
 
-        let tip = d3.tip().attr('class', 'd3-tip').html(function(d) { 
+        let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
             if (!_.isEmpty(titles)) {
-                let str = '<span class="tooltip-time">' + moment(d.data.key).format(tooltipDateFormat) + '</span><br/>';
+                let str = `<span class="tooltip-time">${moment(d.data.key).format(tooltipDateFormat)}</span><br/>`;
                 _.forEach(titles, function (title, i) {
                     let datum = data[d.data.key][i];
                     if (format === 'time') {
@@ -136,12 +136,12 @@ export default Ember.Component.extend({
                     } else {
                         datum = formatNumber(datum);
                     }
-                    str = str.concat('<span class="tooltip-value">' + title + ': ' + datum + '</span><br/>');
+                    str = str.concat(`<span class="tooltip-value">${title}: ${datum}</span><br/>`);
                 });
                 return str;
             }
 
-            return '<span>' + moment(d.data.key).format("L") + '</span><br/><span class="tooltip-value">' + d.data.value + '</span>';
+            return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${d.data.value}</span>`;
         });
 
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
@@ -151,7 +151,7 @@ export default Ember.Component.extend({
             if (showMaxMin && _.isNumber(seriesMaxMin)) {
                 if (index === seriesMaxMin) {
                     values = _.map(g.all(), 'value');
-                    nonZeroValues = _.filter(values, function (v) { return v > 0; });
+                    nonZeroValues = _.filter(values, v => v > 0);
                     maxValue = _.max(nonZeroValues);
                     maxIdx = _.indexOf(values, maxValue);
                     minValue = _.min(nonZeroValues);
@@ -215,9 +215,7 @@ export default Ember.Component.extend({
                 left: 100
             })
             .x(d3.time.scale().domain(xAxis.domain))
-            .xUnits(function() {
-                return groups[0].size() * (groups.length + 1);
-            });
+            .xUnits(() => groups[0].size() * (groups.length + 1));
 
         if (this.get('width')) {
             this.chart.width(this.get('width'));
@@ -231,65 +229,65 @@ export default Ember.Component.extend({
             .renderlet(function (chart) {
 
                 // Set up any necessary hatching patterns
-                let svg = d3.select(".column-chart > svg > defs");
+                let svg = d3.select('.column-chart > svg > defs');
 
                 svg.append('clippath')
                         .attr('id', 'topclip')
-                    .append("rect")
-                        .attr("x", "0")
-                        .attr("y", "0")
-                        .attr("width", 200)
-                        .attr("height", 200);
+                    .append('rect')
+                        .attr('x', '0')
+                        .attr('y', '0')
+                        .attr('width', 200)
+                        .attr('height', 200);
 
                 _.forEach(series, function (series, index) {
                     if (series.hatch === 'pos') {
                         svg.append('pattern')
-                            .attr('id', 'diagonalHatch' + index)
+                            .attr('id', `diagonalHatch${index}`)
                             .attr('patternUnits', 'userSpaceOnUse')
                             .attr('width', 4)
                             .attr('height', 4)
-                            .attr('patternTransform', "rotate(45)")
-                        .append("rect")
-                            .attr("x","0")
-                            .attr("y","0")
-                            .attr("width",2)
-                            .attr("height",4)
-                            .attr("fill", colors[index]);
+                            .attr('patternTransform', 'rotate(45)')
+                        .append('rect')
+                            .attr('x', '0')
+                            .attr('y', '0')
+                            .attr('width', 2)
+                            .attr('height', 4)
+                            .attr('fill', colors[index]);
 
-                        chart.selectAll(".sub._" + getIndexForHatch(index) + " rect.bar")
-                            .attr("fill", "url(#diagonalHatch" + index + ")")
-                            .attr("opacity", ".7");
+                        chart.selectAll(`.sub._${getIndexForHatch(index)} rect.bar`)
+                            .attr('fill', `url(#diagonalHatch${index})`)
+                            .attr('opacity', '.7');
 
                     } else if (series.hatch === 'neg') {
                         svg.append('pattern')
-                            .attr('id', 'diagonalHatch' + index)
+                            .attr('id', `diagonalHatch${index}`)
                             .attr('patternUnits', 'userSpaceOnUse')
                             .attr('width', 4)
                             .attr('height', 4)
-                            .attr('patternTransform', "rotate(-45)")
-                        .append("rect")
-                            .attr("x","0")
-                            .attr("y","0")
-                            .attr("width",2)
-                            .attr("height",4)
-                            .attr("fill", colors[index]);
+                            .attr('patternTransform', 'rotate(-45)')
+                        .append('rect')
+                            .attr('x', '0')
+                            .attr('y', '0')
+                            .attr('width', 2)
+                            .attr('height', 4)
+                            .attr('fill', colors[index]);
 
-                        chart.selectAll(".sub._" + getIndexForHatch(index) + " rect.bar")
-                            .attr("fill", "url(#diagonalHatch" + index + ")")
-                            .attr("opacity", ".7");
+                        chart.selectAll(`.sub._${getIndexForHatch(index)} rect.bar`)
+                            .attr('fill', `url(#diagonalHatch${index})`)
+                            .attr('opacity', '.7');
                     }
                 });
 
-                chart.selectAll("rect.bar")
-                    .attr("rx", "2")
-                    .attr("stroke", "white");
+                chart.selectAll('rect.bar')
+                    .attr('rx', '2')
+                    .attr('stroke', 'white');
 
                 const gap = 2;
                 let bars = chart.selectAll('.sub._0 rect.bar')[0];
                 let firstBar = bars[0];
                 const seriesCount = groups.length;
 
-                if(firstBar){
+                if (firstBar) {
                     let barWidth = (parseInt(d3.select(firstBar).attr('width'), 10)) || 1;
 
                     // if composed, double barWidth
@@ -297,25 +295,25 @@ export default Ember.Component.extend({
                         barWidth *= groups.length; // number of series
                     }
                     
-                    let position = -1 * ( barWidth + gap );
+                    let position = -1 * (barWidth + gap);
 
-                    for(let i = 0; i < seriesCount; i++) {
+                    for (let i = 0; i < seriesCount; i++) {
                         if (type === 'GROUPED') {
-                            chart.selectAll("g.sub._"+i)
-                                .attr("transform", "translate(" + position + ",0)");
+                            chart.selectAll(`g.sub._${i}`)
+                                .attr('transform', `translate(${position},0)`);
                         }
 
-                        position = position + ( barWidth + gap );
+                        position = position + (barWidth + gap);
                     }
-                    chart.selectAll("rect.bar")
-                        .attr("width", barWidth);
+                    chart.selectAll('rect.bar')
+                        .attr('width', barWidth);
 
                 }
 
                 svg.call(tip);
 
                 // clicking actions
-                chart.selectAll('rect.bar').on("click", function(d) {
+                chart.selectAll('rect.bar').on('click', function (d) {
                     onClick(d);
                 });
 
@@ -328,7 +326,7 @@ export default Ember.Component.extend({
                     let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
                     let b = bars[maxIdx];
                     if (b) {
-                        gLabels.append("text")
+                        gLabels.append('text')
                         .text(maxValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
                         .attr('y', Math.max(12, +b.getAttribute('y') - 5))
@@ -340,7 +338,7 @@ export default Ember.Component.extend({
                     b = bars[minIdx];
 
                     if (b) {
-                        gLabels.append("text")
+                        gLabels.append('text')
                         .text(minValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
                         .attr('y', Math.max(12, +b.getAttribute('y') - 5))
@@ -349,7 +347,6 @@ export default Ember.Component.extend({
                         .attr('fill', colors[seriesMaxMin]);
                     }
                 }
-                
             })
             .compose(columnCharts);
 
@@ -368,14 +365,14 @@ export default Ember.Component.extend({
         this.renderChart();
     },
 
-    renderChart: function() {
+    renderChart() {
         this.chart.render();
 
-        $(window).resize(function(){
+        $(window).resize(function () {
             if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
                 this.$().parents().find('.d3-tip').remove();
             }
-            Ember.run.debounce(self, self.createChart, 500);
+            Ember.run.debounce(this, this.createChart, 500);
         });
     },
 
@@ -396,6 +393,5 @@ export default Ember.Component.extend({
         });
         this.set('data', data);
         this.createChart();
-
-    },
+    }
 });
