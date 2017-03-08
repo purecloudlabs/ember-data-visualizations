@@ -367,15 +367,30 @@ export default Ember.Component.extend({
         this.renderChart();
     },
 
-    renderChart() {
-        this.chart.render();
+    resizeTimer: null,
+    onResize: null,
 
-        $(window).resize(function () {
+    setupResize() {
+        this.set('onResize', () => {
             if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
                 this.$().parents().find('.d3-tip').remove();
             }
-            Ember.run.debounce(this, this.createChart, 500);
+            this.set('resizeTimer', Ember.run.debounce(this, this.createChart, 500));
         });
+
+        $(window).resize(this.get('onResize'));
+    },
+
+    tearDownResize() {
+        $(window).off('resize', this.get('onResize'));
+    },
+
+    cancelTimers() {
+        Ember.run.cancel(this.get('resizeTimer'));
+    },
+
+    renderChart() {
+        this.chart.render();
     },
 
     didReceiveAttrs({ newAttrs }) {
@@ -395,5 +410,16 @@ export default Ember.Component.extend({
         });
         this.set('data', data);
         this.createChart();
+    },
+
+    init() {
+        this._super(...arguments);
+        this.setupResize();
+    },
+
+    willDestroyElement() {
+        this._super(...arguments);
+        this.tearDownResize();
+        this.cancelTimers();
     }
 });
