@@ -12,6 +12,9 @@
     "test": "ember try:each",
     "lint": "eslint *.js app/**/*.js tests/**/*.js addon/**/*.js"
   },
+  "pre-push": [
+    "test"
+  ],
   "repository": "https://github.com/MyPureCloud/ember-data-visualizations",
   "engines": {
     "node": ">= 4.2.0"
@@ -33,7 +36,7 @@
     "ember-cli-htmlbars": "^1.0.10",
     "ember-cli-htmlbars-inline-precompile": "^0.3.3",
     "ember-cli-inject-live-reload": "^1.4.1",
-    "ember-cli-moment-shim": "^2.2.1",
+    "ember-cli-moment-shim": "3.0.1",
     "ember-cli-qunit": "^3.0.1",
     "ember-cli-release": "^0.2.9",
     "ember-cli-sri": "^2.1.0",
@@ -46,14 +49,15 @@
     "ember-load-initializers": "^0.5.1",
     "ember-resolver": "^2.0.3",
     "eslint-plugin-ember-suave": "^1.0.0",
-    "loader.js": "^4.0.10"
+    "loader.js": "^4.0.10",
+    "pre-push": "^0.1.1"
   },
   "keywords": [
     "ember-addon"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.7",
-    "ember-tether": "0.4.1"
+    "ember-tether": "~0.4.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
