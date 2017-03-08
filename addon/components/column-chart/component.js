@@ -1,4 +1,4 @@
-/* global _, moment, d3, d3.tip */
+/* global _, $, moment, d3, dc */
 
 import Ember from 'ember';
 
@@ -52,6 +52,7 @@ const formatTime = function (value) {
 };
 
 /**
+   @public
    @module column-chart
    @type component
    @desc dc.js column chart
@@ -90,7 +91,7 @@ export default Ember.Component.extend({
             this.$().parents().find('.d3-tip').remove();
         }
 
-        if (!this.get('group') || !this.get('group.0.all') || !this.get('dimension')){
+        if (!this.get('group') || !this.get('group.0.all') || !this.get('dimension')) {
             return false;
         }
 
@@ -106,7 +107,8 @@ export default Ember.Component.extend({
             return count + idx;
         };
 
-        let columnCharts = [], columnChart, title;
+        let columnCharts = [];
+        let columnChart;
         let compositeChart = dc.compositeChart(`#${this.$().context.id}`);
 
         const colors = this.get('colors');
@@ -147,7 +149,7 @@ export default Ember.Component.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
 
         const groups = this.get('group');
-        _.forEach(groups, function(g, index) {
+        _.forEach(groups, function (g, index) {
             if (showMaxMin && _.isNumber(seriesMaxMin)) {
                 if (index === seriesMaxMin) {
                     values = _.map(g.all(), 'value');
@@ -156,7 +158,7 @@ export default Ember.Component.extend({
                     maxIdx = _.indexOf(values, maxValue);
                     minValue = _.min(nonZeroValues);
                     minIdx = _.indexOf(values, minValue);
-                    
+
                     if (format) {
                         if (format === 'percent') {
                             maxValue = formatPercent(maxValue);
@@ -188,7 +190,7 @@ export default Ember.Component.extend({
 
                 columnCharts.push(columnChart);
             }
-            
+
             columnChart = dc.barChart(compositeChart);
 
             columnChart
@@ -294,7 +296,7 @@ export default Ember.Component.extend({
                     if (type === 'LAYERED') {
                         barWidth *= groups.length; // number of series
                     }
-                    
+
                     let position = -1 * (barWidth + gap);
 
                     for (let i = 0; i < seriesCount; i++) {
@@ -334,7 +336,7 @@ export default Ember.Component.extend({
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
                     }
-                    
+
                     b = bars[minIdx];
 
                     if (b) {

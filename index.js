@@ -1,4 +1,4 @@
-/* jshint node: true */
+/* eslint-env node */
 'use strict';
 
 var TreeMerger = require('broccoli-merge-trees');
@@ -13,7 +13,7 @@ module.exports = {
     },
     treeForAddon(tree) {
         var defaultTree = this._super.treeForAddon.call(this, tree);
-        
+
         // Funnel the addon's component styles so they can be imported into addon.less
         var addonLessTree = new Funnel(tree, {
             include: ['components/**/*.less'],
