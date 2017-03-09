@@ -70,16 +70,14 @@ export default Ember.Component.extend({
     maxMinSeries: null,
     group: null,
     dimension: null,
-    crossfilter: null,
     seriesData: null,
     data: null,
     series: [],
+    height: 200,
     xAxis: {},
     yAxis: {},
 
     onClick() {},
-
-    tooltipRefs: [],
 
     tooltipDateFormat: 'L LT',
 
@@ -109,7 +107,7 @@ export default Ember.Component.extend({
 
         let columnCharts = [];
         let columnChart;
-        let compositeChart = dc.compositeChart(`#${this.$().context.id}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
         const colors = this.get('colors');
         const showMaxMin = this.get('showMaxMin');
@@ -203,11 +201,11 @@ export default Ember.Component.extend({
             columnCharts.push(columnChart);
         });
 
-        this.chart = compositeChart;
+        this.set('chart', compositeChart);
 
-        this.chart.dimension(this.get('dimension'));
+        this.get('chart').dimension(this.get('dimension'));
 
-        this.chart
+        this.get('chart')
             .brushOn(false)
             .height(this.get('height'))
             .margins({
@@ -220,15 +218,19 @@ export default Ember.Component.extend({
             .xUnits(() => groups[0].size() * (groups.length + 1));
 
         if (this.get('width')) {
-            this.chart.width(this.get('width'));
+            this.get('chart').width(this.get('width'));
         }
 
         if (yAxis && yAxis.domain) {
-            this.chart.y(d3.scale.linear().domain(yAxis.domain));
+            this.get('chart').y(d3.scale.linear().domain(yAxis.domain));
         }
         const type = this.get('type');
-        this.chart
-            .renderlet(function (chart) {
+        this.get('chart')
+            .renderlet(chart => {
+                // This is outside the Ember run loop so check if component is destroyed
+                if (this.get('isDestroyed') || this.get('isDestroying')) {
+                    return;
+                }
 
                 // Set up any necessary hatching patterns
                 let svg = d3.select('.column-chart > svg > defs');
@@ -352,16 +354,16 @@ export default Ember.Component.extend({
             })
             .compose(columnCharts);
 
-        this.chart.xAxis().outerTickSize(0);
+        this.get('chart').xAxis().outerTickSize(0);
 
         if (xAxis && xAxis.ticks) {
-            this.chart.xAxis().ticks(xAxis.ticks);
+            this.get('chart').xAxis().ticks(xAxis.ticks);
         }
 
-        this.chart.yAxis().outerTickSize(0);
+        this.get('chart').yAxis().outerTickSize(0);
 
         if (yAxis && yAxis.ticks) {
-            this.chart.yAxis().ticks(yAxis.ticks);
+            this.get('chart').yAxis().ticks(yAxis.ticks);
         }
 
         this.renderChart();
@@ -390,7 +392,7 @@ export default Ember.Component.extend({
     },
 
     renderChart() {
-        this.chart.render();
+        this.get('chart').render();
     },
 
     didReceiveAttrs({ newAttrs }) {
@@ -409,7 +411,9 @@ export default Ember.Component.extend({
             });
         });
         this.set('data', data);
-        this.createChart();
+
+        // Must schedule for afterRender as createChart depends on existence of component's element
+        Ember.run.scheduleOnce('afterRender', this, this.get('createChart'));
     },
 
     init() {

@@ -40,9 +40,7 @@ export default Ember.Controller.extend({
 
         this._crossfilter = crossfilter(content);
 
-        this.set('dimensions', this._crossfilter.dimension(function (d) {
-            return d.date;
-        }));
+        this.set('dimensions', this._crossfilter.dimension(d => d.date));
     },
 
     /**
@@ -52,23 +50,9 @@ export default Ember.Controller.extend({
      * @private
      */
     _createGroups() {
-        let groups = [];
-        let dim = this.get('dimensions');
-
-        let createAddDataFunc = function (key) {
-            return function () {
-                let grouping = dim.group().reduceSum(function (d) {
-                    return d[key];
-                });
-                groups.push(grouping);
-            };
-        };
-
-        createAddDataFunc('calls')();
-        createAddDataFunc('chats')();
-        createAddDataFunc('emails')();
-
-        this.set('groups', groups);
+        const dimensions = this.get('dimensions');
+        const groupNames = ['calls', 'chats', 'emails'];
+        this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
     },
 
     init() {
