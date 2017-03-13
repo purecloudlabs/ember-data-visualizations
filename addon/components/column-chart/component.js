@@ -2,55 +2,6 @@
 
 import Ember from 'ember';
 
-const formatPercent = function (value) {
-    value = value * 100;
-    if (value === 100) {
-        value = Math.round(value);
-    } else {
-        value = value.toFixed(1);
-    }
-    return `${value}%`;
-};
-
-const formatNumber = function (value) {
-    if (value !== 0 && value < 1) {
-        value = value.toFixed(3);
-    } else {
-        value = Math.round(value);
-    }
-
-    return value;
-};
-
-const formatTime = function (value) {
-    const duration = moment.duration(value);
-    let segments = [];
-
-    // For durations >= 24 hours, switch to displaying days only
-    const days = duration.asDays();
-
-    if (days >= 1) {
-        segments.push(`${Math.floor(days)} days`);
-    } else {
-        // For durations < 1 second, show milliseconds as fractional seconds
-        const seconds = value > 0 && value < 1000 ? duration.asSeconds().toFixed(3) : duration.seconds();
-        const minutes = duration.minutes();
-        const hours = duration.hours();
-        if (hours) {
-            segments.push(`${hours}h`);
-        }
-
-        if (minutes) {
-            segments.push(`${minutes}m`);
-        }
-
-        if (seconds || seconds === 0) {
-            segments.push(`${seconds.toString()}s`);
-        }
-    }
-    return segments.join('');
-};
-
 /**
    @public
    @module column-chart
@@ -122,20 +73,13 @@ export default Ember.Component.extend({
 
         const data = this.get('data');
         const tooltipDateFormat = this.get('tooltipDateFormat');
-        const format = this.get('xAxis.format');
+        const formatter = this.get('xAxis.formatter') || (value => value);
 
         let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
             if (!_.isEmpty(titles)) {
                 let str = `<span class="tooltip-time">${moment(d.data.key).format(tooltipDateFormat)}</span><br/>`;
                 _.forEach(titles, function (title, i) {
-                    let datum = data[d.data.key][i];
-                    if (format === 'time') {
-                        datum = formatTime(datum);
-                    } else if (format === 'percent') {
-                        datum = formatPercent(datum);
-                    } else {
-                        datum = formatNumber(datum);
-                    }
+                    const datum = formatter(data[d.data.key][i]);
                     str = str.concat(`<span class="tooltip-value">${title}: ${datum}</span><br/>`);
                 });
                 return str;
@@ -152,26 +96,10 @@ export default Ember.Component.extend({
                 if (index === seriesMaxMin) {
                     values = _.map(g.all(), 'value');
                     nonZeroValues = _.filter(values, v => v > 0);
-                    maxValue = _.max(nonZeroValues);
+                    maxValue = formatter(_.max(nonZeroValues));
                     maxIdx = _.indexOf(values, maxValue);
-                    minValue = _.min(nonZeroValues);
+                    minValue = formatter(_.min(nonZeroValues));
                     minIdx = _.indexOf(values, minValue);
-
-                    if (format) {
-                        if (format === 'percent') {
-                            maxValue = formatPercent(maxValue);
-                            minValue = formatPercent(minValue);
-                        } else if (format === 'time') {
-                            maxValue = formatTime(maxValue);
-                            minValue = formatTime(minValue);
-                        } else {
-                            maxValue = formatNumber(maxValue);
-                            minValue = formatNumber(minValue);
-                        }
-                    } else {
-                        maxValue = formatNumber(maxValue);
-                        minValue = formatNumber(minValue);
-                    }
                 }
             }
 
