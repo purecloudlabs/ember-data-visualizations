@@ -4,83 +4,68 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
     metrics: [
-    {value:'sighting', label: 'Sightings'}
-  ],
-  
-  dimensions: [],
-  domainString: '',
-  groups: [],
-  colors: ['#B9B9B9', '#A0C0CF', '#105470'],
-  xAxis: {
-      domain: [moment("10/31/2016"), moment("12/03/2016")],
-      ticks: 5
-  },
-  yAxis: {
-      ticks: 3
-  },
+        { value: 'sighting', label: 'Sightings' }
+    ],
 
-  series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+    dimensions: [],
+    domainString: '',
+    groups: [],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    xAxis: {
+        domain: [moment('10/31/2016'), moment('12/03/2016')],
+        ticks: 5
+    },
+    yAxis: {
+        ticks: 3
+    },
 
-  onClick: function (datum) {
-      this.set('domainString', datum.x);
-  },
+    series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
 
-  /**
-   * @method _createDimensions
-   * Create the defined dimensions from the controller.
-   * @return {void}
-   * @private
-   */
-  _createDimensions: function() {
-    var content = Ember.get(this, 'content');
+    onClick(datum) {
+        this.set('domainString', datum.x);
+    },
 
-    content.forEach(function(d) {
-      d.date = moment(d.date, 'YYYYMMDD').toDate();
-    });
+    /**
+     * @method _createDimensions
+     * Create the defined dimensions from the controller.
+     * @return {void}
+     * @private
+     */
+    _createDimensions() {
+        let content = Ember.get(this, 'content');
 
-    this._crossfilter = crossfilter(content);
+        content.forEach(function (d) {
+            d.date = moment(d.date, 'YYYYMMDD').toDate();
+        });
 
-    this.set('dimensions', this._crossfilter.dimension(function(d) { return d.date; }));
-  },
+        this._crossfilter = crossfilter(content);
 
+        this.set('dimensions', this._crossfilter.dimension(d => d.date));
+    },
 
-  /**
-   * @method _createGroups
-   * Create the defined groups from the controller.
-   * @return {void}
-   * @private
-   */
-  _createGroups: function() {
-      var groups = [];
-      var dim = this.get('dimensions');
+    /**
+     * @method _createGroups
+     * Create the defined groups from the controller.
+     * @return {void}
+     * @private
+     */
+    _createGroups() {
+        const dimensions = this.get('dimensions');
+        const groupNames = ['calls', 'chats', 'emails'];
+        this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
+    },
 
-     var createAddDataFunc = function(key) {
-         return function() {
-              var grouping = dim.group().reduceSum(function (d) {
-                  return d[key];
-              });
-              groups.push(grouping);
-         };
-      };
+    init() {
+        let self = this;
+        d3.json('data.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('content', json);
+            self._createDimensions();
+            self._createGroups();
+        });
 
-      createAddDataFunc('calls')();
-      createAddDataFunc('chats')();
-      createAddDataFunc('emails')();
-
-      this.set('groups', groups);
-  },
-
-  init: function() {
-      var self = this;
-      d3.json("data.json", function(error, json) {
-        if (error) {
-          return console.log(error);
-        } 
-        self.set('content', json);
-        self._createDimensions();
-        self._createGroups();
-      });
-
-      this.set('domainString', moment("10/31/2016").toISOString() + ' - ' + moment("12/03/2016").toISOString());
-  }
+        this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
+    }
 });

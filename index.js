@@ -1,4 +1,4 @@
-/* jshint node: true */
+/* eslint-env node */
 'use strict';
 
 var TreeMerger = require('broccoli-merge-trees');
@@ -8,12 +8,11 @@ var LessCompiler = require('broccoli-less-single');
 module.exports = {
     name: 'ember-data-visualizations',
     isDevelopingAddon() {
-        // Check for environment both on this app and parent app
-        return (this.app && this.app.env && this.app.env === 'development') || (this.app && this.app.parent && this.app.parent.app && this.app.parent.app.env === 'development');
+        return Boolean(process.env.DATA_VIS_DEV_MODE);
     },
     treeForAddon(tree) {
         var defaultTree = this._super.treeForAddon.call(this, tree);
-        
+
         // Funnel the addon's component styles so they can be imported into addon.less
         var addonLessTree = new Funnel(tree, {
             include: ['components/**/*.less'],
