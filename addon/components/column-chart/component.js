@@ -58,7 +58,7 @@ export default Ember.Component.extend({
 
         let columnCharts = [];
         let columnChart;
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`).renderTitle(false);
 
         const colors = this.get('colors');
         const showMaxMin = this.get('showMaxMin');
@@ -96,10 +96,12 @@ export default Ember.Component.extend({
                 if (index === seriesMaxMin) {
                     values = _.map(g.all(), 'value');
                     nonZeroValues = _.filter(values, v => v > 0);
-                    maxValue = formatter(_.max(nonZeroValues));
+                    maxValue = _.max(nonZeroValues);
                     maxIdx = _.indexOf(values, maxValue);
-                    minValue = formatter(_.min(nonZeroValues));
+                    maxValue = formatter(maxValue);
+                    minValue = _.min(nonZeroValues);
                     minIdx = _.indexOf(values, minValue);
+                    minValue = formatter(minValue);
                 }
             }
 
