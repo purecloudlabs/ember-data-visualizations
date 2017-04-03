@@ -30,7 +30,7 @@ export default Ember.Component.extend({
 
     onClick() {},
 
-    tooltipDateFormat: 'L LT',
+    tooltipDateFormat: 'll LT',
 
     type: 'GROUPED', // GROUPED, LAYERED (overlapping, first series in back -- should only be used for proportions), TODO: add STACKED
 
@@ -77,10 +77,10 @@ export default Ember.Component.extend({
 
         let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
             if (!_.isEmpty(titles)) {
-                let str = `<span class="tooltip-time">${moment(d.data.key).format(tooltipDateFormat)}</span><br/>`;
+                let str = `<span class="tooltip-time">${moment(d.data.key).format(tooltipDateFormat)}</span>`;
                 _.forEach(titles, function (title, i) {
                     const datum = formatter(data[d.data.key][i]);
-                    str = str.concat(`<span class="tooltip-value">${title}: ${datum}</span><br/>`);
+                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label">${title}</span><span class="tooltip-value">${datum}</span></span>`);
                 });
                 return str;
             }
