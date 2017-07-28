@@ -11,6 +11,8 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     classNames: ['chart column-chart'],
 
+    resizeDetector: Ember.inject.service(),
+
     colors: [
         '#1f77b4', '#ff7f0e', '#2ca02c',
         '#9467bd', '#8c564b', '#e377c2',
@@ -310,11 +312,12 @@ export default Ember.Component.extend({
             this.set('resizeTimer', Ember.run.debounce(this, this.createChart, 500));
         });
 
-        $(window).resize(this.get('onResize'));
+        this.set('callback', Ember.run.bind(this, this.onResize));
+        this.get('resizeDetector').setup(`#${this.get('elementId')}`, this.get('callback'));
     },
 
     tearDownResize() {
-        $(window).off('resize', this.get('onResize'));
+        this.get('resizeDetector').teardown(`#${this.get('elementId')}`, this.get('callback'));
     },
 
     cancelTimers() {
@@ -343,17 +346,11 @@ export default Ember.Component.extend({
         this.set('data', data);
 
         // Must schedule for afterRender as createChart depends on existence of component's element
-        Ember.run.scheduleOnce('afterRender', this, this.get('createChart'));
-    },
-
-    init() {
-        this._super(...arguments);
-        this.setupResize();
+        Ember.run.scheduleOnce('afterRender', this, this.setupResize);
     },
 
     willDestroyElement() {
         this._super(...arguments);
-        this.tearDownResize();
-        this.cancelTimers();
+        this.teardown();
     }
 });
