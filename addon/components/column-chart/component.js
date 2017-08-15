@@ -226,6 +226,14 @@ export default Ember.Component.extend({
 
                     // if composed, double barWidth
                     if (type === 'LAYERED') {
+                        let x;
+                        let barD3;
+                        chart.selectAll('rect.bar')[0].forEach(bar => {
+                            barD3 = d3.select(bar);
+                            x = parseInt(barD3.attr('x'), 10);
+                            barD3.attr('x', x - barWidth * (groups.length - 1) / 2 + 1);
+                        });
+
                         barWidth *= groups.length; // number of series
                     }
 
