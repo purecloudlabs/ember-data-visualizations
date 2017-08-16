@@ -1,4 +1,4 @@
-/* global _, $, moment, d3, dc */
+/* global _, moment, d3, dc */
 
 import Ember from 'ember';
 
@@ -11,6 +11,8 @@ import Ember from 'ember';
 export default Ember.Component.extend({
     classNames: ['chart column-chart'],
 
+    resizeDetector: Ember.inject.service(),
+
     colors: [
         '#1f77b4', '#ff7f0e', '#2ca02c',
         '#9467bd', '#8c564b', '#e377c2',
@@ -18,6 +20,7 @@ export default Ember.Component.extend({
     ],
 
     showMaxMin: false,
+    instantRun: false,
     maxMinSeries: null,
     group: null,
     dimension: null,
@@ -156,7 +159,7 @@ export default Ember.Component.extend({
         }
         const type = this.get('type');
         this.get('chart')
-            .renderlet(chart => {
+            .on('renderlet', chart => {
                 // This is outside the Ember run loop so check if component is destroyed
                 if (this.get('isDestroyed') || this.get('isDestroying')) {
                     return;
@@ -308,21 +311,20 @@ export default Ember.Component.extend({
     },
 
     resizeTimer: null,
-    onResize: null,
+
+    onResizeDebounced: null,
 
     setupResize() {
-        this.set('onResize', () => {
-            if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
-                this.$().parents().find('.d3-tip').remove();
-            }
-            this.set('resizeTimer', Ember.run.debounce(this, this.createChart, 500));
+        this.set('onResizeDebounced', () => {
+            this.set('resizeTimer', Ember.run.debounce(this, this.createChart, 100, this.get('instantRun')));
         });
 
-        $(window).resize(this.get('onResize'));
+        this.set('callback', Ember.run.bind(this, this.onResizeDebounced));
+        this.get('resizeDetector').setup(`#${this.get('elementId')}`, this.get('callback'));
     },
 
     tearDownResize() {
-        $(window).off('resize', this.get('onResize'));
+        this.get('resizeDetector').teardown(`#${this.get('elementId')}`, this.get('callback'));
     },
 
     cancelTimers() {
@@ -351,12 +353,7 @@ export default Ember.Component.extend({
         this.set('data', data);
 
         // Must schedule for afterRender as createChart depends on existence of component's element
-        Ember.run.scheduleOnce('afterRender', this, this.get('createChart'));
-    },
-
-    init() {
-        this._super(...arguments);
-        this.setupResize();
+        Ember.run.scheduleOnce('afterRender', this, this.setupResize);
     },
 
     willDestroyElement() {

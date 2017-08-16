@@ -1,5 +1,6 @@
 /* global crossfilter, moment */
 
+import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
@@ -68,6 +69,12 @@ moduleForComponent('column-chart', 'Integration | Component | column chart', {
     integration: true,
     beforeEach() {
         this.set('params', getTestParameters());
+        this.register('service:resizeDetector', Ember.Service.extend({
+            setup(elementId, callback) {
+                callback();
+            },
+            teardown() {}
+        }));
     }
 });
 
@@ -77,16 +84,16 @@ test('it renders', function (assert) {
 });
 
 test('it renders correct number of x axis ticks', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis}}`);
+    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.x.axis g.tick').length, 5);
 });
 
 test('it renders correct number of y axis ticks', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis}}`);
+    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.y.axis g.tick').length, 3);
 });
 
 test('it renders a bar for each data point', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis}}`);
+    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.sub._0 .chart-body rect.bar').length, 3);
 });
