@@ -278,6 +278,14 @@ export default Ember.Component.extend({
                         .attr('text-anchor', 'middle')
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
+
+                        gLabels.append('text')
+                        // unicode for font-awesome caret up
+                        .html(() => '&#xf0d8')
+                        .attr('text-anchor', 'middle')
+                        .attr('class', 'caret-icon')
+                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                        .attr('y', Math.max(12, +b.getAttribute('y') - 15));
                     }
 
                     b = bars[minIdx];
@@ -286,10 +294,18 @@ export default Ember.Component.extend({
                         gLabels.append('text')
                         .text(minValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, +b.getAttribute('y') - 5))
+                        .attr('y', Math.max(12, +b.getAttribute('y') - 15))
                         .attr('text-anchor', 'middle')
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
+
+                        gLabels.append('text')
+                        // unicode for font-awesome caret down
+                        .html(() => '&#xf0d7')
+                        .attr('class', 'caret-icon')
+                        .attr('text-anchor', 'middle')
+                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                        .attr('y', Math.max(12, +b.getAttribute('y') - 5));
                     }
                 }
             })
