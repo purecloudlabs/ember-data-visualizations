@@ -266,7 +266,7 @@ export default Ember.Component.extend({
                     .on('mouseout', tip.hide);
 
                 // Show min and max values over bars
-                if (showMaxMin && _.isNumber(seriesMaxMin)) {
+                if (showMaxMin && _.isNumber(seriesMaxMin) && !(maxIdx === minIdx)) {
                     d3.select(bars[0].parentNode).select('#inline-labels').remove();
                     let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
                     let b = bars[maxIdx];
@@ -274,7 +274,7 @@ export default Ember.Component.extend({
                         gLabels.append('text')
                         .text(maxValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, +b.getAttribute('y') - 5))
+                        .attr('y', Math.max(12, +b.getAttribute('y') - 2))
                         .attr('text-anchor', 'middle')
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
@@ -285,7 +285,7 @@ export default Ember.Component.extend({
                         .attr('text-anchor', 'middle')
                         .attr('class', 'caret-icon')
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, +b.getAttribute('y') - 15));
+                        .attr('y', +b.getAttribute('y') - 12);
                     }
 
                     b = bars[minIdx];
@@ -294,7 +294,7 @@ export default Ember.Component.extend({
                         gLabels.append('text')
                         .text(minValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, +b.getAttribute('y') - 15))
+                        .attr('y', Math.max(12, +b.getAttribute('y') - 10))
                         .attr('text-anchor', 'middle')
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
@@ -305,7 +305,7 @@ export default Ember.Component.extend({
                         .attr('class', 'caret-icon')
                         .attr('text-anchor', 'middle')
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, +b.getAttribute('y') - 5));
+                        .attr('y', +b.getAttribute('y'));
                     }
                 }
             })
