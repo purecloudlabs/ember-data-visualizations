@@ -1,6 +1,8 @@
-/* global _, moment, d3, dc */
+/* global d3, dc */
 
 import Ember from 'ember';
+import moment from 'moment';
+import { isEmpty, isNumber, max, min, each } from 'lodash';
 
 /**
    @public
@@ -39,7 +41,7 @@ export default Ember.Component.extend({
 
     // REQUIRED: group, dimension, xAxis.domain
     createChart() {
-        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
+        if (this.$() && this.$().parents() && !isEmpty(this.$().parents().find('.d3-tip'))) {
             this.$().parents().find('.d3-tip').remove();
         }
 
@@ -72,16 +74,16 @@ export default Ember.Component.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        const titles = _.map(this.get('series'), 'title');
+        const titles = this.get('series').map(entry => entry.title);
 
         const data = this.get('data');
         const tooltipDateFormat = this.get('tooltipDateFormat');
         const formatter = this.get('xAxis.formatter') || (value => value);
 
         let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
-            if (!_.isEmpty(titles)) {
+            if (!isEmpty(titles)) {
                 let str = `<span class="tooltip-time">${moment(d.data.key).format(tooltipDateFormat)}</span>`;
-                _.forEach(titles, function (title, i) {
+                titles.forEach((title, i) => {
                     const datum = formatter(data[d.data.key][i]);
                     str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label">${title}</span><span class="tooltip-value">${datum}</span></span>`);
                 });
@@ -94,22 +96,22 @@ export default Ember.Component.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
 
         const groups = this.get('group');
-        _.forEach(groups, function (g, index) {
-            if (showMaxMin && _.isNumber(seriesMaxMin)) {
+        groups.forEach((g, index) => {
+            if (showMaxMin && isNumber(seriesMaxMin)) {
                 if (index === seriesMaxMin) {
-                    values = _.map(g.all(), 'value');
-                    nonZeroValues = _.filter(values, v => v > 0);
-                    maxValue = _.max(nonZeroValues);
-                    maxIdx = _.indexOf(values, maxValue);
+                    values = g.all().map(gElem => gElem.value);
+                    nonZeroValues = values.filter(v => v > 0);
+                    maxValue = max(nonZeroValues);
+                    maxIdx = values.indexOf(maxValue);
                     maxValue = formatter(maxValue);
-                    minValue = _.min(nonZeroValues);
-                    minIdx = _.indexOf(values, minValue);
+                    minValue = min(nonZeroValues);
+                    minIdx = values.indexOf(minValue);
                     minValue = formatter(minValue);
                 }
             }
 
             // If we are hatching, we need to display a white bar behind the hatched bar
-            if (!_.isEmpty(series) && !_.isEmpty(series[index]) && series[index].hatch) {
+            if (!isEmpty(series) && !isEmpty(series[index]) && series[index].hatch) {
                 columnChart = dc.barChart(compositeChart);
 
                 columnChart
@@ -176,7 +178,7 @@ export default Ember.Component.extend({
                         .attr('width', 200)
                         .attr('height', 200);
 
-                _.forEach(series, function (series, index) {
+                series.forEach((series, index) => {
                     if (series.hatch === 'pos') {
                         svg.append('pattern')
                             .attr('id', `diagonalHatch${index}`)
@@ -266,7 +268,7 @@ export default Ember.Component.extend({
                     .on('mouseout', tip.hide);
 
                 // Show min and max values over bars
-                if (showMaxMin && _.isNumber(seriesMaxMin)) {
+                if (showMaxMin && isNumber(seriesMaxMin)) {
                     d3.select(bars[0].parentNode).select('#inline-labels').remove();
                     let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
                     let b = bars[maxIdx];
@@ -341,8 +343,8 @@ export default Ember.Component.extend({
         this.set('group', Ember.get(newAttrs, 'group.value'));
 
         let data = {};
-        _.each(this.get('group'), function (g) {
-            _.each(g.all(), function (datum) {
+        each(this.get('group'), g => {
+            each(g.all(), datum => {
                 if (data[datum.key]) {
                     data[datum.key].push(datum.value);
                 } else {
