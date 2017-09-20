@@ -2,7 +2,7 @@
 
 import Ember from 'ember';
 import moment from 'moment';
-import { isEmpty, isNumber, max, min, each } from 'lodash';
+import { isEmpty, isNumber, max, min, forEach } from 'lodash';
 
 /**
    @public
@@ -343,8 +343,8 @@ export default Ember.Component.extend({
         this.set('group', Ember.get(newAttrs, 'group.value'));
 
         let data = {};
-        each(this.get('group'), g => {
-            each(g.all(), datum => {
+        forEach(this.get('group'), g => {
+            forEach(g.all(), datum => {
                 if (data[datum.key]) {
                     data[datum.key].push(datum.value);
                 } else {
