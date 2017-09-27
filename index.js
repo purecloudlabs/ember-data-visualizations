@@ -30,6 +30,5 @@ module.exports = {
         this.import('bower_components/d3/d3.js');
         this.import('bower_components/d3-tip/index.js');
         this.import('bower_components/dcjs/dc.js');
-        this.import('bower_components/lodash/lodash.js');
     }
 };

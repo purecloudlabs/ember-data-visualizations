@@ -1,6 +1,8 @@
-/* global _, moment, d3, dc */
+/* global d3, dc */
 
 import Ember from 'ember';
+import moment from 'moment';
+import _ from 'lodash/lodash';
 
 /**
    @public
@@ -72,7 +74,7 @@ export default Ember.Component.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        const titles = _.map(this.get('series'), 'title');
+        const titles = this.get('series').map(entry => entry.title);
 
         const data = this.get('data');
         const tooltipDateFormat = this.get('tooltipDateFormat');
@@ -81,7 +83,7 @@ export default Ember.Component.extend({
         let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
             if (!_.isEmpty(titles)) {
                 let str = `<span class="tooltip-time">${moment(d.data.key).format(tooltipDateFormat)}</span>`;
-                _.forEach(titles, function (title, i) {
+                titles.forEach((title, i) => {
                     const datum = formatter(data[d.data.key][i]);
                     str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label">${title}</span><span class="tooltip-value">${datum}</span></span>`);
                 });
@@ -94,16 +96,16 @@ export default Ember.Component.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
 
         const groups = this.get('group');
-        _.forEach(groups, function (g, index) {
+        groups.forEach((g, index) => {
             if (showMaxMin && _.isNumber(seriesMaxMin)) {
                 if (index === seriesMaxMin) {
-                    values = _.map(g.all(), 'value');
-                    nonZeroValues = _.filter(values, v => v > 0);
+                    values = g.all().map(gElem => gElem.value);
+                    nonZeroValues = values.filter(v => v > 0);
                     maxValue = _.max(nonZeroValues);
-                    maxIdx = _.indexOf(values, maxValue);
+                    maxIdx = values.indexOf(maxValue);
                     maxValue = formatter(maxValue);
                     minValue = _.min(nonZeroValues);
-                    minIdx = _.indexOf(values, minValue);
+                    minIdx = values.indexOf(minValue);
                     minValue = formatter(minValue);
                 }
             }
@@ -176,7 +178,7 @@ export default Ember.Component.extend({
                         .attr('width', 200)
                         .attr('height', 200);
 
-                _.forEach(series, function (series, index) {
+                series.forEach((series, index) => {
                     if (series.hatch === 'pos') {
                         svg.append('pattern')
                             .attr('id', `diagonalHatch${index}`)
@@ -341,8 +343,8 @@ export default Ember.Component.extend({
         this.set('group', Ember.get(newAttrs, 'group.value'));
 
         let data = {};
-        _.each(this.get('group'), function (g) {
-            _.each(g.all(), function (datum) {
+        _.forEach(this.get('group'), g => {
+            _.forEach(g.all(), datum => {
                 if (data[datum.key]) {
                     data[datum.key].push(datum.value);
                 } else {
