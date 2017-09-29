@@ -266,7 +266,7 @@ export default Ember.Component.extend({
                     .on('mouseout', tip.hide);
 
                 // Show min and max values over bars
-                if (showMaxMin && _.isNumber(seriesMaxMin) && !(maxIdx === minIdx)) {
+                if (showMaxMin && _.isNumber(seriesMaxMin)) {
                     d3.select(bars[0].parentNode).select('#inline-labels').remove();
                     let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
                     let b = bars[maxIdx];
@@ -279,18 +279,20 @@ export default Ember.Component.extend({
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
 
-                        gLabels.append('text')
-                        // unicode for font-awesome caret up
-                        .html(() => '&#xf0d8')
-                        .attr('text-anchor', 'middle')
-                        .attr('class', 'caret-icon')
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', +b.getAttribute('y') - 12);
+                        if (!(maxIdx === minIdx)) {
+                            gLabels.append('text')
+                            // unicode for font-awesome caret up
+                            .html(() => '&#xf0d8')
+                            .attr('text-anchor', 'middle')
+                            .attr('class', 'caret-icon')
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', +b.getAttribute('y') - 12);
+                        }
                     }
 
                     b = bars[minIdx];
 
-                    if (b) {
+                    if (b && !(maxIdx === minIdx)) {
                         gLabels.append('text')
                         .text(minValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
