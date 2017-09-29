@@ -22,6 +22,7 @@ export default Ember.Component.extend({
     ],
 
     showMaxMin: false,
+    showComparisonLine: false,
     instantRun: false,
     maxMinSeries: null,
     group: null,
@@ -32,6 +33,10 @@ export default Ember.Component.extend({
     height: 200,
     xAxis: {},
     yAxis: {},
+
+    // Horizontal line to mark a target, average, or any kind of comparison value
+    // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
+    comparisonLine: null,
 
     onClick() {},
 
@@ -293,6 +298,40 @@ export default Ember.Component.extend({
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
                     }
+                }
+
+                if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(data)) {
+                    const chartBody = d3.select('.column-chart > svg > g');
+                    const line = this.get('comparisonLine');
+
+                    chartBody.append('svg:line')
+                        .attr('x1', 100)
+                        .attr('x2', chart.width() - 95)
+                        .attr('y1', 10 + chart.y()(line.value))
+                        .attr('y2', 10 + chart.y()(line.value))
+                        .style('stroke', line.color || '#2CD02C');
+
+                    chartBody.append('svg:line')
+                        .attr('x1', 100)
+                        .attr('x2', 100)
+                        .attr('y1', 15 + chart.y()(line.value))
+                        .attr('y2', 5 + chart.y()(line.value))
+                        .style('stroke', line.color || '#2CD02C');
+
+                    chartBody.append('svg:line')
+                        .attr('x1', chart.width() - 95)
+                        .attr('x2', chart.width() - 95)
+                        .attr('y1', 15 + chart.y()(line.value))
+                        .attr('y2', 5 + chart.y()(line.value))
+                        .style('stroke', line.color || '#2CD02C');
+
+                    chartBody.append('text')
+                        .text(line.displayValue)
+                        .attr('x', 80)
+                        .attr('y', 14 + chart.y()(line.value))
+                        .attr('text-anchor', 'middle')
+                        .attr('font-size', '12px')
+                        .attr('fill', line.textColor || '#000000');
                 }
             })
             .compose(columnCharts);

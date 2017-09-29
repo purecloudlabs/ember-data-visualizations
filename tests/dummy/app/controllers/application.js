@@ -20,6 +20,8 @@ export default Ember.Controller.extend({
         ticks: 3
     },
 
+    comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
+
     series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
 
     onClick(datum) {
