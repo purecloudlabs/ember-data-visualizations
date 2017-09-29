@@ -45,6 +45,7 @@
     "ember-disable-prototype-extensions": "^1.1.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.5",
+    "ember-font-awesome": "4.0.0-alpha.3",
     "ember-load-initializers": "^0.5.1",
     "ember-lodash": "^0.0.11",
     "ember-resolver": "^2.0.3",
