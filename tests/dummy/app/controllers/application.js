@@ -1,7 +1,7 @@
-/* global d3, crossfilter */
-
 import Ember from 'ember';
 import moment from 'moment';
+import d3 from 'ember-dc';
+import crossfilter from 'ember-dc';
 
 export default Ember.Controller.extend({
     metrics: [

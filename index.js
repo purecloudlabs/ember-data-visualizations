@@ -26,9 +26,6 @@ module.exports = {
     included() {
         this._super.included(...arguments);
 
-        this.import('bower_components/crossfilter/crossfilter.js');
-        this.import('bower_components/d3/d3.js');
         this.import('bower_components/d3-tip/index.js');
-        this.import('bower_components/dcjs/dc.js');
     }
 };
