@@ -1,8 +1,8 @@
 import Ember from 'ember';
 import moment from 'moment';
 import _ from 'lodash/lodash';
-import d3 from 'ember-dc';
-import dc from 'ember-dc';
+import d3 from 'd3';
+import dc from 'dc';
 
 /**
    @public
