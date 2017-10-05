@@ -20,7 +20,7 @@ module.exports = {
             allowedToFail: true,
             npm: {
                 devDependencies: {
-                    'ember-source': '>2.16.0-beta.1'
+                    'ember-source': '2.16.0-beta.1'
                 }
             }
         }
