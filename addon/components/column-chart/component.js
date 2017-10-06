@@ -272,10 +272,11 @@ export default Ember.Component.extend({
                 chart.selectAll('rect').on('mouseover', tip.show)
                     .on('mouseout', tip.hide);
 
+                $(`#${this.get('elementId')} #inline-labels`).remove();
+
                 // Show min and max values over bars
-                if (showMaxMin && _.isNumber(seriesMaxMin)) {
-                    d3.select(bars[0].parentNode).select('#inline-labels').remove();
-                    let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
+                if (showMaxMin && _.isNumber(seriesMaxMin) && bars.length > 0) {
+                    let gLabels = d3.select(firstBar.parentNode).append('g').attr('id', 'inline-labels');
                     let b = bars[maxIdx];
                     if (b) {
                         gLabels.append('text')
