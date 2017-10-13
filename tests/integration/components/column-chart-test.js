@@ -1,8 +1,8 @@
-/* global crossfilter, moment */
-
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
+import moment from 'moment';
+import crossfilter from 'crossfilter';
 
 const getTestParameters = function () {
     const groupNames = ['fruits', 'citrus', 'oranges'];

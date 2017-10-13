@@ -1,8 +1,8 @@
-/* global d3, dc */
-
 import Ember from 'ember';
 import moment from 'moment';
 import _ from 'lodash/lodash';
+import d3 from 'd3';
+import dc from 'dc';
 
 /**
    @public
@@ -395,10 +395,8 @@ export default Ember.Component.extend({
         this.get('chart').render();
     },
 
-    didReceiveAttrs({ newAttrs }) {
+    didReceiveAttrs() {
         this._super(...arguments);
-        this.set('dimension', Ember.get(newAttrs, 'dimension.value'));
-        this.set('group', Ember.get(newAttrs, 'group.value'));
 
         let data = {};
         _.forEach(this.get('group'), g => {

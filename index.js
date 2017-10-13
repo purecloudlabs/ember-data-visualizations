@@ -22,13 +22,5 @@ module.exports = {
         var compiledLessTree = new LessCompiler(new TreeMerger([tree, addonLessTree]), 'styles/addon.less', this.name + '.css');
 
         return new TreeMerger([defaultTree, compiledLessTree]);
-    },
-    included() {
-        this._super.included(...arguments);
-
-        this.import('bower_components/crossfilter/crossfilter.js');
-        this.import('bower_components/d3/d3.js');
-        this.import('bower_components/d3-tip/index.js');
-        this.import('bower_components/dcjs/dc.js');
     }
 };
