@@ -34,6 +34,11 @@ export default Ember.Component.extend({
     xAxis: {},
     yAxis: {},
 
+    isChartAvailable: true,
+    chartNotAvailableMessage: null,
+    chartNotAvailableTextColor: '#888888',
+    chartNotAvailableColor: '#b3b3b3',
+
     // Horizontal line to mark a target, average, or any kind of comparison value
     // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
     comparisonLine: null,
@@ -44,10 +49,15 @@ export default Ember.Component.extend({
 
     type: 'GROUPED', // GROUPED, LAYERED (overlapping, first series in back -- should only be used for proportions), TODO: add STACKED
 
-    // REQUIRED: group, dimension, xAxis.domain
+    // REQUIRED: group, dimension, xAxis.domain unless !isChartAvailable
     createChart() {
         if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
             this.$().parents().find('.d3-tip').remove();
+        }
+
+        if (!this.get('isChartAvailable')) {
+            this.showChartNotAvailable();
+            return;
         }
 
         if (!this.get('group') || !this.get('group.0.all') || !this.get('dimension')) {
@@ -418,5 +428,125 @@ export default Ember.Component.extend({
         this._super(...arguments);
         this.tearDownResize();
         this.cancelTimers();
+    },
+
+    showChartNotAvailable() {
+        const chartNotAvailableMessage = this.get('chartNotAvailableMessage');
+        const chartNotAvailableColor = this.get('chartNotAvailableColor');
+        const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
+        const xAxis = this.get('xAxis');
+        const yAxis = this.get('yAxis');
+        const formatter = this.get('xAxis.formatter') || (value => value);
+        
+        let columnChart = dc.barChart(`#${this.get('elementId')}`);
+        this.set('chart', columnChart);
+
+        const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
+        let ticks = 30;
+        if (duration.asMonths() >= 1) {
+            ticks = duration.asDays();
+        } else if (duration.asWeeks() >= 1) {
+            ticks = 30;
+        } else if (duration.asDays() >= 1) {
+            ticks = 24;
+        }
+            
+        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const filter = crossfilter(data);
+        const dimension = filter.dimension(d => d);
+        const group = dimension.group().reduceCount(g => g);
+
+        columnChart
+            .centerBar(true)
+            .barPadding(0.00)
+            .colors(chartNotAvailableColor)
+            .renderTitle(false)
+            .brushOn(false)
+            .height(this.get('height'))
+            .margins({
+                top: 10,
+                right: 100,
+                bottom: 50,
+                left: 100
+            })
+            .x(d3.time.scale().domain(xAxis.domain))
+            .xUnits(() => data.length + 1)
+            .y(d3.scale.linear().domain([0, 1]))
+            .group(group)
+            .dimension(dimension);
+
+        if (this.get('width')) {
+            this.get('chart').width(this.get('width'));
+        }
+
+        columnChart.on('renderlet', chart => {
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
+
+            // Set up any necessary hatching patterns
+            let svg = d3.select('.column-chart > svg > defs');
+
+            svg
+                .append('clippath')
+                    .attr('id', 'topclip')
+                .append('rect')
+                    .attr('x', '0')
+                    .attr('y', '0')
+                    .attr('width', 200)
+                    .attr('height', 200);
+            svg
+                .append('pattern')
+                    .attr('id', `chartNotAvailableHatch`)
+                    .attr('patternUnits', 'userSpaceOnUse')
+                    .attr('width', 4)
+                    .attr('height', 4)
+                    .attr('patternTransform', 'rotate(45)')
+                .append('rect')
+                    .attr('x', '0')
+                    .attr('y', '0')
+                    .attr('width', 2)
+                    .attr('height', 4)
+                    .attr('fill', chartNotAvailableColor);
+
+            chart.selectAll('rect.bar')
+                .attr('fill', `url(#chartNotAvailableHatch)`)
+                .attr('opacity', '.7')
+                .attr('rx', '2')
+                .attr('stroke', 'white');
+        });
+
+        columnChart.on('postRender', chart => {
+            // reenable transitions once we're done... it's a global.
+            dc.disableTransitions = false;
+
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
+
+            d3.select('.column-chart > svg > text').remove();
+            let svg = d3.select('.column-chart > svg');
+            let bbox = svg.node().getBBox();
+            svg
+                .append('text')
+                    .text(chartNotAvailableMessage)
+                    .style('fill', chartNotAvailableTextColor)
+                    .attr('class', 'chart-not-available')
+                    .attr('text-anchor', 'middle')
+                    .attr('y', bbox.y + (bbox.height / 2))
+                    .attr('x', bbox.x + (bbox.width / 2));
+        });
+        if (xAxis && xAxis.ticks) {
+            this.get('chart').xAxis().ticks(xAxis.ticks);
+        }
+        if (yAxis && yAxis.ticks) {
+            this.get('chart').yAxis().ticks(yAxis.ticks);
+        }
+
+        // we don't want to animate the transitions for the "no chart" view.
+        dc.disableTransitions = true;
+        columnChart.render();
     }
 });
