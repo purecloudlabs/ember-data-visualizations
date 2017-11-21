@@ -51,6 +51,13 @@ export default Ember.Component.extend({
 
     // REQUIRED: group, dimension, xAxis.domain unless !isChartAvailable
     createChart() {
+        const oldChart = this.get('chart');
+
+        if (oldChart) {
+            oldChart.on('renderlet', null);
+            oldChart.on('postRender', null);
+        }
+
         if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
             this.$().parents().find('.d3-tip').remove();
         }
@@ -437,7 +444,7 @@ export default Ember.Component.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
         const formatter = this.get('xAxis.formatter') || (value => value);
-        
+
         let columnChart = dc.barChart(`#${this.get('elementId')}`);
         this.set('chart', columnChart);
 
@@ -450,7 +457,7 @@ export default Ember.Component.extend({
         } else if (duration.asDays() >= 1) {
             ticks = 24;
         }
-            
+
         const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
