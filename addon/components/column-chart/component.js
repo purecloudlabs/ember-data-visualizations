@@ -296,11 +296,11 @@ export default Ember.Component.extend({
                     let gLabels = d3.select(firstBar.parentNode).append('g').attr('id', 'inline-labels');
                     let b = bars[maxIdx];
 
-                    if (b) {
-                        // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
-                        // Avoids label falling under any bar in the stack.
-                        const maxLabelY = Math.min(...chart.selectAll(`.sub rect.bar:nth-of-type(${maxIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+                    // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
+                    // Avoids label falling under any bar in the stack.
+                    const maxLabelY = Math.min(...chart.selectAll(`.sub rect.bar:nth-of-type(${maxIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
 
+                    if (b) {
                         gLabels.append('text')
                         .text(maxValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
@@ -323,12 +323,10 @@ export default Ember.Component.extend({
                     b = bars[minIdx];
 
                     if (b && !(maxIdx === minIdx)) {
-                        const minLabelY = Math.min(...chart.selectAll(`.sub rect.bar:nth-of-type(${minIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
-
                         gLabels.append('text')
                         .text(minValue)
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, minLabelY - 10))
+                        .attr('y', Math.max(12, maxLabelY - 2))
                         .attr('text-anchor', 'middle')
                         .attr('font-size', '12px')
                         .attr('fill', colors[seriesMaxMin]);
@@ -339,7 +337,7 @@ export default Ember.Component.extend({
                         .attr('class', 'caret-icon')
                         .attr('text-anchor', 'middle')
                         .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', minLabelY);
+                        .attr('y', maxLabelY - 12);
                     }
                 }
 
