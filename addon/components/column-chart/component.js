@@ -3,6 +3,8 @@ import moment from 'moment';
 import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
+import crossfilter from 'crossfilter';
+import $ from 'jquery';
 
 /**
    @public
@@ -193,12 +195,12 @@ export default Ember.Component.extend({
                 let svg = d3.select('.column-chart > svg > defs');
 
                 svg.append('clippath')
-                        .attr('id', 'topclip')
+                    .attr('id', 'topclip')
                     .append('rect')
-                        .attr('x', '0')
-                        .attr('y', '0')
-                        .attr('width', 200)
-                        .attr('height', 200);
+                    .attr('x', '0')
+                    .attr('y', '0')
+                    .attr('width', 200)
+                    .attr('height', 200);
 
                 series.forEach((series, index) => {
                     if (series.hatch === 'pos') {
@@ -208,7 +210,7 @@ export default Ember.Component.extend({
                             .attr('width', 4)
                             .attr('height', 4)
                             .attr('patternTransform', 'rotate(45)')
-                        .append('rect')
+                            .append('rect')
                             .attr('x', '0')
                             .attr('y', '0')
                             .attr('width', 2)
@@ -226,7 +228,7 @@ export default Ember.Component.extend({
                             .attr('width', 4)
                             .attr('height', 4)
                             .attr('patternTransform', 'rotate(-45)')
-                        .append('rect')
+                            .append('rect')
                             .attr('x', '0')
                             .attr('y', '0')
                             .attr('width', 2)
@@ -302,21 +304,21 @@ export default Ember.Component.extend({
 
                     if (b) {
                         gLabels.append('text')
-                        .text(maxValue)
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, maxLabelY - 2))
-                        .attr('text-anchor', 'middle')
-                        .attr('font-size', '12px')
-                        .attr('fill', colors[seriesMaxMin]);
+                            .text(maxValue)
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', Math.max(12, maxLabelY - 2))
+                            .attr('text-anchor', 'middle')
+                            .attr('font-size', '12px')
+                            .attr('fill', colors[seriesMaxMin]);
 
                         if (!(maxIdx === minIdx)) {
                             gLabels.append('text')
                             // unicode for font-awesome caret up
-                            .html(() => '&#xf0d8')
-                            .attr('text-anchor', 'middle')
-                            .attr('class', 'caret-icon')
-                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                            .attr('y', maxLabelY - 12);
+                                .html(() => '&#xf0d8')
+                                .attr('text-anchor', 'middle')
+                                .attr('class', 'caret-icon')
+                                .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                                .attr('y', maxLabelY - 12);
                         }
                     }
 
@@ -324,20 +326,20 @@ export default Ember.Component.extend({
 
                     if (b && !(maxIdx === minIdx)) {
                         gLabels.append('text')
-                        .text(minValue)
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, maxLabelY - 2))
-                        .attr('text-anchor', 'middle')
-                        .attr('font-size', '12px')
-                        .attr('fill', colors[seriesMaxMin]);
+                            .text(minValue)
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', Math.max(12, maxLabelY - 2))
+                            .attr('text-anchor', 'middle')
+                            .attr('font-size', '12px')
+                            .attr('fill', colors[seriesMaxMin]);
 
                         gLabels.append('text')
                         // unicode for font-awesome caret down
-                        .html(() => '&#xf0d7')
-                        .attr('class', 'caret-icon')
-                        .attr('text-anchor', 'middle')
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', maxLabelY - 12);
+                            .html(() => '&#xf0d7')
+                            .attr('class', 'caret-icon')
+                            .attr('text-anchor', 'middle')
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', maxLabelY - 12);
                     }
                 }
 
@@ -448,7 +450,6 @@ export default Ember.Component.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
-        const formatter = this.get('xAxis.formatter') || (value => value);
 
         let columnChart = dc.barChart(`#${this.get('elementId')}`);
         this.set('chart', columnChart);
@@ -502,34 +503,34 @@ export default Ember.Component.extend({
 
             svg
                 .append('clippath')
-                    .attr('id', 'topclip')
+                .attr('id', 'topclip')
                 .append('rect')
-                    .attr('x', '0')
-                    .attr('y', '0')
-                    .attr('width', 200)
-                    .attr('height', 200);
+                .attr('x', '0')
+                .attr('y', '0')
+                .attr('width', 200)
+                .attr('height', 200);
             svg
                 .append('pattern')
-                    .attr('id', `chartNotAvailableHatch`)
-                    .attr('patternUnits', 'userSpaceOnUse')
-                    .attr('width', 4)
-                    .attr('height', 4)
-                    .attr('patternTransform', 'rotate(45)')
+                .attr('id', 'chartNotAvailableHatch')
+                .attr('patternUnits', 'userSpaceOnUse')
+                .attr('width', 4)
+                .attr('height', 4)
+                .attr('patternTransform', 'rotate(45)')
                 .append('rect')
-                    .attr('x', '0')
-                    .attr('y', '0')
-                    .attr('width', 2)
-                    .attr('height', 4)
-                    .attr('fill', chartNotAvailableColor);
+                .attr('x', '0')
+                .attr('y', '0')
+                .attr('width', 2)
+                .attr('height', 4)
+                .attr('fill', chartNotAvailableColor);
 
             chart.selectAll('rect.bar')
-                .attr('fill', `url(#chartNotAvailableHatch)`)
+                .attr('fill', 'url(#chartNotAvailableHatch)')
                 .attr('opacity', '.7')
                 .attr('rx', '2')
                 .attr('stroke', 'white');
         });
 
-        columnChart.on('postRender', chart => {
+        columnChart.on('postRender', () => {
             // reenable transitions once we're done... it's a global.
             dc.disableTransitions = false;
 
@@ -543,12 +544,12 @@ export default Ember.Component.extend({
             let bbox = svg.node().getBBox();
             svg
                 .append('text')
-                    .text(chartNotAvailableMessage)
-                    .style('fill', chartNotAvailableTextColor)
-                    .attr('class', 'chart-not-available')
-                    .attr('text-anchor', 'middle')
-                    .attr('y', bbox.y + (bbox.height / 2))
-                    .attr('x', bbox.x + (bbox.width / 2));
+                .text(chartNotAvailableMessage)
+                .style('fill', chartNotAvailableTextColor)
+                .attr('class', 'chart-not-available')
+                .attr('text-anchor', 'middle')
+                .attr('y', bbox.y + (bbox.height / 2))
+                .attr('x', bbox.x + (bbox.width / 2));
         });
         if (xAxis && xAxis.ticks) {
             this.get('chart').xAxis().ticks(xAxis.ticks);
