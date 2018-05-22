@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import { inject as service } from '@ember/service';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import moment from 'moment';
@@ -69,7 +69,7 @@ moduleForComponent('column-chart', 'Integration | Component | column chart', {
     integration: true,
     beforeEach() {
         this.set('params', getTestParameters());
-        this.register('service:resizeDetector', Ember.Service.extend({
+        this.register('service:resizeDetector', service({
             setup(elementId, callback) {
                 callback();
             },
