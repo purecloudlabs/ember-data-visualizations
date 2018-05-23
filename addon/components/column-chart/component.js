@@ -238,6 +238,7 @@ export default BaseChartComponent.extend({
             .attr('x2', this.get('chart').width() - 95)
             .attr('y1', 10 + this.get('chart').y()(line.value))
             .attr('y2', 10 + this.get('chart').y()(line.value))
+            .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
@@ -278,7 +279,8 @@ export default BaseChartComponent.extend({
                 .attr('y', Math.max(12, maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
-                .attr('fill', this.get('colors')[this.get('seriesMaxMin')]);
+                .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
+                .attr('class', 'max-value-text');
 
             if (!(maxIdx === minIdx)) {
                 gLabels.append('text')
@@ -287,7 +289,8 @@ export default BaseChartComponent.extend({
                     .attr('text-anchor', 'middle')
                     .attr('class', 'caret-icon')
                     .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                    .attr('y', maxLabelY - 12);
+                    .attr('y', maxLabelY - 12)
+                    .attr('class', 'max-value-indicator');
             }
         }
 
@@ -300,7 +303,8 @@ export default BaseChartComponent.extend({
                 .attr('y', Math.max(12, maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
-                .attr('fill', this.get('colors')[this.get('seriesMaxMin')]);
+                .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
+                .attr('class', 'min-value-text');
 
             gLabels.append('text')
                 // unicode for font-awesome caret down
@@ -308,7 +312,8 @@ export default BaseChartComponent.extend({
                 .attr('class', 'caret-icon')
                 .attr('text-anchor', 'middle')
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', maxLabelY - 12);
+                .attr('y', maxLabelY - 12)
+                .attr('class', 'min-value-indicator');
         }
     },
 
