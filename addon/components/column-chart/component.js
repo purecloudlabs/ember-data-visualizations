@@ -98,9 +98,9 @@ export default Ember.Component.extend({
         const yAxis = this.get('yAxis');
         const xTimeScale = d3.time.scale().domain(xAxis.domain);
 
-        var currentInterval;
-        if (this.get('currentInterval').start) {
-            currentInterval = this.get('currentInterval').start._d;
+        var indicatorDate = null;
+        if (this.get('currentInterval')) {
+            indicatorDate = this.get('currentInterval.start._d');
         }
 
         const titles = this.get('series').map(entry => entry.title);
@@ -111,7 +111,7 @@ export default Ember.Component.extend({
 
         function isIntervalIncluded(scale, interval) {
             let scaleTicksStrings = [];
-            for (let i  = 0; i < scale.ticks().length; i++){
+            for (let i = 0; i < scale.ticks().length; i++) {
                 scaleTicksStrings.push(scale.ticks()[i].toString())
             }
             return scaleTicksStrings.includes(interval.toString());
@@ -395,15 +395,15 @@ export default Ember.Component.extend({
                 }
 
                 //change the tick with the date to include the indicator
-                if (currentInterval) {
+                if (typeof indicatorDate != undefined) {
                     let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
-                    if (isIntervalInRange(xTimeScale, currentInterval)) {
+                    if (isIntervalInRange(xTimeScale, indicatorDate)) {
                         let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                             .filter(function (d) {
-                                return d.toString() === currentInterval.toString()
+                                return d.toString() === indicatorDate.toString()
                             });
                         if (!currentTick.empty()) {
-                            if (isIntervalIncluded(xTimeScale, currentInterval)) {
+                            if (isIntervalIncluded(xTimeScale, indicatorDate)) {
                                 currentTick.select('text').html("\u25C6 " + currentTick.text());
                             }
                             else {
@@ -417,28 +417,30 @@ export default Ember.Component.extend({
 
         this.get('chart').xAxis().outerTickSize(0);
 
-        //if currentInterval is in range but not already in the scale, add it.
-        if (xAxis && xAxis.ticks && currentInterval && !isIntervalIncluded(xTimeScale, currentInterval) && isIntervalInRange(xTimeScale, currentInterval)) {
-            let ticks = xTimeScale.ticks();
-            ticks.push(currentInterval);
-            this.get('chart').xAxis()
-                .ticks(ticks.length);
-            d3.select('.column-chart > svg > g > g.axis').call(this.get('chart').xAxis().tickValues(ticks));
-            d3.select('.column-chart > svg > g > g.axis')
-                .selectAll('g.tick')
-                .filter(function (d) {
-                    return d.toString() === currentInterval.toString()
-                })
-                .select('text').html("\u25C6")
+        // if indicatorDate is in range but not already in the scale, add it.
+        if (typeof indicatorDate != undefined) {
+            if (xAxis && xAxis.ticks && !isIntervalIncluded(xTimeScale, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
+                let ticks = xTimeScale.ticks();
+                ticks.push(indicatorDate);
+                this.get('chart').xAxis()
+                    .ticks(ticks.length);
+                d3.select('.column-chart > svg > g > g.axis').call(this.get('chart').xAxis().tickValues(ticks));
+                d3.select('.column-chart > svg > g > g.axis')
+                    .selectAll('g.tick')
+                    .filter(function (d) {
+                        return d.toString() === indicatorDate.toString()
+                    })
+                    .select('text').html("\u25C6")
+            }
         }
 
-        if (currentInterval && isIntervalInRange(xTimeScale, currentInterval)) {
+        if (indicatorDate && isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(function (d) {
-                    return d.toString() === currentInterval.toString()
+                    return d.toString() === indicatorDate.toString()
                 });
             if (!currentTick.empty()) {
-                if (isIntervalIncluded(xTimeScale, currentInterval)) {
+                if (isIntervalIncluded(xTimeScale, indicatorDate)) {
                     currentTick.select('text').html("\u25C6 " + currentTick.text());
                 }
                 else {
@@ -562,19 +564,6 @@ export default Ember.Component.extend({
                 return;
             }
 
-            if (currentInterval) {
-                let currentTick = d3.select('.column-chart').selectAll('g.tick')
-                    .filter(function (d) { return d.toString() === currentInterval.toString() });
-                if (!currentTick.empty()) {
-                    let currentText = currentTick.text();
-                    if (d3.time.scale().domain(this.get('xAxis').domain).ticks()) {
-                        currentTick.select('text').html("\u25C6 " + currentText);
-                    }
-                    else {
-                        currentTick.select('text').html("\u25C6");
-                    }
-                }
-            }
 
             // Set up any necessary hatching patterns
             let svg = d3.select('.column-chart > svg > defs');
