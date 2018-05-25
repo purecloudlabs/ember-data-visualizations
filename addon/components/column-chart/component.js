@@ -393,8 +393,10 @@ export default Ember.Component.extend({
                         .attr('fill', line.textColor || '#000000');
                 }
 
+                debugger;
                 // change the tick with the date to include the indicator (happens after tick has been added)
                 if (indicatorDate && showCurrentIndicator) {
+                    debugger;
                     let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
                     if (isIntervalInRange(xTimeScale, indicatorDate)) {
                         let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
@@ -410,12 +412,19 @@ export default Ember.Component.extend({
 
         // if indicatorDate is in range but not already in the scale, add it.
         if (indicatorDate && showCurrentIndicator) {
-            if (!isIntervalIncluded(xTimeScale, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
+            if (xAxis && xAxis.ticks && !isIntervalIncluded(xTimeScale, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
                 let ticks = xTimeScale.ticks();
                 ticks.push(indicatorDate);
-                this.get('chart').xAxis().ticks(ticks.length).tickValues(ticks);
+                this.get('chart').xAxis()
+                    .ticks(xAxis.ticks)
+                    .tickValues(ticks);
             }
         }
+
+        if (xAxis && xAxis.ticks) {
+            this.get('chart').xAxis().ticks(xAxis.ticks);
+        }
+
         this.get('chart').yAxis().outerTickSize(0);
 
         if (yAxis && yAxis.ticks) {
