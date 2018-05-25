@@ -111,10 +111,10 @@ export default Ember.Component.extend({
         function isIntervalIncluded(scale, interval) {
             let scaleTicksStrings = [];
             for (let i = 0; i < scale.ticks().length; i++) {
-                scaleTicksStrings.push(scale.ticks()[i].toString())
+                scaleTicksStrings.push(scale.ticks()[i].toString());
             }
             return scaleTicksStrings.includes(interval.toString());
-        };
+        }
 
         function isIntervalInRange(scale, interval) {
             return (scale.ticks().pop() >= interval && scale.ticks()[0] <= interval);
@@ -393,7 +393,7 @@ export default Ember.Component.extend({
                         .attr('fill', line.textColor || '#000000');
                 }
 
-                //change the tick with the date to include the indicator (happens after tick has been added)
+                // change the tick with the date to include the indicator (happens after tick has been added)
                 if (indicatorDate && showCurrentIndicator) {
                     let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
                     if (isIntervalInRange(xTimeScale, indicatorDate)) {
@@ -530,7 +530,6 @@ export default Ember.Component.extend({
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
             }
-
 
             // Set up any necessary hatching patterns
             let svg = d3.select('.column-chart > svg > defs');
