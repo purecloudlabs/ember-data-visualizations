@@ -287,10 +287,9 @@ export default BaseChartComponent.extend({
                 // unicode for font-awesome caret up
                     .html(() => '&#xf0d8')
                     .attr('text-anchor', 'middle')
-                    .attr('class', 'caret-icon')
+                    .attr('class', 'caret-icon max-value-indicator')
                     .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                    .attr('y', maxLabelY - 12)
-                    .attr('class', 'max-value-indicator');
+                    .attr('y', maxLabelY - 12);
             }
         }
 
@@ -309,11 +308,10 @@ export default BaseChartComponent.extend({
             gLabels.append('text')
                 // unicode for font-awesome caret down
                 .html(() => '&#xf0d7')
-                .attr('class', 'caret-icon')
+                .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', 'middle')
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', maxLabelY - 12)
-                .attr('class', 'min-value-indicator');
+                .attr('y', maxLabelY - 12);
         }
     },
 
