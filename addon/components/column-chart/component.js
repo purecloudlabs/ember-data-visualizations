@@ -34,6 +34,7 @@ export default Ember.Component.extend({
     xAxis: {},
     yAxis: {},
     currentInterval: null,
+    showCurrentIndicator: false,
 
     isChartAvailable: true,
     chartNotAvailableMessage: null,
@@ -98,10 +99,8 @@ export default Ember.Component.extend({
         const yAxis = this.get('yAxis');
         const xTimeScale = d3.time.scale().domain(xAxis.domain);
 
-        var indicatorDate = null;
-        if (this.get('currentInterval')) {
-            indicatorDate = this.get('currentInterval.start._d');
-        }
+        const indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
+        const showCurrentIndicator = this.get('showCurrentIndicator');
 
         const titles = this.get('series').map(entry => entry.title);
 
@@ -394,22 +393,14 @@ export default Ember.Component.extend({
                         .attr('fill', line.textColor || '#000000');
                 }
 
-                //change the tick with the date to include the indicator
-                if (typeof indicatorDate != undefined) {
+                //change the tick with the date to include the indicator (happens after tick has been added)
+                if (indicatorDate && showCurrentIndicator) {
                     let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
                     if (isIntervalInRange(xTimeScale, indicatorDate)) {
                         let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
-                            .filter(function (d) {
-                                return d.toString() === indicatorDate.toString()
-                            });
-                        if (!currentTick.empty()) {
-                            if (isIntervalIncluded(xTimeScale, indicatorDate)) {
-                                currentTick.select('text').html("\u25C6 " + currentTick.text());
-                            }
-                            else {
-                                currentTick.select('text').html("\u25C6");
-                            }
-                        }
+                            .filter(d => d.toString() === indicatorDate.toString());
+                        let tickHtml = isIntervalIncluded(xTimeScale, indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                        currentTick.select('text').html(tickHtml);
                     }
                 }
             })
@@ -418,37 +409,13 @@ export default Ember.Component.extend({
         this.get('chart').xAxis().outerTickSize(0);
 
         // if indicatorDate is in range but not already in the scale, add it.
-        if (typeof indicatorDate != undefined) {
-            if (xAxis && xAxis.ticks && !isIntervalIncluded(xTimeScale, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
+        if (indicatorDate && showCurrentIndicator) {
+            if (!isIntervalIncluded(xTimeScale, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
                 let ticks = xTimeScale.ticks();
                 ticks.push(indicatorDate);
-                this.get('chart').xAxis()
-                    .ticks(ticks.length);
-                d3.select('.column-chart > svg > g > g.axis').call(this.get('chart').xAxis().tickValues(ticks));
-                d3.select('.column-chart > svg > g > g.axis')
-                    .selectAll('g.tick')
-                    .filter(function (d) {
-                        return d.toString() === indicatorDate.toString()
-                    })
-                    .select('text').html("\u25C6")
+                this.get('chart').xAxis().ticks(ticks.length).tickValues(ticks);
             }
         }
-
-        if (indicatorDate && isIntervalInRange(xTimeScale, indicatorDate)) {
-            let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
-                .filter(function (d) {
-                    return d.toString() === indicatorDate.toString()
-                });
-            if (!currentTick.empty()) {
-                if (isIntervalIncluded(xTimeScale, indicatorDate)) {
-                    currentTick.select('text').html("\u25C6 " + currentTick.text());
-                }
-                else {
-                    currentTick.select('text').html("\u25C6");
-                }
-            }
-        }
-
         this.get('chart').yAxis().outerTickSize(0);
 
         if (yAxis && yAxis.ticks) {
