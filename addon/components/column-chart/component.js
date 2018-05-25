@@ -3,6 +3,8 @@ import moment from 'moment';
 import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
+import crossfilter from 'crossfilter';
+import $ from 'jquery';
 
 /**
    @public
@@ -481,7 +483,6 @@ export default Ember.Component.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
-        const formatter = this.get('xAxis.formatter') || (value => value);
 
         let columnChart = dc.barChart(`#${this.get('elementId')}`);
         this.set('chart', columnChart);
@@ -544,7 +545,7 @@ export default Ember.Component.extend({
                 .attr('height', 200);
             svg
                 .append('pattern')
-                .attr('id', `chartNotAvailableHatch`)
+                .attr('id', 'chartNotAvailableHatch')
                 .attr('patternUnits', 'userSpaceOnUse')
                 .attr('width', 4)
                 .attr('height', 4)
@@ -557,13 +558,13 @@ export default Ember.Component.extend({
                 .attr('fill', chartNotAvailableColor);
 
             chart.selectAll('rect.bar')
-                .attr('fill', `url(#chartNotAvailableHatch)`)
+                .attr('fill', 'url(#chartNotAvailableHatch)')
                 .attr('opacity', '.7')
                 .attr('rx', '2')
                 .attr('stroke', 'white');
         });
 
-        columnChart.on('postRender', chart => {
+        columnChart.on('postRender', () => {
             // reenable transitions once we're done... it's a global.
             dc.disableTransitions = false;
 
