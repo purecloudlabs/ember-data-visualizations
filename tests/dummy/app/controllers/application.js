@@ -20,7 +20,7 @@ export default Ember.Controller.extend({
         ticks: 3
     },
 
-    currentInterval: moment('11/27/2016'),
+    currentInterval: { start: moment('10/30/2016') },
 
     comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
 

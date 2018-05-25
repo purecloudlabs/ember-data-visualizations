@@ -110,12 +110,8 @@ export default Ember.Component.extend({
         const tooltipDateFormat = this.get('tooltipDateFormat');
         const formatter = this.get('xAxis.formatter') || (value => value);
 
-        function isIntervalIncluded(scale, interval) {
-            let scaleTicksStrings = [];
-            for (let i = 0; i < scale.ticks().length; i++) {
-                scaleTicksStrings.push(scale.ticks()[i].toString());
-            }
-            return scaleTicksStrings.includes(interval.toString());
+        function isIntervalIncluded(ticks, interval) {
+            return ticks.toString().includes(interval.toString());
         }
 
         function isIntervalInRange(scale, interval) {
@@ -401,7 +397,7 @@ export default Ember.Component.extend({
                     if (isIntervalInRange(xTimeScale, indicatorDate)) {
                         let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                             .filter(d => d.toString() === indicatorDate.toString());
-                        let tickHtml = isIntervalIncluded(xTimeScale, indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                        let tickHtml = isIntervalIncluded(xTimeScale.ticks(xAxis.ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
                         currentTick.select('text').html(tickHtml);
                     }
                 }
@@ -412,8 +408,8 @@ export default Ember.Component.extend({
 
         // if indicatorDate is in range but not already in the scale, add it.
         if (indicatorDate && showCurrentIndicator) {
-            if (xAxis && xAxis.ticks && !isIntervalIncluded(xTimeScale, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
-                let ticks = xTimeScale.ticks();
+            let ticks = xTimeScale.ticks(xAxis.ticks);
+            if (xAxis && xAxis.ticks && !isIntervalIncluded(ticks, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
                 ticks.push(indicatorDate);
                 this.get('chart').xAxis()
                     .ticks(xAxis.ticks)
