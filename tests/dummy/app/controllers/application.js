@@ -16,22 +16,15 @@ export default Ember.Controller.extend({
                 if (error) {
                     return Ember.Logger.log(error);
                 }
-                json[5].calls+=20;
-                // console.log(json);
+                json[5].calls += 20;
+
                 self.set('content', json);
                 self._createDimensions();
                 self._createGroups();
             });
-        //     let content = Ember.get(this, 'content');
-        //     content.forEach(function (d) {
-        //         d.date = moment(d.date, 'YYYYMMDD').toDate();
-        //         d.chats = d.chats + 1;
-        //     });
-        //     this.get('dimensions').remove();
-        //     this._crossfilter = crossfilter(content);
-        //     this.set('dimensions', this._crossfilter.dimension(d => d.date));
         }
     },
+
     dimensions: [],
     domainString: '',
     groups: [],
@@ -69,7 +62,13 @@ export default Ember.Controller.extend({
             d.date = moment(d.date, 'YYYYMMDD').toDate();
         });
 
-        this._crossfilter = crossfilter(content);
+        if (this._crossfilter) {
+            this._crossfilter.remove();
+            this._crossfilter.add(content);
+        }
+        else {
+            this._crossfilter = crossfilter(content);
+        }
 
         this.set('dimensions', this._crossfilter.dimension(d => d.date));
     },
