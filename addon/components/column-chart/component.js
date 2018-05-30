@@ -3,6 +3,8 @@ import moment from 'moment';
 import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
+import crossfilter from 'crossfilter';
+import $ from 'jquery';
 
 /**
    @public
@@ -33,6 +35,8 @@ export default Ember.Component.extend({
     height: 200,
     xAxis: {},
     yAxis: {},
+    currentInterval: null,
+    showCurrentIndicator: false,
 
     isChartAvailable: true,
     chartNotAvailableMessage: null,
@@ -43,7 +47,7 @@ export default Ember.Component.extend({
     // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
     comparisonLine: null,
 
-    onClick() {},
+    onClick() { },
 
     tooltipDateFormat: 'll LT',
 
@@ -95,12 +99,24 @@ export default Ember.Component.extend({
 
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
+        const xTimeScale = d3.time.scale().domain(xAxis.domain);
+
+        const indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
+        const showCurrentIndicator = this.get('showCurrentIndicator');
 
         const titles = this.get('series').map(entry => entry.title);
 
         const data = this.get('data');
         const tooltipDateFormat = this.get('tooltipDateFormat');
         const formatter = this.get('xAxis.formatter') || (value => value);
+
+        function isIntervalIncluded(ticks, interval) {
+            return ticks.toString().indexOf(interval.toString()) > -1;
+        }
+
+        function isIntervalInRange(scale, interval) {
+            return scale.ticks().pop() >= interval && scale.ticks()[0] <= interval;
+        }
 
         let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
             if (!_.isEmpty(titles)) {
@@ -171,7 +187,7 @@ export default Ember.Component.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(xAxis.domain))
+            .x(xTimeScale)
             .xUnits(() => groups[0].size() * (groups.length + 1));
 
         if (this.get('width')) {
@@ -193,12 +209,12 @@ export default Ember.Component.extend({
                 let svg = d3.select('.column-chart > svg > defs');
 
                 svg.append('clippath')
-                        .attr('id', 'topclip')
+                    .attr('id', 'topclip')
                     .append('rect')
-                        .attr('x', '0')
-                        .attr('y', '0')
-                        .attr('width', 200)
-                        .attr('height', 200);
+                    .attr('x', '0')
+                    .attr('y', '0')
+                    .attr('width', 200)
+                    .attr('height', 200);
 
                 series.forEach((series, index) => {
                     if (series.hatch === 'pos') {
@@ -208,7 +224,7 @@ export default Ember.Component.extend({
                             .attr('width', 4)
                             .attr('height', 4)
                             .attr('patternTransform', 'rotate(45)')
-                        .append('rect')
+                            .append('rect')
                             .attr('x', '0')
                             .attr('y', '0')
                             .attr('width', 2)
@@ -226,7 +242,7 @@ export default Ember.Component.extend({
                             .attr('width', 4)
                             .attr('height', 4)
                             .attr('patternTransform', 'rotate(-45)')
-                        .append('rect')
+                            .append('rect')
                             .attr('x', '0')
                             .attr('y', '0')
                             .attr('width', 2)
@@ -302,21 +318,21 @@ export default Ember.Component.extend({
 
                     if (b) {
                         gLabels.append('text')
-                        .text(maxValue)
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, maxLabelY - 2))
-                        .attr('text-anchor', 'middle')
-                        .attr('font-size', '12px')
-                        .attr('fill', colors[seriesMaxMin]);
+                            .text(maxValue)
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', Math.max(12, maxLabelY - 2))
+                            .attr('text-anchor', 'middle')
+                            .attr('font-size', '12px')
+                            .attr('fill', colors[seriesMaxMin]);
 
                         if (!(maxIdx === minIdx)) {
                             gLabels.append('text')
-                            // unicode for font-awesome caret up
-                            .html(() => '&#xf0d8')
-                            .attr('text-anchor', 'middle')
-                            .attr('class', 'caret-icon')
-                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                            .attr('y', maxLabelY - 12);
+                                // unicode for font-awesome caret up
+                                .html(() => '&#xf0d8')
+                                .attr('text-anchor', 'middle')
+                                .attr('class', 'caret-icon')
+                                .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                                .attr('y', maxLabelY - 12);
                         }
                     }
 
@@ -324,20 +340,20 @@ export default Ember.Component.extend({
 
                     if (b && !(maxIdx === minIdx)) {
                         gLabels.append('text')
-                        .text(minValue)
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', Math.max(12, maxLabelY - 2))
-                        .attr('text-anchor', 'middle')
-                        .attr('font-size', '12px')
-                        .attr('fill', colors[seriesMaxMin]);
+                            .text(minValue)
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', Math.max(12, maxLabelY - 2))
+                            .attr('text-anchor', 'middle')
+                            .attr('font-size', '12px')
+                            .attr('fill', colors[seriesMaxMin]);
 
                         gLabels.append('text')
-                        // unicode for font-awesome caret down
-                        .html(() => '&#xf0d7')
-                        .attr('class', 'caret-icon')
-                        .attr('text-anchor', 'middle')
-                        .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                        .attr('y', maxLabelY - 12);
+                            // unicode for font-awesome caret down
+                            .html(() => '&#xf0d7')
+                            .attr('class', 'caret-icon')
+                            .attr('text-anchor', 'middle')
+                            .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                            .attr('y', maxLabelY - 12);
                     }
                 }
 
@@ -374,10 +390,32 @@ export default Ember.Component.extend({
                         .attr('font-size', '12px')
                         .attr('fill', line.textColor || '#000000');
                 }
+
+                // change the tick with the date to include the indicator (happens after tick has been added)
+                if (indicatorDate && showCurrentIndicator) {
+                    let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+                    if (isIntervalInRange(xTimeScale, indicatorDate)) {
+                        let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
+                            .filter(d => d.toString() === indicatorDate.toString());
+                        let tickHtml = isIntervalIncluded(xTimeScale.ticks(xAxis.ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                        currentTick.select('text').html(tickHtml);
+                    }
+                }
             })
             .compose(columnCharts);
 
         this.get('chart').xAxis().outerTickSize(0);
+
+        // if indicatorDate is in range but not already in the scale, add it.
+        if (indicatorDate && showCurrentIndicator) {
+            let ticks = xTimeScale.ticks(xAxis.ticks);
+            if (xAxis && xAxis.ticks && !isIntervalIncluded(ticks, indicatorDate) && isIntervalInRange(xTimeScale, indicatorDate)) {
+                ticks.push(indicatorDate);
+                this.get('chart').xAxis()
+                    .ticks(xAxis.ticks)
+                    .tickValues(ticks);
+            }
+        }
 
         if (xAxis && xAxis.ticks) {
             this.get('chart').xAxis().ticks(xAxis.ticks);
@@ -448,7 +486,6 @@ export default Ember.Component.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
-        const formatter = this.get('xAxis.formatter') || (value => value);
 
         let columnChart = dc.barChart(`#${this.get('elementId')}`);
         this.set('chart', columnChart);
@@ -463,7 +500,8 @@ export default Ember.Component.extend({
             ticks = 24;
         }
 
-        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const xTimeScale = d3.time.scale().domain(xAxis.domain);
+        const data = xTimeScale.ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
@@ -481,7 +519,7 @@ export default Ember.Component.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(xAxis.domain))
+            .x(xTimeScale)
             .xUnits(() => data.length + 1)
             .y(d3.scale.linear().domain([0, 1]))
             .group(group)
@@ -502,34 +540,34 @@ export default Ember.Component.extend({
 
             svg
                 .append('clippath')
-                    .attr('id', 'topclip')
+                .attr('id', 'topclip')
                 .append('rect')
-                    .attr('x', '0')
-                    .attr('y', '0')
-                    .attr('width', 200)
-                    .attr('height', 200);
+                .attr('x', '0')
+                .attr('y', '0')
+                .attr('width', 200)
+                .attr('height', 200);
             svg
                 .append('pattern')
-                    .attr('id', `chartNotAvailableHatch`)
-                    .attr('patternUnits', 'userSpaceOnUse')
-                    .attr('width', 4)
-                    .attr('height', 4)
-                    .attr('patternTransform', 'rotate(45)')
+                .attr('id', 'chartNotAvailableHatch')
+                .attr('patternUnits', 'userSpaceOnUse')
+                .attr('width', 4)
+                .attr('height', 4)
+                .attr('patternTransform', 'rotate(45)')
                 .append('rect')
-                    .attr('x', '0')
-                    .attr('y', '0')
-                    .attr('width', 2)
-                    .attr('height', 4)
-                    .attr('fill', chartNotAvailableColor);
+                .attr('x', '0')
+                .attr('y', '0')
+                .attr('width', 2)
+                .attr('height', 4)
+                .attr('fill', chartNotAvailableColor);
 
             chart.selectAll('rect.bar')
-                .attr('fill', `url(#chartNotAvailableHatch)`)
+                .attr('fill', 'url(#chartNotAvailableHatch)')
                 .attr('opacity', '.7')
                 .attr('rx', '2')
                 .attr('stroke', 'white');
         });
 
-        columnChart.on('postRender', chart => {
+        columnChart.on('postRender', () => {
             // reenable transitions once we're done... it's a global.
             dc.disableTransitions = false;
 
@@ -543,16 +581,14 @@ export default Ember.Component.extend({
             let bbox = svg.node().getBBox();
             svg
                 .append('text')
-                    .text(chartNotAvailableMessage)
-                    .style('fill', chartNotAvailableTextColor)
-                    .attr('class', 'chart-not-available')
-                    .attr('text-anchor', 'middle')
-                    .attr('y', bbox.y + (bbox.height / 2))
-                    .attr('x', bbox.x + (bbox.width / 2));
+                .text(chartNotAvailableMessage)
+                .style('fill', chartNotAvailableTextColor)
+                .attr('class', 'chart-not-available')
+                .attr('text-anchor', 'middle')
+                .attr('y', bbox.y + (bbox.height / 2))
+                .attr('x', bbox.x + (bbox.width / 2));
         });
-        if (xAxis && xAxis.ticks) {
-            this.get('chart').xAxis().ticks(xAxis.ticks);
-        }
+
         if (yAxis && yAxis.ticks) {
             this.get('chart').yAxis().ticks(yAxis.ticks);
         }
