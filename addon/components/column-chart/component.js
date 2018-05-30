@@ -111,11 +111,11 @@ export default Ember.Component.extend({
         const formatter = this.get('xAxis.formatter') || (value => value);
 
         function isIntervalIncluded(ticks, interval) {
-            return ticks.toString().includes(interval.toString());
+            return ticks.toString().indexOf(interval.toString()) > -1;
         }
 
         function isIntervalInRange(scale, interval) {
-            return (scale.ticks().pop() >= interval && scale.ticks()[0] <= interval);
+            return scale.ticks().pop() >= interval && scale.ticks()[0] <= interval;
         }
 
         let tip = d3.tip().attr('class', 'd3-tip').html(function (d) {
