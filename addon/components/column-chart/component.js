@@ -58,6 +58,10 @@ export default BaseChartComponent.extend({
             compositeChart.y(d3.scale.linear().domain(this.get('yAxis').domain));
         }
 
+        if (this.get('currentInterval') && this.get('showCurrentIndicator') && this.get('xAxis') && this.get('xAxis').ticks) {
+            compositeChart.xAxis().ticks(this.get('xAxis').ticks).tickValues(this.addTickForCurrentInterval());
+        }
+
         compositeChart.xAxis().outerTickSize(0);
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks);
@@ -116,20 +120,6 @@ export default BaseChartComponent.extend({
         compositeChart
             .on('renderlet', () => this.onRenderlet(maxValue, maxIdx, minValue, minIdx, tip))
             .compose(columnCharts);
-
-        const xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
-        const indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
-
-        // if indicatorDate is in range but not already in the scale, add it.
-        if (indicatorDate && this.get('showCurrentIndicator')) {
-            let ticks = xTimeScale.ticks(this.get('xAxis').ticks);
-            if (this.get('xAxis') && this.get('xAxis').ticks && !this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xTimeScale, indicatorDate)) {
-                ticks.push(indicatorDate);
-                compositeChart.xAxis()
-                    .ticks(this.get('xAxis').ticks)
-                    .tickValues(ticks);
-            }
-        }
 
         this.set('chart', compositeChart);
     },
@@ -234,17 +224,8 @@ export default BaseChartComponent.extend({
             this.addComparisonLine();
         }
 
-        const indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
-
-        // change the tick with the date to include the indicator (happens after tick has been added)
-        if (indicatorDate && this.get('showCurrentIndicator')) {
-            let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
-            if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
-                let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
-                    .filter(d => d.toString() === indicatorDate.toString());
-                let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-                currentTick.select('text').html(tickHtml);
-            }
+        if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
+            this.changeTickForCurrentInterval();
         }
     },
 
@@ -264,6 +245,29 @@ export default BaseChartComponent.extend({
 
     isIntervalInRange(scale, interval) {
         return (scale.ticks().pop() >= interval && scale.ticks()[0] <= interval);
+    },
+
+    addTickForCurrentInterval() {
+        // if indicatorDate is in range but not already in the scale, add it.
+        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+        let indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
+        let ticks = xTimeScale.ticks(this.get('xAxis').ticks);
+        if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xTimeScale, indicatorDate)) {
+            ticks.push(indicatorDate);
+        }
+        return ticks;
+    },
+
+    changeTickForCurrentInterval() {
+        // this method should be called on renderlet
+        let indicatorDate = this.get('currentInterval.start._d');
+        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+        if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
+            let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
+                .filter(d => d.toString() === indicatorDate.toString());
+            let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+            currentTick.select('text').html(tickHtml);
+        }
     },
 
     addComparisonLine() {
@@ -321,7 +325,7 @@ export default BaseChartComponent.extend({
 
             if (!(maxIdx === minIdx)) {
                 gLabels.append('text')
-                // unicode for font-awesome caret up
+                    // unicode for font-awesome caret up
                     .html(() => '&#xf0d8')
                     .attr('text-anchor', 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
