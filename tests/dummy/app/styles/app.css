@@ -2,6 +2,6 @@ body {
     height: 100vh;
 }
 
-body > div {
+body > .ember-view {
     height: 100%;
 }
