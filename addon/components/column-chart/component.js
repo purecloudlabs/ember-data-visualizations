@@ -459,6 +459,7 @@ export default Ember.Component.extend({
         this._super(...arguments);
 
         let data = {};
+        if (_.isEmpty(this.get('data'))) {
         _.forEach(this.get('group'), g => {
             _.forEach(g.all(), datum => {
                 if (data[datum.key]) {
@@ -472,6 +473,28 @@ export default Ember.Component.extend({
 
         // Must schedule for afterRender as createChart depends on existence of component's element
         Ember.run.scheduleOnce('afterRender', this, this.setupResize);
+        }
+        else {
+            _.forEach(this.get('group'), g => {
+                _.forEach(g.all(), datum => {
+                    if (data[datum.key]) {
+                        data[datum.key].push(datum.value);
+                    } else {
+                        data[datum.key] = [datum.value];
+                    }
+                });
+            });
+            this.set('data', data);
+            dc.redrawAll();
+            //this.get('chart').redraw();
+            //console.log('do something');
+            // let currentDate = this.get('currentInterval.start._d');
+            // this.get('chart').selectAll('rect.bar').filter(function(d){return d.x.toString() == currentDate.toString()})
+            // .transition()
+            // .attr('transform', 'translate(0,-20)')
+            // .attr('height', 30)
+        }
+
     },
 
     willDestroyElement() {

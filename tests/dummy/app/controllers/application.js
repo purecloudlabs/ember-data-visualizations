@@ -2,12 +2,36 @@ import Ember from 'ember';
 import moment from 'moment';
 import d3 from 'd3';
 import crossfilter from 'crossfilter';
+import _ from 'lodash/lodash';
 
 export default Ember.Controller.extend({
     metrics: [
         { value: 'sighting', label: 'Sightings' }
     ],
 
+    actions: {
+        updateData() {
+            let self = this;
+            d3.json('data.json', function (error, json) {
+                if (error) {
+                    return Ember.Logger.log(error);
+                }
+                json[5].calls+=20;
+                // console.log(json);
+                self.set('content', json);
+                self._createDimensions();
+                self._createGroups();
+            });
+        //     let content = Ember.get(this, 'content');
+        //     content.forEach(function (d) {
+        //         d.date = moment(d.date, 'YYYYMMDD').toDate();
+        //         d.chats = d.chats + 1;
+        //     });
+        //     this.get('dimensions').remove();
+        //     this._crossfilter = crossfilter(content);
+        //     this.set('dimensions', this._crossfilter.dimension(d => d.date));
+        }
+    },
     dimensions: [],
     domainString: '',
     groups: [],
@@ -20,7 +44,7 @@ export default Ember.Controller.extend({
         ticks: 3
     },
 
-    currentInterval: { start: moment('10/30/2016') },
+    currentInterval: { start: moment('11/06/2016') },
 
     comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
 
@@ -28,6 +52,8 @@ export default Ember.Controller.extend({
 
     onClick(datum) {
         this.set('domainString', datum.x);
+        datum.y++;
+        console.log(datum);
     },
 
     /**
