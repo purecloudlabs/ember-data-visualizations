@@ -2,7 +2,6 @@ import Ember from 'ember';
 import moment from 'moment';
 import d3 from 'd3';
 import crossfilter from 'crossfilter';
-import _ from 'lodash/lodash';
 
 export default Ember.Controller.extend({
     metrics: [
@@ -46,7 +45,6 @@ export default Ember.Controller.extend({
     onClick(datum) {
         this.set('domainString', datum.x);
         datum.y++;
-        console.log(datum);
     },
 
     /**
@@ -65,8 +63,7 @@ export default Ember.Controller.extend({
         if (this._crossfilter) {
             this._crossfilter.remove();
             this._crossfilter.add(content);
-        }
-        else {
+        } else {
             this._crossfilter = crossfilter(content);
         }
 
