@@ -1,3 +1,8 @@
 {
+<<<<<<< HEAD
   "ignore_dirs": ["tmp", "dist"]
+=======
+  "ignore_dirs": ["tmp", "bower_components", "node_modules", "dist", "addons", "test-dist"],
+  "fsevents_latency": 0.5
+>>>>>>> master
 }

@@ -376,7 +376,8 @@ export default BaseChartComponent.extend({
             ticks = 24;
         }
 
-        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const xTimeScale = d3.time.scale().domain(xAxis.domain);
+        const data = xTimeScale.ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
@@ -394,7 +395,7 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(xAxis.domain))
+            .x(xTimeScale)
             .xUnits(() => data.length + 1)
             .y(d3.scale.linear().domain([0, 1]))
             .group(group)
@@ -463,9 +464,7 @@ export default BaseChartComponent.extend({
                 .attr('y', bbox.y + (bbox.height / 2))
                 .attr('x', bbox.x + (bbox.width / 2));
         });
-        if (xAxis && xAxis.ticks) {
-            this.get('chart').xAxis().ticks(xAxis.ticks);
-        }
+
         if (yAxis && yAxis.ticks) {
             this.get('chart').yAxis().ticks(yAxis.ticks);
         }
