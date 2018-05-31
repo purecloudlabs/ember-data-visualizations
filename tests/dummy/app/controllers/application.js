@@ -9,18 +9,23 @@ export default Ember.Controller.extend({
     ],
 
     actions: {
-        updateData() {
-            let self = this;
-            d3.json('data.json', function (error, json) {
-                if (error) {
-                    return Ember.Logger.log(error);
-                }
-                json[5].calls += 20;
-
-                self.set('content', json);
-                self._createDimensions();
-                self._createGroups();
-            });
+        increaseData() {
+            let content = Ember.get(this, 'content');
+            content[5].calls += 15;
+            content[5].chats += 15;
+            content[5].emails += 15;
+            this.set('content', content);
+            this._createDimensions();
+            this._createGroups();
+        },
+        decreaseData() {
+            let content = Ember.get(this, 'content');
+            content[5].calls -= 15;
+            content[5].chats -= 15;
+            content[5].emails -= 15;
+            this.set('content', content);
+            this._createDimensions();
+            this._createGroups();
         }
     },
 

@@ -1,5 +1,8 @@
 {{domainString}}
 
+<button{{action "increaseData"}}>Increase</button>
+<button{{action "decreaseData"}}>Decrease</button>
+
 {{column-chart
     dimension=dimensions
     group=groups
@@ -19,5 +22,4 @@
     showCurrentIndicator=true
 }}
 
-<button{{action "updateData"}}>Update</button>
 {{outlet}}
