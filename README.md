@@ -1,7 +1,7 @@
 ember-data-visualizations
 ==============================================================================
 
-[Short description of the addon.]
+Ember addon to support visualizations with dc.js (d3 & crossfiltering)
 
 Installation
 ------------------------------------------------------------------------------
@@ -22,14 +22,14 @@ Contributing
 
 ### Installation
 
-* `git clone <repository-url>`
+* `git clone https://github.com/purecloudlabs/ember-data-visualizations.git`
 * `cd ember-data-visualizations`
-* `npm install`
+* `yarn --pure-lockfile`
 
 ### Linting
 
-* `npm run lint:js`
-* `npm run lint:js -- --fix`
+* `yarn lint:js`
+* `yarn lint:js -- --fix`
 
 ### Running tests
 
@@ -47,4 +47,4 @@ For more information on using ember-cli, visit [https://ember-cli.com/](https://
 License
 ------------------------------------------------------------------------------
 
-This project is licensed under the [MIT License](LICENSE.md).
+This project is licensed under the [MIT License](LICENSE).
