@@ -22,4 +22,23 @@
     showCurrentIndicator=true
 }}
 
+{{line-chart
+    dimension=dimensions
+    group=groups
+    seriesData=content
+    type='LAYERED'
+    seriesMaxMin=2
+    showMaxMin=true
+    series=series
+    colors=colors
+    height=200
+    xAxis=xAxis
+    yAxis=yAxis
+    onClick=(action onClick)
+    showComparisonLine=true
+    comparisonLine=comparisonLine
+    currentInterval=currentInterval
+    showCurrentIndicator=true
+}}
+
 {{outlet}}
