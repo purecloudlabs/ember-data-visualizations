@@ -101,10 +101,6 @@ export default Component.extend({
         this.cancelTimers();
     },
 
-    // init() {
-    //     this._super(...arguments);
-    // },
-
     didReceiveAttrs() {
         this._super(...arguments);
 

@@ -51,7 +51,7 @@ export default BaseChartComponent.extend({
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
             .dimension(this.get('dimension'))
             .elasticY(true)
-            .yAxisPadding('15%');
+            .yAxisPadding('40%');
 
         if (this.get('width')) {
             compositeChart.width(this.get('width'));

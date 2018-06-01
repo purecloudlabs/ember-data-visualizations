@@ -6,6 +6,6 @@ body > .ember-view {
     height: 50%;
 }
 
-svg {
+ .line-chart {
     fill: none;
 }
