@@ -101,10 +101,10 @@ export default Component.extend({
         this.cancelTimers();
     },
 
-    init() {
-        this._super(...arguments);
-        scheduleOnce('afterRender', this, this.setupResize);
-    },
+    // init() {
+    //     this._super(...arguments);
+    //     scheduleOnce('afterRender', this, this.setupResize);
+    // },
 
     didReceiveAttrs() {
         this._super(...arguments);
@@ -120,9 +120,7 @@ export default Component.extend({
             });
         });
         this.set('data', data);
-
-        if (this.get('chart')) {
-            dc.redrawAll();
-        }
+        scheduleOnce('afterRender', this, this.setupResize);
+        dc.redrawAll();
     }
 });
