@@ -101,11 +101,6 @@ export default Component.extend({
         this.cancelTimers();
     },
 
-    // init() {
-    //     this._super(...arguments);
-    //     scheduleOnce('afterRender', this, this.setupResize);
-    // },
-
     didReceiveAttrs() {
         this._super(...arguments);
 

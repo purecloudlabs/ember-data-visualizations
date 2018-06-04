@@ -257,9 +257,11 @@ export default BaseChartComponent.extend({
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
-            if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-                currentTick.select('text').html(tickHtml);
+            if (!currentTick.empty()) {
+                if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
+                    let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                    currentTick.select('text').html(tickHtml);
+                }
             }
         }
     },
