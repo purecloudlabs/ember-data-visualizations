@@ -90,7 +90,7 @@ test('it renders correct number of x axis ticks', function (assert) {
 
 test('it renders correct number of y axis ticks', function (assert) {
     this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
-    assert.equal(this.$('g.y.axis g.tick').length, 3);
+    assert.equal(this.$('g.y.axis g.tick').length, 4);
 });
 
 test('it renders a bar for each data point', function (assert) {
