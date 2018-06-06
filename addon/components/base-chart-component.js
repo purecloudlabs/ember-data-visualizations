@@ -43,17 +43,17 @@ export default Component.extend({
         cancel(this.get('resizeTimer'));
     },
 
-    addClickHandlersAndTooltips(svg, tip) {
+    addClickHandlersAndTooltips(svg, tip, elementToApplyTip) {
         svg.call(tip);
 
         // clicking actions
-        this.get('chart').selectAll('rect.bar').on('click', d => {
+        this.get('chart').selectAll(elementToApplyTip).on('click', d => {
             this.onClick(d);
         });
 
-        this.get('chart').selectAll('rect')
-            .on('mouseover', tip.show)
-            .on('mouseout', tip.hide);
+        this.get('chart').selectAll(elementToApplyTip)
+            .on('mouseover.tip', tip.show)
+            .on('mouseout.tip', tip.hide);
     },
 
     onClick() {},
@@ -90,8 +90,8 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
-            this.$().parents().find('.d3-tip').remove();
+        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`d3-tip #${this.get('elementId')}`))) {
+            this.$().parents().find(`d3-tip #${this.get('elementId')}`).remove();
         }
     },
 

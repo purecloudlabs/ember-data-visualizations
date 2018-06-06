@@ -1,5 +1,5 @@
-// import moment from 'moment';
-// import _ from 'lodash/lodash';
+import moment from 'moment';
+import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 // import crossfilter from 'crossfilter';
@@ -36,7 +36,8 @@ export default BaseChartComponent.extend({
             })
             .x(d3.time.scale().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
-            .elasticY(true);
+            .elasticY(true)
+            .transitionDuration(0);
 
         if (this.get('width')) {
             compositeChart.width(this.get('width'));
@@ -62,6 +63,7 @@ export default BaseChartComponent.extend({
 
         let lineCharts = [];
         let lineChart;
+        let tip = this.createTooltip();
 
         this.get('group').forEach((g, index) => {
             lineChart = dc.lineChart(compositeChart);
@@ -76,13 +78,34 @@ export default BaseChartComponent.extend({
         });
 
         compositeChart
-            .on('renderlet', () => this.onRenderlet())
+            .on('renderlet', () => this.onRenderlet(tip))
             .compose(lineCharts);
 
         this.set('chart', compositeChart);
     },
 
-    onRenderlet() {
+    createTooltip() {
+        const formatter = this.get('xAxis.formatter') || (value => value);
+        const titles = this.get('series').map(entry => entry.title);
+        let tip = d3.tip().attr('class', `d3-tip #${this.get('elementId')}`).html(d => {
+            if (!_.isEmpty(titles)) {
+                let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
+                titles.forEach((title, i) => {
+                    const datum = formatter(this.get('data')[d.data.key][i]);
+                    const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                });
+                return str;
+            }
+
+            return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${d.data.value}</span>`;
+        });
+
+        return tip;
+    },
+
+    onRenderlet(tip) {
+        this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip, 'circle.dot');
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
