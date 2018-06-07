@@ -25,14 +25,14 @@ export default BaseChartComponent.extend({
         let chart = dc.pieChart(`#${this.get('elementId')}`);
 
         chart
-            .width(768)
-            .height(480)
+            .height(this.get('height'))
+            .width(this.get('height'))
             .slicesCap(20)
             .innerRadius(100)
             .dimension(this.get('dimension'))
-            .group(this.get('group')[0])
-            .legent(dc.legend());
+            .group(this.get('group'))
+            .legend(dc.legend());
 
-        chart.render();
+        this.set('chart', chart);
     }
 });

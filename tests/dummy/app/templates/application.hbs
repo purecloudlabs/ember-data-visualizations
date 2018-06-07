@@ -15,7 +15,6 @@
     height=200
     xAxis=xAxis
     yAxis=yAxis
-    onClick=(action onClick)
     showComparisonLine=true
     comparisonLine=comparisonLine
     currentInterval=currentInterval
@@ -34,13 +33,26 @@
     height=200
     xAxis=xAxis
     yAxis=yAxis
-    onClick=(action onClick)
     showComparisonLine=true
     comparisonLine=comparisonLine
     currentInterval=currentInterval
     showCurrentIndicator=false
 }}
 
-{{pie-chart}}
+{{pie-chart
+    dimension=dimensions
+    group=groups
+    seriesData=content
+    seriesMaxMin=2
+    showMaxMin=true
+    series=series
+    colors=colors
+    height=200
+    xAxis=xAxis
+    yAxis=yAxis
+    showComparisonLine=true
+    comparisonLine=comparisonLine
+    currentInterval=currentInterval
+    showCurrentIndicator=false}}
 
 {{outlet}}
