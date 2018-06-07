@@ -103,6 +103,10 @@ export default Component.extend({
     didReceiveAttrs() {
         this._super(...arguments);
 
+        if (this.get('isDestroyed') || this.get('isDestroying')) {
+            return;
+        }
+
         let data = {};
         _.forEach(this.get('group'), g => {
             _.forEach(g.all(), datum => {
