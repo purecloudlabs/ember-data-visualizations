@@ -48,7 +48,9 @@ export default BaseChartComponent.extend({
             })
             .x(d3.time.scale().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
-            .dimension(this.get('dimension'));
+            .dimension(this.get('dimension'))
+            .elasticY(true)
+            .yAxisPadding('40%');
 
         if (this.get('width')) {
             compositeChart.width(this.get('width'));
@@ -311,7 +313,7 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll(`.sub rect.bar:nth-of-type(${maxIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+        const maxLabelY = Math.min(...this.get('chart').selectAll('.sub rect.bar')[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
 
         if (b) {
             gLabels.append('text')
