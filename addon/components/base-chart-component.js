@@ -27,6 +27,11 @@ export default Component.extend({
 
     setupResize() {
         this.set('onResizeDebounced', () => {
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
+
             this.set('resizeTimer', debounce(this, this.createChart, 400, this.get('instantRun')));
         });
 
