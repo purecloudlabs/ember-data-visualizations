@@ -44,7 +44,9 @@ export default Component.extend({
     },
 
     addClickHandlersAndTooltips(svg, tip) {
-        svg.call(tip);
+        if (tip && !svg.empty()) {
+            svg.call(tip);
+        }
 
         // clicking actions
         this.get('chart').selectAll('rect.bar').on('click', d => {
