@@ -13,7 +13,7 @@ export default Component.extend({
     resizeTimer: null,
     onResizeDebounced: null,
     isChartAvailable: false,
-    chartNotAvailableMessage: 'Please select a slice',
+    chartNotAvailableMessage: 'Chart Not Available for this view',
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
     tooltipDateFormat: 'll LT',

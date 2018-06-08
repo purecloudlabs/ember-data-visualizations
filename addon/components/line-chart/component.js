@@ -157,9 +157,27 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let lineChart = dc.lineChart(`#${this.get('elementId')}`);
-        this.set('chart', lineChart);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
+        compositeChart
+            .colors(chartNotAvailableColor)
+            .renderTitle(false)
+            .height(this.get('height'))
+            .margins({
+                top: 10,
+                right: 100,
+                bottom: 50,
+                left: 100
+            })
+            .x(d3.time.scale().domain(xAxis.domain))
+            .xUnits(() => data.length + 1)
+            .y(d3.scale.linear().domain([0, 1]));
+
+        if (this.get('width')) {
+            compositeChart.width(this.get('width'));
+        }
+
+        // determine number of ticks
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
         let ticks = 30;
         if (duration.asMonths() >= 1) {
@@ -170,71 +188,41 @@ export default BaseChartComponent.extend({
             ticks = 24;
         }
 
+        // create horizontal line groups
         const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
-        const group = dimension.group().reduceCount(g => g);
-
-        lineChart
-            .colors(chartNotAvailableColor)
-            .renderTitle(false)
-            .brushOn(false)
-            .height(this.get('height'))
-            .margins({
-                top: 10,
-                right: 100,
-                bottom: 50,
-                left: 100
-            })
-            .x(d3.time.scale().domain(xAxis.domain))
-            .xUnits(() => data.length + 1)
-            .y(d3.scale.linear().domain([0, 1]))
-            .group(group)
-            .dimension(dimension);
-
-        if (this.get('width')) {
-            this.get('chart').width(this.get('width'));
+        let groups = [];
+        for (let i = 0; i <= 5; i++) {
+            groups[i] = dimension.group().reduce(function () {
+                return i / 5;
+            },
+            function () { },
+            function () { });
         }
 
-        lineChart.on('renderlet', chart => {
-            // This is outside the Ember run loop so check if component is destroyed
-            if (this.get('isDestroyed') || this.get('isDestroying')) {
-                return;
-            }
+        // create subcharts
+        let lineCharts = [];
+        let lineChart;
 
-            // Set up any necessary hatching patterns
-            let svg = d3.select('.line-chart > svg > defs');
+        groups.forEach((g) => {
+            lineChart = dc.lineChart(compositeChart);
 
-            svg
-                .append('clippath')
-                .attr('id', 'topclip')
-                .append('rect')
-                .attr('x', '0')
-                .attr('y', '0')
-                .attr('width', 200)
-                .attr('height', 200);
-            svg
-                .append('pattern')
-                .attr('id', 'chartNotAvailableHatch')
-                .attr('patternUnits', 'userSpaceOnUse')
-                .attr('width', 4)
-                .attr('height', 4)
-                .attr('patternTransform', 'rotate(45)')
-                .append('rect')
-                .attr('x', '0')
-                .attr('y', '0')
-                .attr('width', 2)
-                .attr('height', 4)
-                .attr('fill', chartNotAvailableColor);
+            lineChart
+                .group(g)
+                .dimension(dimension)
+                .colors(chartNotAvailableColor)
+                .renderTitle(false)
+                .x(d3.time.scale().domain(this.get('xAxis').domain));
 
-            chart.selectAll('rect.bar')
-                .attr('fill', 'url(#chartNotAvailableHatch)')
-                .attr('opacity', '.7')
-                .attr('rx', '2')
-                .attr('stroke', 'white');
+            lineCharts.push(lineChart);
         });
 
-        lineChart.on('postRender', () => {
+        compositeChart.compose(lineCharts);
+
+        this.set('chart', compositeChart);
+
+        compositeChart.on('postRender', () => {
 
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
@@ -259,6 +247,6 @@ export default BaseChartComponent.extend({
         if (yAxis && yAxis.ticks) {
             this.get('chart').yAxis().ticks(yAxis.ticks);
         }
-        lineChart.render();
+        compositeChart.render();
     }
 });
