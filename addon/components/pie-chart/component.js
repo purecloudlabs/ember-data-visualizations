@@ -1,5 +1,5 @@
 // import moment from 'moment';
-import _ from 'lodash/lodash';
+// import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 // import crossfilter from 'crossfilter';
@@ -26,14 +26,13 @@ export default BaseChartComponent.extend({
             '#7ADB37', '#FDBA43', '#FC0D1C'
         ];
 
-        // const colorScale = d3.scale.ordinal().range([this.get('colors')]);
-
         chart
             .height(this.get('height'))
             .width(this.get('width'))
             .ordinalColors(colors)
             .dimension(this.get('dimension'))
             .group(this.get('group'))
+            .renderTitle(false)
             .legend(dc.legend()
                 .gap(15)
                 .y(10)
@@ -50,9 +49,11 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(tip) {
+        d3.select('.pie-chart > svg > .totalText').remove();
         if (this.get('showTotal')) {
             d3.select('.pie-chart > svg')
                 .append('text')
+                .attr('class', 'totalText')
                 .attr({ 'text-anchor': 'middle' })
                 .attr('transform', `translate (${this.get('width') / 2}, ${this.get('height') / 2})`)
                 .text(this.get('data').total);
@@ -61,44 +62,40 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        const formatter = this.get('xAxis.formatter') || (value => value);
-        const titles = this.get('series').map(entry => entry.key);
         let tip = d3.tip().attr('class', `d3-tip #${this.get('elementId')}`).html(d => {
-            if (!_.isEmpty(titles)) {
-                let str = '';
-                titles.forEach((title, i) => {
-                    const datum = formatter(this.get('data')[d.data.key][i]);
-                    const secondaryClass = d.y === datum ? 'primary-stat' : '';
-                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
-                });
-                return str;
-            }
-
-            return `<span class="tooltip-value">${d.data.value}</span>`;
+            return `<span class="pie-tip">${d.data.value}</span>`;
         });
 
         return tip;
     },
 
     onClick(d) {
-        const allSlices = this.get('chart').selectAll('g.pie-slice');
+        const allSlices = this.get('chart').selectAll('.pie-slice');
         const thisSlice = allSlices.filter(pieD => pieD == d);
         const siblings = allSlices.filter(pieD => pieD !== d);
+        const legendItems = this.get('chart').selectAll('.dc-legend-item');
+        const thisLegendItem = legendItems.filter(legendD => legendD.data == d.value);
+        const siblingLegendItems = legendItems.filter(legendD => legendD.data !== d.value);
 
         if (thisSlice.style('opacity') == 1) {
             // either there is no selection or this slice is selected
             if (siblings.style('opacity') == 1) {
                 // no selection yet: select this element
+                thisLegendItem.style('opacity', 1);
                 thisSlice.style('opacity', 1);
+                siblingLegendItems.style('opacity', .5);
                 siblings.style('opacity', .5);
             } else {
                 // this is selected: unselect all
                 allSlices.style('opacity', 1);
+                legendItems.style('opacity', 1);
             }
         } else {
             // another slice is selected: select this one instead
             thisSlice.style('opacity', 1);
+            thisLegendItem.style('opacity', 1);
             siblings.style('opacity', .5);
+            siblingLegendItems.style('opacity', .5);
         }
     }
 });
