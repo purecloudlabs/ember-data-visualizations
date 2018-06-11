@@ -26,6 +26,14 @@ export default Ember.Controller.extend({
             this.set('content', content);
             this._createDimensions();
             this._createGroups();
+        },
+
+        toggleDonut() {
+            this.get('donutChart') ? this.set('donutChart', false) : this.set('donutChart', true);
+        },
+
+        toggleTotal() {
+            this.get('showTotal') ? this.set('showTotal', false) : this.set('showTotal', true);
         }
     },
 
@@ -98,6 +106,26 @@ export default Ember.Controller.extend({
             self._createGroups();
         });
 
+        d3.json('agents.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('agentContent', json);
+            self._createAgentDimensions();
+            self._createAgentGroups();
+        });
+
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
+    },
+
+    _createAgentDimensions() {
+        let content = Ember.get(this, 'agentContent');
+        let cf = crossfilter(content);
+        this.set('agentDimensions', cf.dimension(d => d.status));
+    },
+
+    _createAgentGroups() {
+        const dimensions = this.get('agentDimensions');
+        this.set('agentGroups', dimensions.group().reduceCount(d => d.status));
     }
 });

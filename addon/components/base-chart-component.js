@@ -52,9 +52,9 @@ export default Component.extend({
         svg.call(tip);
 
         // clicking actions
-        // this.get('chart').selectAll(elementToApplyTip).on('click.add', d => {
-        //     this.onClick(d);
-        // });
+        this.get('chart').selectAll(elementToApplyTip).on('click', d => {
+            this.onClick(d);
+        });
 
         this.get('chart').selectAll(elementToApplyTip)
             .on('mouseover.tip', tip.show)
@@ -63,11 +63,11 @@ export default Component.extend({
 
     onClick() {},
 
-    buildChart() {},
+    buildChart() { },
 
-    showChartNotAvailable() {},
+    showChartNotAvailable() { },
 
-    createTooltip() {},
+    createTooltip() { },
 
     createChart() {
         this.cleanupCurrentChart();
@@ -79,7 +79,7 @@ export default Component.extend({
 
         // NOTE: THIS BEING HERE IS ASSUMING ALL CHARTS WILL USE ALL OF THESE PROPERTIES. MAY NOT BE A VALID ASSUMPTION
         // REQUIRED: group, dimension, xAxis.domain unless !isChartAvailable
-        if (!this.get('group') || !this.get('group.0.all') || !this.get('dimension')) {
+        if (!this.get('group') || /* !this.get('group.0.all') ||*/ !this.get('dimension')) {
             return false;
         }
 
@@ -108,17 +108,29 @@ export default Component.extend({
 
     didReceiveAttrs() {
         this._super(...arguments);
-
         let data = {};
-        _.forEach(this.get('group'), g => {
-            _.forEach(g.all(), datum => {
+        if (Array.isArray(this.get('group'))) {
+            _.forEach(this.get('group'), g => {
+                _.forEach(g.all(), datum => {
+                    if (data[datum.key]) {
+                        data[datum.key].push(datum.value);
+                    } else {
+                        data[datum.key] = [datum.value];
+                    }
+                });
+            });
+        } else if (this.get('group')) {
+            data.total = 0;
+            _.forEach(this.get('group').all(), datum => {
                 if (data[datum.key]) {
                     data[datum.key].push(datum.value);
+                    data.total += datum.value;
                 } else {
                     data[datum.key] = [datum.value];
+                    data.total += datum.value;
                 }
             });
-        });
+        }
         this.set('data', data);
 
         scheduleOnce('afterRender', this, this.setupResize);

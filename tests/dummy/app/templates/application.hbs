@@ -18,7 +18,7 @@
     showComparisonLine=true
     comparisonLine=comparisonLine
     currentInterval=currentInterval
-    showCurrentIndicator=false
+    showCurrentIndicator=true
 }}
 
 {{line-chart
@@ -39,20 +39,17 @@
     showCurrentIndicator=false
 }}
 
+<button{{action "toggleDonut"}}>Toggle donut</button>
+<button{{action "toggleTotal"}}>Toggle total</button>
 {{pie-chart
-    dimension=dimensions
-    group=groups
-    seriesData=content
-    seriesMaxMin=2
-    showMaxMin=true
-    series=series
+    dimension=agentDimensions
+    group=agentGroups
+    seriesData=agentContent
     colors=colors
-    height=200
-    xAxis=xAxis
-    yAxis=yAxis
-    showComparisonLine=true
-    comparisonLine=comparisonLine
-    currentInterval=currentInterval
-    showCurrentIndicator=false}}
+    height=400
+    width=800
+    showTotal=showTotal
+    donutChart=donutChart
+}}
 
 {{outlet}}
