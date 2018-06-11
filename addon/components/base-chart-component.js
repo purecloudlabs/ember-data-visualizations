@@ -4,6 +4,7 @@ import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import _ from 'lodash/lodash';
 import dc from 'dc';
 
+
 export default Component.extend({
     resizeDetector: service(),
 
@@ -28,6 +29,10 @@ export default Component.extend({
 
     setupResize() {
         this.set('onResizeDebounced', () => {
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
             this.set('resizeTimer', debounce(this, this.createChart, 400, this.get('instantRun')));
         });
 
@@ -47,7 +52,6 @@ export default Component.extend({
         if (tip && !svg.empty()) {
             svg.call(tip);
         }
-
         // clicking actions
         this.get('chart').selectAll('rect.bar').on('click', d => {
             this.onClick(d);
