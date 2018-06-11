@@ -37,6 +37,7 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
         compositeChart
+            .transitionDuration(0)
             .renderTitle(false)
             .brushOn(false)
             .height(this.get('height'))
@@ -102,7 +103,8 @@ export default BaseChartComponent.extend({
                     .barPadding(0.00)
                     .group(g)
                     .colors('white')
-                    .renderTitle(false);
+                    .renderTitle(false)
+                    .elasticY(true);
 
                 columnCharts.push(columnChart);
             }
@@ -114,7 +116,8 @@ export default BaseChartComponent.extend({
                 .barPadding(0.00)
                 .group(g)
                 .colors(this.get('colors')[index])
-                .renderTitle(false);
+                .renderTitle(false)
+                .elasticY(true);
 
             columnCharts.push(columnChart);
         });
@@ -378,8 +381,7 @@ export default BaseChartComponent.extend({
             ticks = 24;
         }
 
-        const xTimeScale = d3.time.scale().domain(xAxis.domain);
-        const data = xTimeScale.ticks(ticks);
+        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
@@ -397,7 +399,7 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(xTimeScale)
+            .x(d3.time.scale().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
             .y(d3.scale.linear().domain([0, 1]))
             .group(group)
@@ -466,7 +468,9 @@ export default BaseChartComponent.extend({
                 .attr('y', bbox.y + (bbox.height / 2))
                 .attr('x', bbox.x + (bbox.width / 2));
         });
-
+        if (xAxis && xAxis.ticks) {
+            this.get('chart').xAxis().ticks(xAxis.ticks);
+        }
         if (yAxis && yAxis.ticks) {
             this.get('chart').yAxis().ticks(yAxis.ticks);
         }

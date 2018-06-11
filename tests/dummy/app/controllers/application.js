@@ -8,6 +8,27 @@ export default Ember.Controller.extend({
         { value: 'sighting', label: 'Sightings' }
     ],
 
+    actions: {
+        increaseData() {
+            let content = Ember.get(this, 'content');
+            content[5].calls += 15;
+            content[5].chats += 15;
+            content[5].emails += 15;
+            this.set('content', content);
+            this._createDimensions();
+            this._createGroups();
+        },
+        decreaseData() {
+            let content = Ember.get(this, 'content');
+            content[5].calls -= 15;
+            content[5].chats -= 15;
+            content[5].emails -= 15;
+            this.set('content', content);
+            this._createDimensions();
+            this._createGroups();
+        }
+    },
+
     dimensions: [],
     domainString: '',
     groups: [],
@@ -19,8 +40,8 @@ export default Ember.Controller.extend({
     yAxis: {
         ticks: 3
     },
-
     currentInterval: { start: moment('12/02/2016') },
+
 
     comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
 
@@ -28,6 +49,7 @@ export default Ember.Controller.extend({
 
     onClick(datum) {
         this.set('domainString', datum.x);
+        datum.y++;
     },
 
     /**
@@ -43,7 +65,12 @@ export default Ember.Controller.extend({
             d.date = moment(d.date, 'YYYYMMDD').toDate();
         });
 
-        this._crossfilter = crossfilter(content);
+        if (this._crossfilter) {
+            this._crossfilter.remove();
+            this._crossfilter.add(content);
+        } else {
+            this._crossfilter = crossfilter(content);
+        }
 
         this.set('dimensions', this._crossfilter.dimension(d => d.date));
     },

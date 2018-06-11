@@ -2,6 +2,8 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import _ from 'lodash/lodash';
+import dc from 'dc';
+
 
 export default Component.extend({
     resizeDetector: service(),
@@ -48,7 +50,10 @@ export default Component.extend({
     },
 
     addClickHandlersAndTooltips(svg, tip) {
-        svg.call(tip);
+        if (tip && !svg.empty()) {
+            svg.call(tip);
+        }
+
 
         // clicking actions
         this.get('chart').selectAll('rect.bar').on('click', d => {
@@ -119,7 +124,8 @@ export default Component.extend({
             });
         });
         this.set('data', data);
-
         scheduleOnce('afterRender', this, this.setupResize);
+        dc.redrawAll();
+
     }
 });
