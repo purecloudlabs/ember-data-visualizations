@@ -35,6 +35,9 @@ export default BaseChartComponent.extend({
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        if (!this.get('data')) {
+            return;
+        }
 
         compositeChart
             .transitionDuration(0)
@@ -48,10 +51,14 @@ export default BaseChartComponent.extend({
                 left: 100
             })
             .x(d3.time.scale().domain(this.get('xAxis').domain))
-            .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
-            .dimension(this.get('dimension'))
-            .elasticY(true)
-            .yAxisPadding('40%');
+            .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1));
+
+        if (this.get('realtimeUpdatesEnabled')) {
+            compositeChart
+                .dimension(this.get('dimension'))
+                .elasticY(true)
+                .yAxisPadding('40%');
+        }
 
         if (this.get('width')) {
             compositeChart.width(this.get('width'));
@@ -90,8 +97,10 @@ export default BaseChartComponent.extend({
                     .barPadding(0.00)
                     .group(g)
                     .colors('white')
-                    .renderTitle(false)
-                    .elasticY(true);
+                    .renderTitle(false);
+                if (this.get('realtimeUpdatesEnabled')) {
+                    columnChart.elasticY(true);
+                }
 
                 columnCharts.push(columnChart);
             }
@@ -103,8 +112,10 @@ export default BaseChartComponent.extend({
                 .barPadding(0.00)
                 .group(g)
                 .colors(this.get('colors')[index])
-                .renderTitle(false)
-                .elasticY(true);
+                .renderTitle(false);
+            if (this.get('realtimeUpdatesEnabled')) {
+                columnChart.elasticY(true);
+            }
 
             columnCharts.push(columnChart);
         });

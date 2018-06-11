@@ -67,6 +67,9 @@ export default Component.extend({
     createTooltip() {},
 
     createChart() {
+        if (this.get('chart') && !this.get('realtimeUpdatesEnabled')) {
+            return;
+        }
         this.cleanupCurrentChart();
 
         if (!this.get('isChartAvailable')) {
@@ -118,6 +121,8 @@ export default Component.extend({
         });
         this.set('data', data);
         scheduleOnce('afterRender', this, this.setupResize);
-        dc.redrawAll();
+        if (this.get('realtimeUpdatesEnabled')) {
+            dc.redrawAll();
+        }
     }
 });
