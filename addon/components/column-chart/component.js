@@ -76,10 +76,23 @@ export default BaseChartComponent.extend({
         }
 
         let tip = this.createTooltip();
-        let columnChart;
+        let columnChart, maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let columnCharts = [];
         const groups = this.get('group');
+        const formatter = this.get('xAxis.formatter') || (value => value);
         groups.forEach((g, index) => {
+            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
+                if (index === this.get('seriesMaxMin')) {
+                    values = g.all().map(gElem => gElem.value);
+                    nonZeroValues = values.filter(v => v > 0);
+                    maxValue = _.max(nonZeroValues);
+                    maxIdx = values.indexOf(maxValue);
+                    maxValue = formatter(maxValue);
+                    minValue = _.min(nonZeroValues);
+                    minIdx = values.indexOf(minValue);
+                    minValue = formatter(minValue);
+                }
+            }
 
             // If we are hatching, we need to display a white bar behind the hatched bar
             if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
@@ -110,7 +123,7 @@ export default BaseChartComponent.extend({
         });
 
         compositeChart
-            .on('renderlet', () => this.onRenderlet(tip))
+            .on('renderlet', () => this.onRenderlet(maxValue, maxIdx, minValue, minIdx, tip))
             .compose(columnCharts);
 
         this.set('chart', compositeChart);
@@ -135,7 +148,7 @@ export default BaseChartComponent.extend({
         return tip;
     },
 
-    onRenderlet(tip) {
+    onRenderlet(maxValue, maxIdx, minValue, minIdx, tip) {
         // This is outside the Ember run loop so check if component is destroyed
         if (this.get('isDestroyed') || this.get('isDestroying')) {
             return;
@@ -209,7 +222,7 @@ export default BaseChartComponent.extend({
 
         // Show min and max values over bars
         if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin')) && bars.length > 0) {
-            this.addMaxMinLabels(bars);
+            this.addMaxMinLabels(bars, maxIdx, maxValue, minIdx, minValue);
         }
 
         if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
@@ -257,21 +270,14 @@ export default BaseChartComponent.extend({
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
-            if (!currentTick.empty()) {
-                if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                    let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-                    currentTick.select('text').html(tickHtml);
-                }
-            }
+            let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+            currentTick.select('text').html(tickHtml);
         }
     },
 
     addComparisonLine() {
         const chartBody = d3.select('.column-chart > svg > g');
         const line = this.get('comparisonLine');
-
-        d3.selectAll('.comparison-line').remove();
-        d3.selectAll('#comparison-text').remove();
 
         chartBody.append('svg:line')
             .attr('x1', 100)
@@ -286,7 +292,6 @@ export default BaseChartComponent.extend({
             .attr('x2', 100)
             .attr('y1', 15 + this.get('chart').y()(line.value))
             .attr('y2', 5 + this.get('chart').y()(line.value))
-            .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
@@ -294,7 +299,6 @@ export default BaseChartComponent.extend({
             .attr('x2', this.get('chart').width() - 95)
             .attr('y1', 15 + this.get('chart').y()(line.value))
             .attr('y2', 5 + this.get('chart').y()(line.value))
-            .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('text')
@@ -303,34 +307,16 @@ export default BaseChartComponent.extend({
             .attr('y', 14 + this.get('chart').y()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
-            .attr('id', 'comparison-text')
             .attr('fill', line.textColor || '#000000');
     },
 
-    addMaxMinLabels(bars) {
-        let formatter = this.get('xAxis.formatter') || (value => value);
-        let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
-        let groups = this.get('group');
-        groups.forEach((g, index) => {
-            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
-                if (index === this.get('seriesMaxMin')) {
-                    values = g.all().map(gElem => gElem.value);
-                    nonZeroValues = values.filter(v => v > 0);
-                    maxValue = _.max(nonZeroValues);
-                    maxIdx = values.indexOf(maxValue);
-                    maxValue = formatter(maxValue);
-                    minValue = _.min(nonZeroValues);
-                    minIdx = values.indexOf(minValue);
-                    minValue = formatter(minValue);
-                }
-            }
-        });
+    addMaxMinLabels(bars, maxIdx, maxValue, minIdx, minValue) {
         let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
         let b = bars[maxIdx];
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll(`.sub rect.bar:nth-of-type(${maxIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+        const maxLabelY = Math.min(...this.get('chart').selectAll('.sub rect.bar')[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
 
         if (b) {
             gLabels.append('text')

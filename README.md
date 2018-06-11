@@ -1,25 +1,50 @@
-# Ember-data-visualizations
+ember-data-visualizations
+==============================================================================
 
-This README outlines the details of collaborating on this Ember addon.
+Ember addon to support visualizations with dc.js (d3 & crossfiltering)
 
-## Installation
+Installation
+------------------------------------------------------------------------------
 
-* `git clone` this repository
-* `npm install`
+```
+ember install ember-data-visualizations
+```
 
-## Running
 
-* `ember server`
-* Visit your app at http://localhost:4200.
+Usage
+------------------------------------------------------------------------------
 
-## Running Tests
+[Longer description of how to use the addon in apps.]
 
-* `npm test` (Runs `ember try:testall` to test your addon against multiple Ember versions)
-* `ember test`
-* `ember test --server`
 
-## Building
+Contributing
+------------------------------------------------------------------------------
 
-* `ember build`
+### Installation
 
-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+* `git clone https://github.com/purecloudlabs/ember-data-visualizations.git`
+* `cd ember-data-visualizations`
+* `yarn --pure-lockfile`
+
+### Linting
+
+* `yarn lint:js`
+* `yarn lint:js -- --fix`
+
+### Running tests
+
+* `ember test` – Runs the test suite on the current Ember version
+* `ember test --server` – Runs the test suite in "watch mode"
+* `ember try:each` – Runs the test suite against multiple Ember versions
+
+### Running the dummy application
+
+* `ember serve`
+* Visit the dummy application at [http://localhost:4200](http://localhost:4200).
+
+For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
+
+License
+------------------------------------------------------------------------------
+
+This project is licensed under the [MIT License](LICENSE).
