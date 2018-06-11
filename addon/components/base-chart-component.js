@@ -4,7 +4,6 @@ import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import _ from 'lodash/lodash';
 import dc from 'dc';
 
-
 export default Component.extend({
     resizeDetector: service(),
 

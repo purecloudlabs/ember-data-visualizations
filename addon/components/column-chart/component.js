@@ -79,7 +79,6 @@ export default BaseChartComponent.extend({
         let columnChart;
         let columnCharts = [];
         const groups = this.get('group');
-        const formatter = this.get('xAxis.formatter') || (value => value);
         groups.forEach((g, index) => {
             // If we are hatching, we need to display a white bar behind the hatched bar
             if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
