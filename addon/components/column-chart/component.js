@@ -79,38 +79,62 @@ export default BaseChartComponent.extend({
         let columnChart;
         let columnCharts = [];
         const groups = this.get('group');
-        groups.forEach((g, index) => {
-            // If we are hatching, we need to display a white bar behind the hatched bar
-            if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+
+        if (this.get('type') !== 'STACKED') {
+            groups.forEach((g, index) => {
+                // If we are hatching, we need to display a white bar behind the hatched bar
+                if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+                    columnChart = dc.barChart(compositeChart);
+
+                    columnChart
+                        .centerBar(true)
+                        .barPadding(0.00)
+                        .group(g)
+                        .colors('white')
+                        .renderTitle(false)
+                        .elasticY(true);
+
+                    columnCharts.push(columnChart);
+                }
+
                 columnChart = dc.barChart(compositeChart);
 
                 columnChart
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors('white')
+                    .colors(this.get('colors')[index])
                     .renderTitle(false)
                     .elasticY(true);
 
                 columnCharts.push(columnChart);
-            }
-
+            });
+        } else {
             columnChart = dc.barChart(compositeChart);
-
             columnChart
                 .centerBar(true)
                 .barPadding(0.00)
-                .group(g)
-                .colors(this.get('colors')[index])
+                .group(groups[0])
                 .renderTitle(false)
                 .elasticY(true);
-
+            groups.forEach((g, index) => {
+                if (index != 0) {
+                    columnChart.stack(g);
+                }
+            });
             columnCharts.push(columnChart);
-        });
+        }
 
         compositeChart
             .on('renderlet', () => this.onRenderlet(tip))
             .compose(columnCharts);
+
+        if (this.get('type') === 'STACKED') {
+            const colors = this.get('colors');
+            compositeChart.on('pretransition', (chart) => {
+                chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+            });
+        }
 
         this.set('chart', compositeChart);
     },
@@ -175,7 +199,7 @@ export default BaseChartComponent.extend({
             let barWidth = (parseInt(d3.select(bars[0]).attr('width'), 10)) || 1;
 
             // if composed, double barWidth
-            if (this.get('type') === 'LAYERED') {
+            if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
                 this.get('chart').selectAll('rect.bar')[0].forEach(bar => {
