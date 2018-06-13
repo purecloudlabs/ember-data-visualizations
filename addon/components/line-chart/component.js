@@ -37,6 +37,7 @@ export default BaseChartComponent.extend({
             .x(d3.time.scale().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
             .elasticY(true)
+            .yAxisPadding('20%')
             .transitionDuration(0);
 
         if (this.get('width')) {
