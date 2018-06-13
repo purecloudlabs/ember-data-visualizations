@@ -129,7 +129,7 @@ export default BaseChartComponent.extend({
             .on('renderlet', () => this.onRenderlet(tip))
             .compose(columnCharts);
 
-        if (this.get('type') == 'STACKED') {
+        if (this.get('type') === 'STACKED') {
             const colors = this.get('colors');
             compositeChart.on('pretransition', (chart) => {
                 chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
