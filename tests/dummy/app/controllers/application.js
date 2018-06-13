@@ -26,14 +26,6 @@ export default Ember.Controller.extend({
             this.set('content', content);
             this._createDimensions();
             this._createGroups();
-        },
-
-        toggleDonut() {
-            this.get('donutChart') ? this.set('donutChart', false) : this.set('donutChart', true);
-        },
-
-        toggleTotal() {
-            this.get('showTotal') ? this.set('showTotal', false) : this.set('showTotal', true);
         }
     },
 

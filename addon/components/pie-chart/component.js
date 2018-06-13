@@ -2,7 +2,7 @@
 // import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
-// import crossfilter from 'crossfilter';
+import crossfilter from 'crossfilter';
 // import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
 
@@ -19,6 +19,9 @@ export default BaseChartComponent.extend({
         '#7ADB37', '#FC0D1C', '#FDBA43'
     ],
 
+    externalLabels: false,
+    labels: true,
+
     buildChart() {
         let chart = dc.pieChart(`#${this.get('elementId')}`);
 
@@ -27,8 +30,7 @@ export default BaseChartComponent.extend({
         ];
 
         chart
-            .height(this.get('height'))
-            .width(this.get('width'))
+            .radius(this.get('height'))
             .ordinalColors(colors)
             .dimension(this.get('dimension'))
             .group(this.get('group'))
@@ -38,8 +40,20 @@ export default BaseChartComponent.extend({
                 .y(10)
                 .x(30));
 
+        if (this.get('externalLabels')) {
+            chart
+                .externalRadiusPadding(this.get('height') * 0.1)
+                .externalLabels(this.get('height') * 0.08);
+        }
+
         if (this.get('donutChart')) {
-            chart.innerRadius(100);
+            chart.innerRadius(this.get('height') / 4);
+        }
+
+        if (!this.get('labels')) {
+            chart.on('pretransition', (chart) => {
+                chart.selectAll('text.pie-slice').remove();
+            });
         }
 
         let tip = this.createTooltip();
@@ -49,24 +63,21 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(tip) {
-        d3.select('.pie-chart > svg > .totalText').remove();
+        d3.select('g.pie-slice-group > .totalText').remove();
         if (this.get('showTotal')) {
-            d3.select('.pie-chart > svg')
+            d3.select('g.pie-slice-group')
                 .append('text')
                 .attr('class', 'totalText')
                 .attr({ 'text-anchor': 'middle' })
-                .attr('transform', `translate (${this.get('width') / 2}, ${this.get('height') / 2})`)
                 .text(this.get('data').total);
         }
         this.addClickHandlersAndTooltips(d3.select('.pie-chart > svg'), tip, '.pie-slice');
     },
 
     createTooltip() {
-        let tip = d3.tip().attr('class', `d3-tip #${this.get('elementId')}`).html(d => {
-            return `<span class="pie-tip">${d.data.value}</span>`;
-        });
-
-        return tip;
+        return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
+            .style('text-align', 'center')
+            .html(d => `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${d.data.value}</span>`);
     },
 
     onClick(d) {
@@ -97,5 +108,54 @@ export default BaseChartComponent.extend({
             siblings.style('opacity', .5);
             siblingLegendItems.style('opacity', .5);
         }
+    },
+
+    showChartNotAvailable() {
+        const chartNotAvailableMessage = this.get('chartNotAvailableMessage');
+        const chartNotAvailableColor = this.get('chartNotAvailableColor');
+        const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
+
+        let pieChart = dc.pieChart(`#${this.get('elementId')}`);
+        this.set('chart', pieChart);
+
+        const data = [{ key: '', value: 1 }];
+        const filter = crossfilter(data);
+        const dimension = filter.dimension(d => d);
+        const group = dimension.group().reduceCount(g => g);
+
+        pieChart
+            .group(group)
+            .dimension(dimension)
+            .colors(chartNotAvailableColor)
+            .renderTitle(false);
+
+        if (this.get('donutChart')) {
+            pieChart.innerRadius(120);
+        }
+
+        pieChart.on('pretransition', (chart) => {
+            chart.selectAll('text.pie-slice').remove();
+        });
+
+        pieChart.on('postRender', () => {
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
+
+            d3.select('.pie-chart > svg > text').remove();
+            let svg = d3.select('.pie-chart > svg');
+            let bbox = svg.node().getBBox();
+            svg
+                .append('text')
+                .text(chartNotAvailableMessage)
+                .style('fill', chartNotAvailableTextColor)
+                .attr('class', 'chart-not-available')
+                .attr('text-anchor', 'middle')
+                .attr('y', bbox.y + (bbox.height / 2))
+                .attr('x', bbox.x + (bbox.width / 2));
+        });
+
+        pieChart.render();
     }
 });

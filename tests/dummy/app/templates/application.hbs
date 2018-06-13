@@ -39,8 +39,10 @@
     showCurrentIndicator=false
 }}
 
-<button{{action "toggleDonut"}}>Toggle donut</button>
-<button{{action "toggleTotal"}}>Toggle total</button>
+{{input type='checkbox' checked=donutChart}}Donut<br/>
+{{input type='checkbox' checked=showTotal}}Total<br/>
+{{input type='checkbox' checked=labels}}Labels<br/>
+{{input type='checkbox' checked=externalLabels}}External labels<br/>
 {{pie-chart
     dimension=agentDimensions
     group=agentGroups
@@ -50,6 +52,8 @@
     width=800
     showTotal=showTotal
     donutChart=donutChart
+    externalLabels=externalLabels
+    labels=labels
 }}
 
 {{outlet}}
