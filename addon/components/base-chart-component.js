@@ -47,18 +47,17 @@ export default Component.extend({
         cancel(this.get('resizeTimer'));
     },
 
-    addClickHandlersAndTooltips(svg, tip) {
-        if (tip && !svg.empty()) {
-            svg.call(tip);
-        }
+    addClickHandlersAndTooltips(svg, tip, elementToApplyTip) {
+        svg.call(tip);
+
         // clicking actions
-        this.get('chart').selectAll('rect.bar').on('click', d => {
+        this.get('chart').selectAll(elementToApplyTip).on('click', d => {
             this.onClick(d);
         });
 
-        this.get('chart').selectAll('rect')
-            .on('mouseover', tip.show)
-            .on('mouseout', tip.hide);
+        this.get('chart').selectAll(elementToApplyTip)
+            .on('mouseover.tip', tip.show)
+            .on('mouseout.tip', tip.hide);
     },
 
     onClick() {},

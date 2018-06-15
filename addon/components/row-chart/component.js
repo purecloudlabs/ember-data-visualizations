@@ -1,6 +1,6 @@
 // import moment from 'moment';
 // import _ from 'lodash/lodash';
-// import d3 from 'd3';
+import d3 from 'd3';
 import dc from 'dc';
 // import crossfilter from 'crossfilter';
 // import $ from 'jquery';
@@ -33,18 +33,92 @@ export default BaseChartComponent.extend({
     buildChart() {
         let rowChart = dc.rowChart(`#${this.get('elementId')}`);
 
-        const formatter = this.get('yAxis.formatter') || (value => value);
-
         rowChart
-            .group(this.get('group')[2])
+            .group(this.get('group')[0])
             .dimension(this.get('dimension'))
             .ordering((d) => d.key)
-            .colors(this.get('colors'))
+            .colors(this.get('colors')[2])
             .height(this.get('height'))
             .width(this.get('width'))
-            // .labelOffsetX(-100)
-            .label((d) => formatter(d.key));
+            .renderLabel(false)
+            .renderTitle(false)
+            .xAxis().ticks(this.get('xAxis.ticks'));
 
+        rowChart.on('pretransition', () => {
+            let totalWidth = this.get('width') + this.get('labelWidth');
+            d3.select('.row-chart > svg').attr('width', totalWidth);
+            d3.select('.row-chart > svg > g').attr('transform', `translate(${this.get('labelWidth')},0)`).attr('width', totalWidth);
+            if (this.get('hideAxisLines')) {
+                d3.selectAll('.row-chart > svg > g > g.axis > g.tick > line').remove();
+            }
+        });
+
+        let tip = this.createTooltip();
+
+        rowChart.on('renderlet', () => this.onRenderlet(tip));
         this.set('chart', rowChart);
+    },
+
+    createTooltip() {
+        return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
+            .style('text-align', 'center')
+            .html(d => `<span class="row-tip-key">${d.key}</span><br/><span class="row-tip-value">${d.value}</span>`)
+            // .direction('e');
+    },
+
+    onRenderlet(tip) {
+        this.addYAxis();
+        this.addClickHandlersAndTooltips(d3.select('.row-chart > svg'), tip, 'g.row > rect');
+    },
+
+    addYAxis() {
+        // add labels to corresponding bar groups and move them appropriately
+        let barHeight = d3.select('.row-chart > svg g.row > rect').attr('height');
+        d3.selectAll('.row-chart > svg > g > g.row')
+            .append('g').attr('class', 'tick')
+            .append('text')
+            .text(d => d.key)
+            .attr('y', barHeight / 2)
+            .attr('dy', '.35em')
+            .attr('x', function () {
+                return -1 * d3.select(this)[0][0].clientWidth - 15;
+            });
+
+        // hide x axis grid lines
+        if (this.get('hideAxisLines')) {
+            let lineFunction = d3.svg.line()
+                .y(d => d.y)
+                .x(() => 0)
+                .interpolate('linear');
+            // add 0 line
+            d3.select('.row-chart > svg > g > g.axis').append('path')
+                .attr('class', 'range')
+                .attr('d', lineFunction([{ 'y': 0 }, { 'y': -1 * this.get('height') }]));
+        }
+
+        // add y ticks and grid lines
+        let ticksGroups = d3.selectAll('.row-chart > svg > g > g.row > g.tick');
+        let lineFunction = d3.svg.line()
+            .y(() => 0)
+            .x(d => d.x)
+            .interpolate('linear');
+        if (this.get('showYTicks')) {
+            ticksGroups.append('path')
+                .attr('d', lineFunction([{ 'x': 0 }, { 'x': 6 }]))
+                .attr('transform', `translate(-6,${barHeight / 2})`);
+        }
+
+        if (this.get('showYTickLines')) {
+            let widths = [];
+            d3.selectAll('.row-chart > svg > g > g.row > rect').each(function () {
+                widths.push(d3.select(this).attr('width'));
+            });
+            let width = this.get('width') - 80;
+            ticksGroups.each(function (d, i) {
+                d3.select(this).append('path')
+                    .attr('d', lineFunction([{ 'x': parseInt(widths[i]) + 1 }, { 'x': width }]))
+                    .attr('transform', `translate(-0,${barHeight / 2})`);
+            });
+        }
     }
 });

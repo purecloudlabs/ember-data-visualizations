@@ -22,18 +22,22 @@
     showCurrentIndicator=true
 }}
 
+{{input type='checkbox' checked=hideAxisLines}}Hide x tick lines<br/>
+{{input type='checkbox' checked=showYTicks}}Show y ticks<br/>
+{{input type='checkbox' checked=showYTickLines}}Show y tick lines<br/>
 {{row-chart
-    dimension=dimensions
-    group=groups
-    series=series
+    dimension=queueDimensions
+    group=queueGroups
     colors=colors
-    height=800
+    height=400
     width=600
+    labelWidth=150
     xAxis=yAxis
     yAxis=xAxis
     onClick=(action onClick)
-    currentInterval=currentInterval
-    showCurrentIndicator=true
+    hideAxisLines=hideAxisLines
+    showYTicks=showYTicks
+    showYTickLines=showYTickLines
 }}
 
 {{outlet}}

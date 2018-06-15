@@ -201,7 +201,7 @@ export default BaseChartComponent.extend({
                 .attr('width', barWidth);
         }
 
-        this.addClickHandlersAndTooltips(svg, tip);
+        this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 

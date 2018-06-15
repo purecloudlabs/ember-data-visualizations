@@ -98,6 +98,34 @@ export default Ember.Controller.extend({
             self._createGroups();
         });
 
+        d3.json('queuedata.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('queueContent', json);
+            self._createQueueDimensions();
+            self._createQueueGroups();
+        });
+
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
+    },
+
+    _createQueueDimensions() {
+        let content = Ember.get(this, 'queueContent');
+
+        if (this._QueueCrossfilter) {
+            this._QueueCrossfilter.remove();
+            this._QueueCrossfilter.add(content);
+        } else {
+            this._QueueCrossfilter = crossfilter(content);
+        }
+
+        this.set('queueDimensions', this._QueueCrossfilter.dimension(d => d.queue));
+    },
+
+    _createQueueGroups() {
+        const dimensions = this.get('queueDimensions');
+        const groupNames = ['interactions'];
+        this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
     }
 });
