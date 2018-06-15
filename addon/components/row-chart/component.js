@@ -1,5 +1,5 @@
 // import moment from 'moment';
-// import _ from 'lodash/lodash';
+import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 // import crossfilter from 'crossfilter';
@@ -43,6 +43,7 @@ export default BaseChartComponent.extend({
             .renderLabel(false)
             .renderTitle(false)
             .xAxis().ticks(this.get('xAxis.ticks'));
+        // .xAxisPadding('20%');
 
         rowChart.on('pretransition', () => {
             let totalWidth = this.get('width') + this.get('labelWidth');
@@ -68,6 +69,9 @@ export default BaseChartComponent.extend({
 
     onRenderlet(tip) {
         this.addYAxis();
+        if (this.get('showMaxMin')) {
+            this.addMaxMinLabels(this.get('chart').selectAll('g.row > rect')[0]);
+        }
         this.addClickHandlersAndTooltips(d3.select('.row-chart > svg'), tip, 'g.row > rect');
     },
 
@@ -119,6 +123,73 @@ export default BaseChartComponent.extend({
                     .attr('d', lineFunction([{ 'x': parseInt(widths[i]) + 1 }, { 'x': width }]))
                     .attr('transform', `translate(-0,${barHeight / 2})`);
             });
+        }
+    },
+
+    addMaxMinLabels(bars) {
+        let formatter = this.get('xAxis.formatter') || (value => value);
+        let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
+        let groups = this.get('group');
+        groups.forEach((g, index) => {
+            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
+                if (index === this.get('seriesMaxMin')) {
+                    values = g.all().map(gElem => gElem.value);
+                    nonZeroValues = values.filter(v => v > 0);
+                    maxValue = _.max(nonZeroValues);
+                    maxIdx = values.indexOf(maxValue);
+                    maxValue = formatter(maxValue);
+                    minValue = _.min(nonZeroValues);
+                    minIdx = values.indexOf(minValue);
+                    minValue = formatter(minValue);
+                }
+            }
+        });
+        let gLabels = d3.select('.row-chart > svg > g').append('g').attr('id', 'inline-labels');
+        let b = bars[maxIdx];
+
+        // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
+        // Avoids label falling under any bar in the stack.
+        const maxLabelY = Math.max(...bars.map(rect => parseInt(rect.getAttribute('width'), 10)));
+
+        if (b) {
+            gLabels.append('text')
+                .text(maxValue)
+                .attr('transform', b.parentNode.getAttribute('transform'))
+                // .attr('x', Math.max(12, maxLabelY - 2))
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
+                .attr('class', 'max-value-text');
+
+            if (!(maxIdx === minIdx)) {
+                gLabels.append('text')
+                    // unicode for font-awesome caret up
+                    .html(() => '&#xf0d8')
+                    .attr('text-anchor', 'middle')
+                    .attr('class', 'caret-icon max-value-indicator')
+                    .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                    .attr('x', maxLabelY - 12);
+            }
+        }
+        b = bars[minIdx];
+
+        if (b && !(maxIdx === minIdx)) {
+            gLabels.append('text')
+                .text(minValue)
+                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                .attr('x', Math.max(12, maxLabelY - 2))
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
+                .attr('class', 'min-value-text');
+
+            gLabels.append('text')
+                // unicode for font-awesome caret down
+                .html(() => '&#xf0d7')
+                .attr('class', 'caret-icon min-value-indicator')
+                .attr('text-anchor', 'middle')
+                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                .attr('x', maxLabelY - 12);
         }
     }
 });
