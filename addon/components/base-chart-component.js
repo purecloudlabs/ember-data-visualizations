@@ -47,8 +47,7 @@ export default Component.extend({
         cancel(this.get('resizeTimer'));
     },
 
-
-    addClickHandlersAndTooltips(svg, tip) {
+    addClickHandlersAndTooltips(svg, tip, elementToApplyTip) {
         if (tip && !svg.empty()) {
             svg.call(tip);
         }
