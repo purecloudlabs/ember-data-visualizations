@@ -28,6 +28,10 @@ export default Component.extend({
 
     setupResize() {
         this.set('onResizeDebounced', () => {
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
             this.set('resizeTimer', debounce(this, this.createChart, 400, this.get('instantRun')));
         });
 
@@ -43,9 +47,11 @@ export default Component.extend({
         cancel(this.get('resizeTimer'));
     },
 
-    addClickHandlersAndTooltips(svg, tip, elementToApplyTip) {
-        svg.call(tip);
 
+    addClickHandlersAndTooltips(svg, tip) {
+        if (tip && !svg.empty()) {
+            svg.call(tip);
+        }
         // clicking actions
         this.get('chart').selectAll(elementToApplyTip).on('click', d => {
             this.onClick(d);

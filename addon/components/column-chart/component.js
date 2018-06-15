@@ -79,39 +79,62 @@ export default BaseChartComponent.extend({
         let columnChart;
         let columnCharts = [];
         const groups = this.get('group');
-        groups.forEach((g, index) => {
 
-            // If we are hatching, we need to display a white bar behind the hatched bar
-            if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+        if (this.get('type') !== 'STACKED') {
+            groups.forEach((g, index) => {
+                // If we are hatching, we need to display a white bar behind the hatched bar
+                if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+                    columnChart = dc.barChart(compositeChart);
+
+                    columnChart
+                        .centerBar(true)
+                        .barPadding(0.00)
+                        .group(g)
+                        .colors('white')
+                        .renderTitle(false)
+                        .elasticY(true);
+
+                    columnCharts.push(columnChart);
+                }
+
                 columnChart = dc.barChart(compositeChart);
 
                 columnChart
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors('white')
+                    .colors(this.get('colors')[index])
                     .renderTitle(false)
                     .elasticY(true);
 
                 columnCharts.push(columnChart);
-            }
-
+            });
+        } else {
             columnChart = dc.barChart(compositeChart);
-
             columnChart
                 .centerBar(true)
                 .barPadding(0.00)
-                .group(g)
-                .colors(this.get('colors')[index])
+                .group(groups[0])
                 .renderTitle(false)
                 .elasticY(true);
-
+            groups.forEach((g, index) => {
+                if (index != 0) {
+                    columnChart.stack(g);
+                }
+            });
             columnCharts.push(columnChart);
-        });
+        }
 
         compositeChart
             .on('renderlet', () => this.onRenderlet(tip))
             .compose(columnCharts);
+
+        if (this.get('type') === 'STACKED') {
+            const colors = this.get('colors');
+            compositeChart.on('pretransition', (chart) => {
+                chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+            });
+        }
 
         this.set('chart', compositeChart);
     },
@@ -135,7 +158,6 @@ export default BaseChartComponent.extend({
 
         return tip;
     },
-
     onRenderlet(tip) {
         // This is outside the Ember run loop so check if component is destroyed
         if (this.get('isDestroyed') || this.get('isDestroying')) {
@@ -178,7 +200,7 @@ export default BaseChartComponent.extend({
             let barWidth = (parseInt(d3.select(bars[0]).attr('width'), 10)) || 1;
 
             // if composed, double barWidth
-            if (this.get('type') === 'LAYERED') {
+            if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
                 this.get('chart').selectAll('rect.bar')[0].forEach(bar => {
@@ -258,9 +280,11 @@ export default BaseChartComponent.extend({
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
-            if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-                currentTick.select('text').html(tickHtml);
+            if (!currentTick.empty()) {
+                if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
+                    let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                    currentTick.select('text').html(tickHtml);
+                }
             }
         }
     },
@@ -329,7 +353,7 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll(`.sub rect.bar:nth-of-type(${maxIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+        const maxLabelY = Math.min(...this.get('chart').selectAll('.sub rect.bar')[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
 
         if (b) {
             gLabels.append('text')
@@ -351,7 +375,6 @@ export default BaseChartComponent.extend({
                     .attr('y', maxLabelY - 12);
             }
         }
-
         b = bars[minIdx];
 
         if (b && !(maxIdx === minIdx)) {
