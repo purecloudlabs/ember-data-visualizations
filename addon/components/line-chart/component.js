@@ -15,12 +15,6 @@ import BaseChartComponent from '../base-chart-component';
 export default BaseChartComponent.extend({
     classNames: ['line-chart'],
 
-    colors: [
-        '#1f77b4', '#ff7f0e', '#2ca02c',
-        '#9467bd', '#8c564b', '#e377c2',
-        '#7f7f7f', '#bcbd22', '#17becf'
-    ],
-
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
@@ -123,7 +117,7 @@ export default BaseChartComponent.extend({
     },
 
     isIntervalInRange(scale, interval) {
-        return (scale.ticks().pop() >= interval && scale.ticks()[0] <= interval);
+        return scale.ticks().pop() >= interval && scale.ticks()[0] <= interval;
     },
 
     addTickForCurrentInterval() {
