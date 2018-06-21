@@ -130,11 +130,45 @@ export default BaseChartComponent.extend({
             .renderTitle(false);
 
         if (this.get('donutChart')) {
-            pieChart.innerRadius(120);
+            pieChart.innerRadius(this.get('height') / 3);
         }
 
         pieChart.on('pretransition', (chart) => {
             chart.selectAll('text.pie-slice').remove();
+        });
+
+        pieChart.on('renderlet', () => {
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
+            // Set up any necessary hatching patterns
+            let svg = d3.select('.pie-chart > svg').append('defs');
+            let bbox = svg.node().getBBox();
+            let radius = this.get('height') / 3 + 1;
+
+            svg
+                .append('pattern')
+                .attr('id', 'pieChartNotAvailableHatch')
+                .attr('patternUnits', 'userSpaceOnUse')
+                .attr('width', 4)
+                .attr('height', 4)
+                .attr('patternTransform', 'rotate(45)')
+                .append('rect')
+                .attr('x', '0')
+                .attr('y', '0')
+                .attr('width', 2)
+                .attr('height', 4)
+                .attr('fill', chartNotAvailableColor);
+
+            d3.select('.pie-chart > svg > g > g')
+                .append('circle')
+                .attr('cx', bbox.x + (bbox.width / 2))
+                .attr('cy', bbox.y + (bbox.height / 2))
+                .attr('r', radius)
+                .attr('fill', 'url(#pieChartNotAvailableHatch)');
+
+            // d3.select('.pie-chart > svg > g > g > g > path').attr('fill', 'url(#pieChartNotAvailableHatch');
         });
 
         pieChart.on('postRender', () => {
