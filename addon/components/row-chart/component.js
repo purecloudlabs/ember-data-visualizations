@@ -80,15 +80,17 @@ export default BaseChartComponent.extend({
     addYAxis(chart) {
         // add labels to corresponding bar groups and move them appropriately
         let barHeight = chart.select('svg g.row > rect').attr('height');
-        chart.selectAll('svg > g > g.row')
-            .append('g').attr('class', 'tick')
-            .append('text')
-            .text(d => d.key)
-            .attr('y', barHeight / 2)
-            .attr('dy', '.35em')
-            .attr('x', function () {
-                return -1 * d3.select(this)[0][0].clientWidth - 15;
-            });
+        if (chart.selectAll('svg > g > g.row > g.tick').empty()) {
+            chart.selectAll('svg > g > g.row')
+                .append('g').attr('class', 'tick')
+                .append('text')
+                .text(d => d.key)
+                .attr('y', barHeight / 2)
+                .attr('dy', '.35em')
+                .attr('x', function () {
+                    return -1 * d3.select(this)[0][0].clientWidth - 15;
+                });
+        }
 
         // add y ticks and grid lines
         let ticksGroups = chart.selectAll('svg > g > g.row > g.tick');

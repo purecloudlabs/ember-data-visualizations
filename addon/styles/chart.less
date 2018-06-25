@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     font-family: @font-family;
-    height: 30%;
+    height: 100%;
     width: 100%;
 
     .chart-header,
@@ -50,7 +50,7 @@
     }
 
     .x.axis line,
-    path {
+    .x.axis path {
         fill: none;
         stroke: @alto;
         stroke-width: 1px;
@@ -169,7 +169,7 @@
           }
   
           /* Creates a small triangle extender for the tooltip */
-          .d3-tip:after {
+          .d3-tip.n:after {
             box-sizing: border-box;
             display: inline;
             font-size: 10px;
@@ -187,7 +187,7 @@
             top: 100%;
             left: 0;
           }
-        }
+
 
         /* Creates a small triangle extender for the tooltip */
         .d3-tip.n:after {
