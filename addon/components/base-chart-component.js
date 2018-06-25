@@ -9,6 +9,12 @@ export default Component.extend({
 
     classNames: ['chart'],
 
+    colors: [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#9467bd', '#8c564b', '#e377c2',
+        '#7f7f7f', '#bcbd22', '#17becf'
+    ],
+
     instantRun: false,
     resizeTimer: null,
     onResizeDebounced: null,
@@ -95,7 +101,7 @@ export default Component.extend({
         }
 
         if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
-            this.$().parents().find('.d3-tip').remove();
+            this.$().parents().find(`.d3-tip #${this.get('elementId')}`).remove();
         }
     },
 
