@@ -1,0 +1,1 @@
+export { default } from 'ember-data-visualizations/components/row-chart/component';

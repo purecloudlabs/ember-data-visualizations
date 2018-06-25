@@ -26,6 +26,29 @@ export default Ember.Controller.extend({
             this.set('content', content);
             this._createDimensions();
             this._createGroups();
+        },
+        increaseQueue() {
+            let content = Ember.get(this, 'queueContent');
+
+            content.push({ 'queue': 'IT' });
+            content.push({ 'queue': 'Manufacturing' });
+            content.push({ 'queue': 'Sales' });
+            content.push({ 'queue': 'Support' });
+
+            this.set('queueContent', content);
+            this._createQueueDimensions();
+            this._createQueueGroups();
+        },
+        decreaseQueue() {
+            let content = Ember.get(this, 'queueContent');
+            content.pop();
+            content.pop();
+            content.pop();
+            content.pop();
+
+            this.set('queueContent', content);
+            this._createQueueDimensions();
+            this._createQueueGroups();
         }
     },
 
@@ -107,6 +130,15 @@ export default Ember.Controller.extend({
             self._createAgentGroups();
         });
 
+        d3.json('queuedata.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('queueContent', json);
+            self._createQueueDimensions();
+            self._createQueueGroups();
+        });
+
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
     },
 
@@ -119,5 +151,23 @@ export default Ember.Controller.extend({
     _createAgentGroups() {
         const dimensions = this.get('agentDimensions');
         this.set('agentGroups', dimensions.group().reduceCount(d => d.status));
+    },
+    _createQueueDimensions() {
+        let content = Ember.get(this, 'queueContent');
+
+        if (this._QueueCrossfilter) {
+            this._QueueCrossfilter.remove();
+            this._QueueCrossfilter.add(content);
+        } else {
+            this._QueueCrossfilter = crossfilter(content);
+        }
+
+        this.set('queueDimensions', this._QueueCrossfilter.dimension(d => d.queue));
+    },
+
+    _createQueueGroups() {
+        const dimensions = this.get('queueDimensions');
+        const groupNames = ['interactions'];
+        this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
     }
 });

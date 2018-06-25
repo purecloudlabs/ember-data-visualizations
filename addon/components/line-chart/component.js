@@ -2,7 +2,7 @@ import moment from 'moment';
 import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
-// import crossfilter from 'crossfilter';
+import crossfilter from 'crossfilter';
 // import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
 
@@ -14,12 +14,6 @@ import BaseChartComponent from '../base-chart-component';
 */
 export default BaseChartComponent.extend({
     classNames: ['line-chart'],
-
-    colors: [
-        '#1f77b4', '#ff7f0e', '#2ca02c',
-        '#9467bd', '#8c564b', '#e377c2',
-        '#7f7f7f', '#bcbd22', '#17becf'
-    ],
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
@@ -37,6 +31,7 @@ export default BaseChartComponent.extend({
             .x(d3.time.scale().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
             .elasticY(true)
+            .yAxisPadding('20%')
             .transitionDuration(0);
 
         if (this.get('width')) {
@@ -105,6 +100,12 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(tip) {
+
+        // This is outside the Ember run loop so check if component is destroyed
+        if (this.get('isDestroyed') || this.get('isDestroying')) {
+            return;
+        }
+
         this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip, 'circle.dot');
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
@@ -116,7 +117,7 @@ export default BaseChartComponent.extend({
     },
 
     isIntervalInRange(scale, interval) {
-        return (scale.ticks().pop() >= interval && scale.ticks()[0] <= interval);
+        return scale.ticks().pop() >= interval && scale.ticks()[0] <= interval;
     },
 
     addTickForCurrentInterval() {
@@ -142,5 +143,105 @@ export default BaseChartComponent.extend({
                 currentTick.select('text').html(tickHtml);
             }
         }
+    },
+
+    showChartNotAvailable() {
+        const chartNotAvailableMessage = this.get('chartNotAvailableMessage');
+        const chartNotAvailableColor = this.get('chartNotAvailableColor');
+        const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
+        const xAxis = this.get('xAxis');
+        const yAxis = this.get('yAxis');
+
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+
+        compositeChart
+            .colors(chartNotAvailableColor)
+            .renderTitle(false)
+            .height(this.get('height'))
+            .margins({
+                top: 10,
+                right: 100,
+                bottom: 50,
+                left: 100
+            })
+            .x(d3.time.scale().domain(xAxis.domain))
+            .xUnits(() => data.length + 1)
+            .y(d3.scale.linear().domain([0, 1]));
+
+        if (this.get('width')) {
+            compositeChart.width(this.get('width'));
+        }
+
+        // determine number of ticks
+        const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
+        let ticks = 30;
+        if (duration.asMonths() >= 1) {
+            ticks = duration.asDays();
+        } else if (duration.asWeeks() >= 1) {
+            ticks = 30;
+        } else if (duration.asDays() >= 1) {
+            ticks = 24;
+        }
+
+        // create horizontal line groups
+        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const filter = crossfilter(data);
+        const dimension = filter.dimension(d => d);
+        let groups = [];
+        for (let i = 0; i <= 5; i++) {
+            groups[i] = dimension.group().reduce(function () {
+                return i / 5;
+            },
+            function () { },
+            function () { });
+        }
+
+        // create subcharts
+        let lineCharts = [];
+        let lineChart;
+
+        groups.forEach((g) => {
+            lineChart = dc.lineChart(compositeChart);
+
+            lineChart
+                .group(g)
+                .dimension(dimension)
+                .colors(chartNotAvailableColor)
+                .renderTitle(false)
+                .x(d3.time.scale().domain(this.get('xAxis').domain));
+
+            lineCharts.push(lineChart);
+        });
+
+        compositeChart.compose(lineCharts);
+
+        this.set('chart', compositeChart);
+
+        compositeChart.on('postRender', () => {
+
+            // This is outside the Ember run loop so check if component is destroyed
+            if (this.get('isDestroyed') || this.get('isDestroying')) {
+                return;
+            }
+
+            d3.select('.line-chart > svg > text').remove();
+            let svg = d3.select('.line-chart > svg');
+            let bbox = svg.node().getBBox();
+            svg
+                .append('text')
+                .text(chartNotAvailableMessage)
+                .style('fill', chartNotAvailableTextColor)
+                .attr('class', 'chart-not-available')
+                .attr('text-anchor', 'middle')
+                .attr('y', bbox.y + (bbox.height / 2))
+                .attr('x', bbox.x + (bbox.width / 2));
+        });
+        if (xAxis && xAxis.ticks) {
+            this.get('chart').xAxis().ticks(xAxis.ticks);
+        }
+        if (yAxis && yAxis.ticks) {
+            this.get('chart').yAxis().ticks(yAxis.ticks);
+        }
+        compositeChart.render();
     }
 });
