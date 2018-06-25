@@ -77,7 +77,8 @@ export default BaseChartComponent.extend({
     createTooltip() {
         return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
             .style('text-align', 'center')
-            .html(d => `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${d.data.value}</span>`);
+            .html(d => `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${d.data.value}</span>`)
+            .direction('e');
     },
 
     onClick(d) {
