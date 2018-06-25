@@ -80,7 +80,6 @@ export default BaseChartComponent.extend({
         let columnCharts = [];
         const groups = this.get('group');
         groups.forEach((g, index) => {
-
             // If we are hatching, we need to display a white bar behind the hatched bar
             if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
                 columnChart = dc.barChart(compositeChart);
@@ -135,7 +134,6 @@ export default BaseChartComponent.extend({
 
         return tip;
     },
-
     onRenderlet(tip) {
         // This is outside the Ember run loop so check if component is destroyed
         if (this.get('isDestroyed') || this.get('isDestroying')) {
@@ -338,7 +336,7 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll(`.sub rect.bar:nth-of-type(${maxIdx + 1})`)[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+        const maxLabelY = Math.min(...this.get('chart').selectAll('.sub rect.bar')[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
 
         if (b) {
             gLabels.append('text')
@@ -360,7 +358,6 @@ export default BaseChartComponent.extend({
                     .attr('y', maxLabelY - 12);
             }
         }
-
         b = bars[minIdx];
 
         if (b && !(maxIdx === minIdx)) {

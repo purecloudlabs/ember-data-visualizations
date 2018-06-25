@@ -32,7 +32,6 @@ export default Component.extend({
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
             }
-
             this.set('resizeTimer', debounce(this, this.createChart, 400, this.get('instantRun')));
         });
 
@@ -132,11 +131,7 @@ export default Component.extend({
             });
         }
         this.set('data', data);
-
         scheduleOnce('afterRender', this, this.setupResize);
-
-        if (this.get('chart')) {
-            dc.redrawAll();
-        }
+        dc.redrawAll();
     }
 });
