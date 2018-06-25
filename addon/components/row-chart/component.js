@@ -3,6 +3,7 @@ import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import $ from 'jquery';
 /**
    @public
    @module row-chart
@@ -30,6 +31,8 @@ export default BaseChartComponent.extend({
         let labelWidth = this.get('labelWidth') || 150;
 
         rowChart
+            .transitionDuration(0)
+            .elasticX(true)
             .group(this.get('group')[0])
             .dimension(this.get('dimension'))
             .ordering((d) => d.key)
@@ -67,6 +70,7 @@ export default BaseChartComponent.extend({
 
     onRenderlet(chart, tip) {
         this.addYAxis(chart);
+        $(`#${this.get('elementId')} #inline-labels`).remove();
         if (this.get('showMaxMin')) {
             this.addMaxMinLabels(chart.selectAll('g.row > rect')[0]);
         }

@@ -26,6 +26,29 @@ export default Ember.Controller.extend({
             this.set('content', content);
             this._createDimensions();
             this._createGroups();
+        },
+        increaseQueue() {
+            let content = Ember.get(this, 'queueContent');
+
+            content.push({ 'queue': 'IT' });
+            content.push({ 'queue': 'Manufacturing' });
+            content.push({ 'queue': 'Sales' });
+            content.push({ 'queue': 'Support' });
+
+            this.set('queueContent', content);
+            this._createQueueDimensions();
+            this._createQueueGroups();
+        },
+        decreaseQueue() {
+            let content = Ember.get(this, 'queueContent');
+            content.pop();
+            content.pop();
+            content.pop();
+            content.pop();
+
+            this.set('queueContent', content);
+            this._createQueueDimensions();
+            this._createQueueGroups();
         }
     },
 
