@@ -19,7 +19,7 @@ export default Component.extend({
     resizeTimer: null,
     onResizeDebounced: null,
     isChartAvailable: true,
-    chartNotAvailableMessage: null,
+    chartNotAvailableMessage: '',
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
     tooltipDateFormat: 'll LT',
@@ -54,8 +54,9 @@ export default Component.extend({
     },
 
     addClickHandlersAndTooltips(svg, tip, elementToApplyTip) {
-        svg.call(tip);
-
+        if (tip && !svg.empty()) {
+            svg.call(tip);
+        }
         // clicking actions
         this.get('chart').selectAll(elementToApplyTip).on('click', d => {
             this.onClick(d);
@@ -100,7 +101,7 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find('.d3-tip'))) {
+        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`d3-tip #${this.get('elementId')}`))) {
             this.$().parents().find(`.d3-tip #${this.get('elementId')}`).remove();
         }
     },
@@ -125,7 +126,11 @@ export default Component.extend({
             });
         });
         this.set('data', data);
+
         scheduleOnce('afterRender', this, this.setupResize);
-        dc.redrawAll();
+
+        if (this.get('chart')) {
+            dc.redrawAll();
+        }
     }
 });

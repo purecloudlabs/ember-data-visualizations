@@ -19,7 +19,24 @@
     showComparisonLine=true
     comparisonLine=comparisonLine
     currentInterval=currentInterval
-    showCurrentIndicator=true
+    showCurrentIndicator=false
+}}
+
+{{line-chart
+    dimension=dimensions
+    group=groups
+    seriesData=content
+    type='LAYERED'
+    series=series
+    colors=colors
+    height=200
+    xAxis=xAxis
+    yAxis=yAxis
+    onClick=(action onClick)
+    showComparisonLine=true
+    comparisonLine=comparisonLine
+    currentInterval=currentInterval
+    showCurrentIndicator=false
 }}
 
 {{input type='checkbox' checked=hideAxisLines}}Hide x tick lines<br/>

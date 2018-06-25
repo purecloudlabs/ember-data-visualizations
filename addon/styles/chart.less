@@ -113,54 +113,79 @@
 
 }
 
-.d3-tip {
-          background: @text-color;
-          border-radius: 2px;
-          color: @white;
-          font-family: @font-family;
-          line-height: 1;
-          margin-top: -7px;
-          padding: 12px;
-          transition: opacity .25s ease-in-out, color .25s ease-in-out;
+          .d3-tip {
+            background: @text-color;
+            border-radius: 2px;
+            color: @white;
+            font-family: @font-family;
+            line-height: 1;
+            margin-top: -7px;
+            padding: 12px;
+            transition: opacity .25s ease-in-out, color .25s ease-in-out;
+  
+            .tooltip-time {
+              background: #3f3f3f;
+              color: @silver-chalice;
+              display: flex;
+              justify-content: center;
+              font-size: 11px;
+              text-align: center;
+              margin: -12px -12px 10px -12px;
+              padding: 6px 12px;
+            }
+  
+            .tooltip-list-item {
+              clear: both;
+              display: flex;
+              font-size: 14px;
+              margin: 10px 0;
+  
+              &:last-of-type {
+                  margin-bottom: 0;
+              }
+  
+              &:only-of-type {
+                  margin-top: 16px;
+              }
+  
+              > * {
+                  flex: 1 0 auto;
+              }
+            }
+  
+            .tooltip-label {
+              color: @gallery;
+              font-weight: 300;
+            }
+  
+            .tooltip-value {
+              text-align: right;
+              margin-left: 8px;
+            }
 
-          .tooltip-time {
-            background: #3f3f3f;
-            color: @silver-chalice;
-            display: flex;
-            justify-content: center;
-            font-size: 11px;
+            .primary-stat {
+                font-weight: 900;
+            }
+          }
+  
+          /* Creates a small triangle extender for the tooltip */
+          .d3-tip:after {
+            box-sizing: border-box;
+            display: inline;
+            font-size: 10px;
+            width: 100%;
+            line-height: 1;
+            color: @text-color;
+            content: "\25BC";
+            position: absolute;
             text-align: center;
-            margin: -12px -12px 10px -12px;
-            padding: 6px 12px;
           }
-
-          .tooltip-list-item {
-            clear: both;
-            display: flex;
-            font-size: 14px;
-            margin: 10px 0;
-
-            &:last-of-type {
-                margin-bottom: 0;
-            }
-
-            &:only-of-type {
-                margin-top: 16px;
-            }
-
-            > * {
-                flex: 1 0 auto;
-            }
-          }
-
-          .tooltip-label {
-            color: @gallery;
-            font-weight: 300;
-          }
-
-          .tooltip-value {
-            text-align: right;
-            margin-left: 8px;
+  
+          /* Style northward tooltips differently */
+          .d3-tip.n:after {
+            margin: -3px 0 0 0;
+            top: 100%;
+            left: 0;
           }
         }
 
