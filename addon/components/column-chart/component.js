@@ -15,12 +15,6 @@ import BaseChartComponent from '../base-chart-component';
 export default BaseChartComponent.extend({
     classNames: ['column-chart'],
 
-    colors: [
-        '#1f77b4', '#ff7f0e', '#2ca02c',
-        '#9467bd', '#8c564b', '#e377c2',
-        '#7f7f7f', '#bcbd22', '#17becf'
-    ],
-
     showMaxMin: false,
     showComparisonLine: false,
     currentInterval: null,
@@ -142,12 +136,13 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3.tip().attr('class', 'd3-tip').html(d => {
+        let tip = d3.tip().attr('class', `d3-tip #${this.get('elementId')}`).html(d => {
             if (!_.isEmpty(titles)) {
                 let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
                 titles.forEach((title, i) => {
                     const datum = formatter(this.get('data')[d.data.key][i]);
-                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label">${title}</span><span class="tooltip-value">${datum}</span></span>`);
+                    const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
                 });
                 return str;
             }
@@ -225,7 +220,7 @@ export default BaseChartComponent.extend({
                 .attr('width', barWidth);
         }
 
-        this.addClickHandlersAndTooltips(svg, tip);
+        this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
