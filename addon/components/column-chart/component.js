@@ -15,12 +15,6 @@ import BaseChartComponent from '../base-chart-component';
 export default BaseChartComponent.extend({
     classNames: ['column-chart'],
 
-    colors: [
-        '#1f77b4', '#ff7f0e', '#2ca02c',
-        '#9467bd', '#8c564b', '#e377c2',
-        '#7f7f7f', '#bcbd22', '#17becf'
-    ],
-
     showMaxMin: false,
     showComparisonLine: false,
     currentInterval: null,
@@ -37,6 +31,7 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
         compositeChart
+            .transitionDuration(0)
             .renderTitle(false)
             .brushOn(false)
             .height(this.get('height'))
@@ -75,53 +70,65 @@ export default BaseChartComponent.extend({
         }
 
         let tip = this.createTooltip();
-        let columnChart, maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
+        let columnChart;
         let columnCharts = [];
         const groups = this.get('group');
-        const formatter = this.get('xAxis.formatter') || (value => value);
-        groups.forEach((g, index) => {
-            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
-                if (index === this.get('seriesMaxMin')) {
-                    values = g.all().map(gElem => gElem.value);
-                    nonZeroValues = values.filter(v => v > 0);
-                    maxValue = _.max(nonZeroValues);
-                    maxIdx = values.indexOf(maxValue);
-                    maxValue = formatter(maxValue);
-                    minValue = _.min(nonZeroValues);
-                    minIdx = values.indexOf(minValue);
-                    minValue = formatter(minValue);
-                }
-            }
 
-            // If we are hatching, we need to display a white bar behind the hatched bar
-            if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+        if (this.get('type') !== 'STACKED') {
+            groups.forEach((g, index) => {
+                // If we are hatching, we need to display a white bar behind the hatched bar
+                if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+                    columnChart = dc.barChart(compositeChart);
+
+                    columnChart
+                        .centerBar(true)
+                        .barPadding(0.00)
+                        .group(g)
+                        .colors('white')
+                        .renderTitle(false)
+                        .elasticY(true);
+
+                    columnCharts.push(columnChart);
+                }
+
                 columnChart = dc.barChart(compositeChart);
 
                 columnChart
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors('white')
-                    .renderTitle(false);
+                    .colors(this.get('colors')[index])
+                    .renderTitle(false)
+                    .elasticY(true);
 
                 columnCharts.push(columnChart);
-            }
-
+            });
+        } else {
             columnChart = dc.barChart(compositeChart);
-
             columnChart
                 .centerBar(true)
                 .barPadding(0.00)
-                .group(g)
-                .colors(this.get('colors')[index])
-                .renderTitle(false);
-
+                .group(groups[0])
+                .renderTitle(false)
+                .elasticY(true);
+            groups.forEach((g, index) => {
+                if (index != 0) {
+                    columnChart.stack(g);
+                }
+            });
             columnCharts.push(columnChart);
-        });
+        }
 
         compositeChart
-            .on('renderlet', () => this.onRenderlet(maxValue, maxIdx, minValue, minIdx, tip))
+            .on('renderlet', () => this.onRenderlet(tip))
             .compose(columnCharts);
+
+        if (this.get('type') === 'STACKED') {
+            const colors = this.get('colors');
+            compositeChart.on('pretransition', (chart) => {
+                chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+            });
+        }
 
         this.set('chart', compositeChart);
     },
@@ -129,12 +136,13 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3.tip().attr('class', 'd3-tip').html(d => {
+        let tip = d3.tip().attr('class', `d3-tip #${this.get('elementId')}`).html(d => {
             if (!_.isEmpty(titles)) {
                 let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
                 titles.forEach((title, i) => {
                     const datum = formatter(this.get('data')[d.data.key][i]);
-                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label">${title}</span><span class="tooltip-value">${datum}</span></span>`);
+                    const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
                 });
                 return str;
             }
@@ -144,8 +152,7 @@ export default BaseChartComponent.extend({
 
         return tip;
     },
-
-    onRenderlet(maxValue, maxIdx, minValue, minIdx, tip) {
+    onRenderlet(tip) {
         // This is outside the Ember run loop so check if component is destroyed
         if (this.get('isDestroyed') || this.get('isDestroying')) {
             return;
@@ -187,7 +194,7 @@ export default BaseChartComponent.extend({
             let barWidth = (parseInt(d3.select(bars[0]).attr('width'), 10)) || 1;
 
             // if composed, double barWidth
-            if (this.get('type') === 'LAYERED') {
+            if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
                 this.get('chart').selectAll('rect.bar')[0].forEach(bar => {
@@ -213,13 +220,13 @@ export default BaseChartComponent.extend({
                 .attr('width', barWidth);
         }
 
-        this.addClickHandlersAndTooltips(svg, tip);
+        this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
         // Show min and max values over bars
         if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin')) && bars.length > 0) {
-            this.addMaxMinLabels(bars, maxIdx, maxValue, minIdx, minValue);
+            this.addMaxMinLabels(bars);
         }
 
         if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
@@ -267,14 +274,21 @@ export default BaseChartComponent.extend({
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
-            let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-            currentTick.select('text').html(tickHtml);
+            if (!currentTick.empty()) {
+                if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
+                    let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                    currentTick.select('text').html(tickHtml);
+                }
+            }
         }
     },
 
     addComparisonLine() {
         const chartBody = d3.select('.column-chart > svg > g');
         const line = this.get('comparisonLine');
+
+        d3.selectAll('.comparison-line').remove();
+        d3.selectAll('#comparison-text').remove();
 
         chartBody.append('svg:line')
             .attr('x1', 100)
@@ -289,6 +303,7 @@ export default BaseChartComponent.extend({
             .attr('x2', 100)
             .attr('y1', 15 + this.get('chart').y()(line.value))
             .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
@@ -296,6 +311,7 @@ export default BaseChartComponent.extend({
             .attr('x2', this.get('chart').width() - 95)
             .attr('y1', 15 + this.get('chart').y()(line.value))
             .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('text')
@@ -304,10 +320,28 @@ export default BaseChartComponent.extend({
             .attr('y', 14 + this.get('chart').y()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
+            .attr('id', 'comparison-text')
             .attr('fill', line.textColor || '#000000');
     },
 
-    addMaxMinLabels(bars, maxIdx, maxValue, minIdx, minValue) {
+    addMaxMinLabels(bars) {
+        let formatter = this.get('xAxis.formatter') || (value => value);
+        let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
+        let groups = this.get('group');
+        groups.forEach((g, index) => {
+            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
+                if (index === this.get('seriesMaxMin')) {
+                    values = g.all().map(gElem => gElem.value);
+                    nonZeroValues = values.filter(v => v > 0);
+                    maxValue = _.max(nonZeroValues);
+                    maxIdx = values.indexOf(maxValue);
+                    maxValue = formatter(maxValue);
+                    minValue = _.min(nonZeroValues);
+                    minIdx = values.indexOf(minValue);
+                    minValue = formatter(minValue);
+                }
+            }
+        });
         let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
         let b = bars[maxIdx];
 
@@ -335,7 +369,6 @@ export default BaseChartComponent.extend({
                     .attr('y', maxLabelY - 12);
             }
         }
-
         b = bars[minIdx];
 
         if (b && !(maxIdx === minIdx)) {
@@ -378,8 +411,7 @@ export default BaseChartComponent.extend({
             ticks = 24;
         }
 
-        const xTimeScale = d3.time.scale().domain(xAxis.domain);
-        const data = xTimeScale.ticks(ticks);
+        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
@@ -397,7 +429,7 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(xTimeScale)
+            .x(d3.time.scale().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
             .y(d3.scale.linear().domain([0, 1]))
             .group(group)
@@ -466,7 +498,9 @@ export default BaseChartComponent.extend({
                 .attr('y', bbox.y + (bbox.height / 2))
                 .attr('x', bbox.x + (bbox.width / 2));
         });
-
+        if (xAxis && xAxis.ticks) {
+            this.get('chart').xAxis().ticks(xAxis.ticks);
+        }
         if (yAxis && yAxis.ticks) {
             this.get('chart').yAxis().ticks(yAxis.ticks);
         }
