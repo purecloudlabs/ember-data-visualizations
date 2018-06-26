@@ -39,9 +39,9 @@
     showCurrentIndicator=false
 }}
 
-{{input type='checkbox' checked=hideAxisLines}}Hide x tick lines<br/>
+{{input type='checkbox' checked=hideXAxisLines}}Hide x tick lines<br/>
 {{input type='checkbox' checked=showYTicks}}Show y ticks<br/>
-{{input type='checkbox' checked=showYTickLines}}Show y tick lines<br/>
+{{input type='checkbox' checked=showYGridLines}}Show y tick lines<br/>
 <button{{action "increaseQueue"}}>Increase</button>
 <button{{action "decreaseQueue"}}>Decrease</button>
 {{row-chart
@@ -53,9 +53,9 @@
     labelWidth=150
     xAxis=yAxis
     onClick=(action onClick)
-    hideAxisLines=hideAxisLines
+    hideXAxisLines=hideXAxisLines
     showYTicks=showYTicks
-    showYTickLines=showYTickLines
+    showYGridLines=showYGridLines
     showMaxMin=true
     chartNotAvailableBars=6
 }}
