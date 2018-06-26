@@ -85,9 +85,9 @@ export default Component.extend({
 
         // NOTE: THIS BEING HERE IS ASSUMING ALL CHARTS WILL USE ALL OF THESE PROPERTIES. MAY NOT BE A VALID ASSUMPTION
         // REQUIRED: group, dimension, xAxis.domain unless !isChartAvailable
-        if (!this.get('group') || /* !this.get('group.0.all') ||*/ !this.get('dimension')) {
-            return false;
-        }
+        // if (!this.get('group') || /* !this.get('group.0.all') ||*/ !this.get('dimension')) {
+        //     return false;
+        // }
 
         this.buildChart();
 
