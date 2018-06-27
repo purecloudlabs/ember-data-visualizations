@@ -3,7 +3,7 @@ body {
 }
 
 body > .ember-view {
-    height: 50%;
+    height: 100vh;
 }
 
  .line-chart {

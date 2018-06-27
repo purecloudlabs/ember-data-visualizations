@@ -18,8 +18,8 @@ export default Component.extend({
     instantRun: false,
     resizeTimer: null,
     onResizeDebounced: null,
-    isChartAvailable: true,
-    chartNotAvailableMessage: '',
+    isChartAvailable: false,
+    chartNotAvailableMessage: 'Chart not available for this view',
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
     tooltipDateFormat: 'll LT',
@@ -64,7 +64,8 @@ export default Component.extend({
 
         this.get('chart').selectAll(elementToApplyTip)
             .on('mouseover.tip', tip.show)
-            .on('mouseout.tip', tip.hide);
+            .on('mouseout.hideThisTip', tip.hide)
+            .on('mouseout.hideAllTips', this.get('chart').selectAll(elementToApplyTip).hide);
     },
 
     onClick() {},
@@ -85,9 +86,9 @@ export default Component.extend({
 
         // NOTE: THIS BEING HERE IS ASSUMING ALL CHARTS WILL USE ALL OF THESE PROPERTIES. MAY NOT BE A VALID ASSUMPTION
         // REQUIRED: group, dimension, xAxis.domain unless !isChartAvailable
-        // if (!this.get('group') || /* !this.get('group.0.all') ||*/ !this.get('dimension')) {
-        //     return false;
-        // }
+        if (!this.get('group') || /* !this.get('group.0.all') ||*/ !this.get('dimension')) {
+            return false;
+        }
 
         this.buildChart();
 

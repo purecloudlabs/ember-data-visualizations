@@ -55,7 +55,11 @@ export default Ember.Controller.extend({
     dimensions: [],
     domainString: '',
     groups: [],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    colors: [
+        '#7ADB37', // available
+        '#FC0D1C', // busy
+        '#FDBA43', // away
+        '#2FCEF5'], // on queue
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
         ticks: 5
@@ -69,6 +73,40 @@ export default Ember.Controller.extend({
     comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
 
     series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+
+    // format object tells the chart how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
+    // e.g. the 'title' property is 'entity' here, which tells the chart that the 'entity' property on the data objects should be used for the displayed title on each bubble
+    format: {
+        valueFormat: 'timestamp', title: 'entity', subtitle: 'value', radius: 'value', color: 'category',
+        keyFormat: agentName => {
+            if (typeof agentName === 'string') {
+                let names = agentName.split(' ');
+                return `${names[0].charAt(0)}${names[1].charAt(0)}`;
+            }
+            return null;
+        }
+    },
+
+    // this is the timestamp value format function. Takes a timestamp and returns a formatted display for the chart.
+    valueFormatter(timestamp) {
+        let duration = moment.duration(moment().diff(moment(timestamp)));
+        let str = '';
+        if (duration.days() !== 0) {
+            str = str.concat(`${duration.days()} `);
+            let qualifier = duration.days() === 1 ? 'day ' : 'days ';
+            str = str.concat(qualifier);
+        }
+        if (duration.hours() !== 0) {
+            str = str.concat(`${duration.hours()}h `);
+        }
+        if (duration.minutes() !== 0) {
+            str = str.concat(`${duration.minutes()}m `);
+        }
+        if (duration.seconds() !== 0) {
+            str = str.concat(`${duration.seconds()}s`);
+        }
+        return str;
+    },
 
     onClick(datum) {
         this.set('domainString', datum.x);
@@ -139,6 +177,15 @@ export default Ember.Controller.extend({
             self._createQueueGroups();
         });
 
+        d3.json('agentStatus.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('statusContent', json);
+            self._createStatusDimensions();
+            self._createStatusGroups();
+        });
+
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
     },
 
@@ -169,5 +216,54 @@ export default Ember.Controller.extend({
         const dimensions = this.get('queueDimensions');
         const groupNames = ['interactions'];
         this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
+    },
+
+    _createStatusDimensions() {
+        let content = Ember.get(this, 'statusContent');
+
+        if (this._StatusCrossfilter) {
+            this._StatusCrossfilter.remove();
+            this._StatusCrossfilter.add(content);
+        } else {
+            this._StatusCrossfilter = crossfilter(content);
+        }
+
+        this.set('statusDimension', this._StatusCrossfilter.dimension(d => d[this.format.title]));
+    },
+
+    _createStatusGroups() {
+        const dimensions = this.get('statusDimension');
+        // const content = this.get('statusContent');
+
+        // generic color mapping code
+        // let colorsMap = {}, colorsArray = [], j = 0;
+        // for (let i = 0; i < content.length; i++) {
+        //     let color = content[i][this.format.color];
+        //     if (colorsArray.indexOf(color) === -1) {
+        //         colorsArray.push(color);
+        //         colorsMap[color] = j;
+        //         j++;
+        //     }
+        // }
+
+        // status color mapping code
+        let colorsMap = { 'Available': 0, 'Busy': 1, 'Away': 2, 'On Queue': 3 };
+
+        let groups = [];
+        groups.push(dimensions.group().reduce(
+            (p, v) => {
+                p.radius = v[this.format.radius];
+                p.subtitle = v[this.format.subtitle];
+                p.color = v[this.format.color];
+                p.colorValue = colorsMap[v[this.format.color]];
+                p.keyFormat = this.format.keyFormat;
+                return p;
+            },
+            () => { },
+            () => ({})
+        )
+        );
+        // this.set('format', this.format);
+        this.set('statusGroups', groups);
     }
 });
