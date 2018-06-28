@@ -96,6 +96,7 @@ export default BaseChartComponent.extend({
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d.label);
         const group = dimension.group().reduceCount();
+        dc.disableTransitions = true;
 
         bubbleChart
             .width(this.get('width'))
@@ -107,7 +108,8 @@ export default BaseChartComponent.extend({
             .radiusValueAccessor(d => d.value)
             .renderTitle(false)
             .label(() => '')
-            .colors(chartNotAvailableColor);
+            .colors(chartNotAvailableColor)
+            .transitionDuration(0);
 
         // bubbleChart.on('pretransition')
 
@@ -138,7 +140,7 @@ export default BaseChartComponent.extend({
             svg.selectAll('.bubble').attr('fill', 'url(#bubbleChartNotAvailableHatch');
 
             // append text to chart
-            svg.select('text').remove();
+            svg.selectAll('text').remove();
             let bbox = svg.node().getBBox();
             svg
                 .append('text')
