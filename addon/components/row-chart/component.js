@@ -26,9 +26,6 @@ export default BaseChartComponent.extend({
 
     buildChart() {
         let rowChart = dc.rowChart(`#${this.get('elementId')}`);
-        let width = this.get('width') || 600;
-        let height = this.get('height') || 400;
-        let labelWidth = this.get('labelWidth') || 150;
 
         rowChart
             .transitionDuration(0)
@@ -37,10 +34,18 @@ export default BaseChartComponent.extend({
             .dimension(this.get('dimension'))
             .ordering(d => d.key)
             .colors(this.get('colors')[2])
-            .height(height)
-            .width(width)
+            .height(this.get('height'))
             .renderLabel(false)
             .renderTitle(false);
+
+        if (this.get('width')) {
+            rowChart.width(this.get('width'));
+        }
+
+        const labelWidth = this.get('labelWidth') || 150;
+        const totalWidth = rowChart.width();
+        const chartWidth = totalWidth - labelWidth;
+        rowChart.width(chartWidth);
 
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             rowChart.xAxis().ticks(this.get('xAxis').ticks);
@@ -48,7 +53,6 @@ export default BaseChartComponent.extend({
 
         rowChart.on('pretransition', chart => {
             // move svg over to make room for labels
-            let totalWidth = width + labelWidth;
             chart.select('svg').attr('width', totalWidth);
             chart.select('svg > g').attr('transform', `translate(${labelWidth},0)`).attr('width', totalWidth);
 
@@ -58,7 +62,7 @@ export default BaseChartComponent.extend({
             }
         });
 
-        let tip = this.createTooltip();
+        const tip = this.createTooltip();
 
         rowChart.on('renderlet', chart => this.onRenderlet(chart, tip));
         this.set('chart', rowChart);
@@ -97,7 +101,7 @@ export default BaseChartComponent.extend({
 
         // add y ticks and grid lines
         let ticksGroups = chart.selectAll('svg g.row > g.tick');
-        let lineFunction = d3.svg.line()
+        const lineFunction = d3.svg.line()
             .y(0)
             .x(d => d.x)
             .interpolate('linear');
@@ -108,19 +112,19 @@ export default BaseChartComponent.extend({
                 .attr('transform', `translate(-6,${barHeight / 2})`);
         }
 
-        // this is a bit hack-y; it only draws the line from the end of the bar to the end of the svg.
-        // the lines must be added after the bars, though, to know where to position them, and making them the full length
-        // causes them to show on top of the bars.
+        // this is a bit hack-y; it only draws the line from the end of the bar to the length of the longest bar.
+        // the lines must be added after the bars, though, to know where to position them, and making them the full
+        // length causes them to show on top of the bars.
         // d3 v4 has a sendToBack function which would solve this problem.
         if (this.get('showYGridLines')) {
             let widths = [];
             chart.selectAll('svg g.row > rect').each(function () {
                 widths.push(d3.select(this).attr('width'));
             });
-            let width = (this.get('width') || 600) - 80;
+            const maxBarWidth = Math.max(...chart.selectAll('g.row > rect')[0].map(rect => parseInt(rect.getAttribute('width'), 10)));
             ticksGroups.each(function (d, i) {
                 d3.select(this).append('path')
-                    .attr('d', lineFunction([{ x: parseInt(widths[i]) + 1 }, { x: width }]))
+                    .attr('d', lineFunction([{ x: parseInt(widths[i]) + 1 }, { x: maxBarWidth + 1 }]))
                     .attr('class', 'yGridLine')
                     .attr('transform', `translate(-0,${barHeight / 2})`);
             });
@@ -151,7 +155,7 @@ export default BaseChartComponent.extend({
                 .text(maxValue)
                 .attr('transform', b.parentNode.getAttribute('transform'))
                 .attr('x', Math.max(12, maxLabelY - 2) + 5)
-                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2) + 3)
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('class', 'max-value-text');
@@ -163,7 +167,7 @@ export default BaseChartComponent.extend({
                     .html(() => '&#xf0da')
                     .attr('text-anchor', 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
-                    .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                    .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2) + 3)
                     .attr('x', maxLabelY - 12);
             }
         }
@@ -174,7 +178,7 @@ export default BaseChartComponent.extend({
                 .text(minValue)
                 .attr('transform', b.parentNode.getAttribute('transform'))
                 .attr('x', Math.max(12, maxLabelY - 2) + 5)
-                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2) + 3)
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('class', 'min-value-text');
@@ -185,7 +189,7 @@ export default BaseChartComponent.extend({
                 .attr('transform', b.parentNode.getAttribute('transform'))
                 .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', 'middle')
-                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2))
+                .attr('y', +b.getAttribute('y') + (b.getAttribute('height') / 2) + 3)
                 .attr('x', maxLabelY - 12);
         }
     },
@@ -193,9 +197,6 @@ export default BaseChartComponent.extend({
         const chartNotAvailableMessage = this.get('chartNotAvailableMessage');
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
-        const width = this.get('width') || 600;
-        const height = this.get('height') || 400;
-        const labelWidth = this.get('labelWidth') || 150;
 
         let rowChart = dc.rowChart(`#${this.get('elementId')}`);
         this.set('chart', rowChart);
@@ -212,10 +213,18 @@ export default BaseChartComponent.extend({
             .colors(chartNotAvailableColor)
             .renderTitle(false)
             .renderLabel(false)
-            .height(height)
-            .width(width)
+            .height(this.get('height'))
             .group(group)
             .dimension(dimension);
+
+        if (this.get('width')) {
+            rowChart.width(this.get('width'));
+        }
+
+        const labelWidth = this.get('labelWidth') || 150;
+        const totalWidth = rowChart.width();
+        const chartWidth = totalWidth - labelWidth;
+        rowChart.width(chartWidth);
 
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             rowChart.xAxis().ticks(this.get('xAxis').ticks);
@@ -223,7 +232,6 @@ export default BaseChartComponent.extend({
 
         rowChart.on('pretransition', chart => {
             // move it the same distance over as it would be if it did have labels (for consistency)
-            let totalWidth = width + labelWidth;
             chart.select('svg').attr('width', totalWidth);
             chart.select('svg > g').attr('transform', `translate(${labelWidth},0)`).attr('width', totalWidth);
         });

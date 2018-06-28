@@ -119,7 +119,6 @@
             color: @white;
             font-family: @font-family;
             line-height: 1;
-            margin-top: -7px;
             padding: 12px;
             transition: opacity .25s ease-in-out, color .25s ease-in-out;
   
@@ -182,32 +181,11 @@
           }
   
           /* Style northward tooltips differently */
-          .d3-tip.n:after {
-            margin: -3px 0 0 0;
+          .d3-tip.n {
+            margin-top: -7px;
             top: 100%;
             left: 0;
           }
-
-
-        /* Creates a small triangle extender for the tooltip */
-        .d3-tip.n:after {
-          box-sizing: border-box;
-          display: inline;
-          font-size: 10px;
-          width: 100%;
-          line-height: 1;
-          color: @text-color;
-          content: "\25BC";
-          position: absolute;
-          text-align: center;
-        }
-
-        /* Style northward tooltips differently */
-        .d3-tip.n:after {
-          margin: -3px 0 0 0;
-          top: 100%;
-          left: 0;
-        }
 
         /* Creates a small triangle extender for the tooltip */
         .d3-tip.e:before {
@@ -221,7 +199,7 @@
             position: absolute;
             text-align: center;
             transform: rotate(90deg);
-            top: 45%;
+            top: 40%;
             left: -52%;
         }
 
