@@ -15,23 +15,15 @@ import BaseChartComponent from '../base-chart-component';
 export default BaseChartComponent.extend({
     classNames: ['pie-chart'],
 
-    colors: [
-        '#7ADB37', '#FC0D1C', '#FDBA43'
-    ],
-
     externalLabels: false,
     labels: true,
 
     buildChart() {
         let chart = dc.pieChart(`#${this.get('elementId')}`);
 
-        const colors = [
-            '#7ADB37', '#FDBA43', '#FC0D1C'
-        ];
-
         chart
             .radius(this.get('height'))
-            .ordinalColors(colors)
+            .ordinalColors(this.get('colors'))
             .dimension(this.get('dimension'))
             .group(this.get('group'))
             .renderTitle(false)

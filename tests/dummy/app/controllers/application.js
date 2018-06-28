@@ -56,6 +56,7 @@ export default Ember.Controller.extend({
     domainString: '',
     groups: [],
     colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    statusColors: ['#7ADB37', '#FC0D1C', '#FDBA43'],
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
         ticks: 5
