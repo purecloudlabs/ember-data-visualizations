@@ -56,7 +56,12 @@ export default Ember.Controller.extend({
     domainString: '',
     groups: [],
     colors: ['#B9B9B9', '#A0C0CF', '#105470'],
-    statusColors: ['#7ADB37', '#FC0D1C', '#FDBA43'],
+    statusColors: [
+        '#7ADB37', // available
+        '#FC0D1C', // busy
+        '#FDBA43', // away
+        '#2FCEF5'], // on queue
+    colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
         ticks: 5

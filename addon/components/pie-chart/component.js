@@ -1,9 +1,7 @@
-// import moment from 'moment';
-// import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
-// import $ from 'jquery';
+import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
 
 /**
@@ -22,7 +20,7 @@ export default BaseChartComponent.extend({
         let chart = dc.pieChart(`#${this.get('elementId')}`);
 
         chart
-            .radius(this.get('height'))
+            .radius(this.get('height') / 2)
             .ordinalColors(this.get('colors'))
             .dimension(this.get('dimension'))
             .group(this.get('group'))
@@ -31,6 +29,10 @@ export default BaseChartComponent.extend({
                 .gap(15)
                 .y(10)
                 .x(30));
+
+        if (this.get('colorMap')) {
+            chart.colors(d3.scale.ordinal().domain(this.get('colorMap')).range(this.get('colors')));
+        }
 
         if (this.get('externalLabels')) {
             chart
@@ -49,28 +51,73 @@ export default BaseChartComponent.extend({
         }
 
         let tip = this.createTooltip();
-        chart.on('renderlet', () => this.onRenderlet(tip));
+        chart.on('renderlet', chart => this.onRenderlet(chart, tip));
 
         this.set('chart', chart);
     },
 
-    onRenderlet(tip) {
-        d3.select('g.pie-slice-group > .totalText').remove();
+    onRenderlet(chart, tip) {
+        chart.select('g.pie-slice-group > .totalText').remove();
         if (this.get('showTotal')) {
-            d3.select('g.pie-slice-group')
+            chart.select('g.pie-slice-group')
                 .append('text')
                 .attr('class', 'totalText')
                 .attr({ 'text-anchor': 'middle' })
                 .text(this.get('data').total);
         }
-        this.addClickHandlersAndTooltips(d3.select('.pie-chart > svg'), tip, '.pie-slice');
+        this.addClickHandlersAndTooltips(chart.select('svg'), tip);
     },
 
     createTooltip() {
-        return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
+        return d3.tip()
+            .attr('class', 'd3-tip pie-chart')
+            .attr('id', `${this.get('elementId')}`)
             .style('text-align', 'center')
-            .html(d => `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${d.data.value}</span>`)
-            .direction('e');
+            .html(d => {
+                return `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${d.data.value}</span>`;
+            });
+    },
+
+    addClickHandlersAndTooltips(svg, tip) {
+        if (tip && !svg.empty()) {
+            svg.call(tip);
+        }
+
+        // clicking actions
+        this.get('chart').selectAll('.pie-slice').on('click', d => {
+            this.onClick(d);
+        });
+
+        // tooltip positioning
+        this.get('chart').selectAll('.pie-slice')
+            .on('mouseover.tip', d => {
+                tip
+                    .show(d);
+
+                const endAngle = d.endAngle - (Math.PI / 2), startAngle = d.startAngle - (Math.PI / 2);
+                const alpha = endAngle - startAngle;
+                const radius = this.get('chart').radius();
+
+                // coordinates of centroid if startAngle = 0
+                const xbar = (2 / 3) * (radius / alpha) * Math.sin(alpha);
+                const ybar = (-2 / 3) * (radius / alpha) * (Math.cos(alpha) - 1);
+
+                // rotate about (0,0) (center of circle) startAngle radians
+                const centroidY = ybar * Math.cos(startAngle) + xbar * Math.sin(startAngle);
+                const centroidX = xbar * Math.cos(startAngle) - ybar * Math.sin(startAngle);
+
+                // coordinates of the center point of the chart
+                const centerOfChartY = $(`#${this.get('elementId')}`)[0].offsetTop + (this.get('chart').height() / 2);
+                const centerOfChartX = $(`#${this.get('elementId')}`)[0].offsetLeft + (this.get('chart').width() / 2);
+
+                // account for size of tooltip
+                const offsetX = ((d.data.key.length + 1) * -4);
+                const offsetY = 0;
+
+                tip.style('top', (`${centerOfChartY + centroidY + offsetY}px`));
+                tip.style('left', (`${centerOfChartX + centroidX + offsetX}px`));
+            })
+            .on('mouseout.tip', tip.hide);
     },
 
     onClick(d) {
