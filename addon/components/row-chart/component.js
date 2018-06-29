@@ -65,11 +65,7 @@ export default BaseChartComponent.extend({
         return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
             .style('text-align', 'center')
             .html(d => `<span class="row-tip-key">${d.key}</span><br/><span class="row-tip-value">${d.value}</span>`)
-            .direction('e')
-            // this doesn't work!
-            .offset(function () {
-                return [this.getBBox().height / 2, 0];
-            });
+            .direction('e');
     },
 
     onRenderlet(chart, tip) {
