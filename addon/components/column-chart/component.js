@@ -236,6 +236,13 @@ export default BaseChartComponent.extend({
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
+
+        // example for individual bar coloration, maybe implemented in the future
+        // const _this = this;
+        // this.get('chart').selectAll('rect.bar').filter(function (d) {
+        //     return d.x.toString() === _this.get('currentInterval.start._d').toString();
+        // })
+        //     .attr('fill', 'red');
     },
 
     getIndexForHatch(idx) {

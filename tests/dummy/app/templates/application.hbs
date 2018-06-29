@@ -1,4 +1,4 @@
-{{domainString}}
+{{domainString}}<br/>
 
 <button{{action "increaseData"}}>Increase</button>
 <button{{action "decreaseData"}}>Decrease</button>
@@ -38,5 +38,27 @@
     currentInterval=currentInterval
     showCurrentIndicator=false
 }}
+
+{{input type='checkbox' checked=hideXAxisLines}}Hide x tick lines<br/>
+{{input type='checkbox' checked=showYTicks}}Show y ticks<br/>
+{{input type='checkbox' checked=showYGridLines}}Show y tick lines<br/>
+<button{{action "increaseQueue"}}>Increase</button>
+<button{{action "decreaseQueue"}}>Decrease</button>
+<div style='width: 40%'>
+{{row-chart
+    dimension=queueDimensions
+    group=queueGroups
+    colors=colors
+    height=400
+    labelWidth=150
+    xAxis=yAxis
+    onClick=(action onClick)
+    hideXAxisLines=hideXAxisLines
+    showYTicks=showYTicks
+    showYGridLines=showYGridLines
+    showMaxMin=true
+    chartNotAvailableBars=6
+}}
+</div>
 
 {{outlet}}
