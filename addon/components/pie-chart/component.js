@@ -24,11 +24,14 @@ export default BaseChartComponent.extend({
             .ordinalColors(this.get('colors'))
             .dimension(this.get('dimension'))
             .group(this.get('group'))
-            .renderTitle(false)
-            .legend(dc.legend()
+            .renderTitle(false);
+
+        if (this.get('legend')) {
+            chart.legend(dc.legend()
                 .gap(15)
                 .y(10)
                 .x(30));
+        }
 
         if (this.get('colorMap')) {
             chart.colors(d3.scale.ordinal().domain(this.get('colorMap')).range(this.get('colors')));

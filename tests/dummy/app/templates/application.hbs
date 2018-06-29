@@ -41,10 +41,10 @@
 {{input type='checkbox' checked=showTotal}}Total<br/>
 {{input type='checkbox' checked=labels}}Labels<br/>
 {{input type='checkbox' checked=externalLabels}}External labels<br/>
+{{input type='checkbox' checked=legend}}Show Legend<br/>
 {{pie-chart
     dimension=agentDimensions
     group=agentGroups
-    seriesData=agentContent
     colors=statusColors
     colorMap=colorMap
     height=400
@@ -53,6 +53,7 @@
     donutChart=donutChart
     externalLabels=externalLabels
     labels=labels
+    legend=legend
 }}
 
 {{input type='checkbox' checked=hideAxisLines}}Hide x tick lines<br/>
