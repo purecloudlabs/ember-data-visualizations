@@ -54,8 +54,6 @@ The line chart uses an *array* of crossfilter groups to display different types 
 * `height` (number): height in pixels of chart
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator
-
-##### COMING SOON
 * `showComparisonLine` (boolean): whether or not to show a comparison line
 * `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear to the left of the line on the y axis), `color` (color of line, hex string), `textColor` (color of text, hex string)
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the line chart
