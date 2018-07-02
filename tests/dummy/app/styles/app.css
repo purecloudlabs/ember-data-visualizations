@@ -5,7 +5,3 @@ body {
 body > .ember-view {
     height: 50%;
 }
-
- .line-chart {
-    fill: none;
-}
