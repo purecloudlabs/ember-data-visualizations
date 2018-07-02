@@ -14,19 +14,19 @@ ember install ember-data-visualizations
 Usage
 ------------------------------------------------------------------------------
 
-## All charts
+### All charts
 All charts must have a group and a dimension. All charts use `d3-tip` (an npm package which can be found [here](https://github.com/Caged/d3-tip)) to create and style tooltips. 
 See the dummy app for an example of each type of chart. The code for the dummy can be found in `tests/dummy`. In particular, `tests/dummy/controllers/application.js` and `tests/dummy/templates/application.hbs` will be useful in understanding the use of this addon.
 
-## Column chart
+### Column chart
 The column chart uses an *array* of crossfilter groups to display different types of column charts (vertical bar charts). If there is only one group, *you must still pass an array of 1 group to the column chart*. This is true for many of the charts in this addon.
 
-### Required parameters
+##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
 * `group`: *array* of crossfilter groups to use for chart
 * `xAxis` (Object): `domain` (Array, probably of `moment` objects) and `ticks` (number of ticks to show)
 
-### Optional parameters
+##### Optional parameters
 * `yAxis` (Object): `domain` (Array, probably of numbers) (optional) and `ticks` (number of ticks to show)
 * `type` (String) (defaults to `GROUPED`): `GROUPED`, `LAYERED`, `STACKED`. `GROUPED` is for "ordinary" data and is most likely what should be used if there is only one crossfilter group. `LAYERED` is for "overlapping data;" i.e. there are 10 fruits, 6 of which are citrus, 3 of which are oranges. If this chart is `LAYERED`, the `series` option tells the chart how to format the bars (hatching). `STACKED` creates a stacked bar chart; i.e. there are 10 fruits, 20 vegetables, and 15 meats and we want to display them on top of each other.
 * `series` (Array):  Each object in the array should have a `title` property and a `hatch` property. `title` should be the name of `this.get('group')` at the same index (used in tooltip creation). `hatch` should be either `pos` (for a hatch from bottom left to top right), `neg` (for a hatch from top left to bottom right), or `false` (for no hatch).
@@ -39,15 +39,15 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator
 
-## Line chart
+### Line chart
 The line chart uses an *array* of crossfilter groups to display different types of line charts. If there is only one group, *you must still pass an array of 1 group to the line chart*. This is true for many of the charts in this addon.
 
-### Required parameters
+##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
 * `group`: *array* of crossfilter groups to use for chart
 * `xAxis` (Object): `domain` (Array, probably of `moment` objects) and `ticks` (number of ticks to show)
 
-### Optional parameters
+##### Optional parameters
 * `yAxis` (Object): `domain` (Array, probably of numbers) (optional) and `ticks` (number of ticks to show)
 * `series` (Array):  Each object in the array should have a `title` property. `title` should be the name of `this.get('group')` at the same index (used in tooltip creation).
 * `colors` (Array): Hex strings to color the chart
@@ -55,20 +55,20 @@ The line chart uses an *array* of crossfilter groups to display different types 
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator
 
-### COMING SOON
+##### COMING SOON
 * `showComparisonLine` (boolean): whether or not to show a comparison line
 * `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear to the left of the line on the y axis), `color` (Hex string)
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the line chart
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 
-## Row chart
+### Row chart
 The row chart uses an *array* of crossfilter groups to display different types of row charts (horizontal bar charts). If there is only one group, *you must still pass an array of 1 group to the row chart*. This is true for many of the charts in this addon.
 
-### Required parameters
+##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
 * `group`: *array* of crossfilter groups to use for chart
 
-### Optional parameters
+##### Optional parameters
 * `colors` (Array): Hex strings to color the chart (colors[2] is currently the color that the bars appear as)
 * `labelWidth` (number): width in pixels of the labels div. Defaults to 150
 * `xAxis` (Object): `ticks` property tells the chart how many ticks to display on the x axis
@@ -79,14 +79,14 @@ The row chart uses an *array* of crossfilter groups to display different types o
 * `showMaxMin`: whether or not to show max/min indicators for the maximum and minimum values of the row chart
 * `chartNotAvailableBars` (number): number of bars to show on the chart not available view
 
-## Pie chart
+### Pie chart
 The pie chart does *not* use an array of crossfilter groups. 
 
-### Required parameters
+##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
 * `group`: crossfilter group to use for chart (NOT AN ARRAY)
 
-### Optional parameters
+##### Optional parameters
 * `colors` (Array): Hex strings to color the chart
 * `colorMap` (Object): parameter/key pairs by which to color chart. e.g. if key values of the data are `'apples, bananas, blueberries'`, colorMap might be `{'apples': '#8b0000', 'bananas': '#ffff00', 'blueberries': '#6495ed'}`, where those colors exist in the `colors` array
 * `height` (number): height in pixels of the chart (radius of the chart is height / 2)
