@@ -6,7 +6,6 @@
 {{column-chart
     dimension=dimensions
     group=groups
-    seriesData=content
     type='LAYERED'
     seriesMaxMin=2
     showMaxMin=true
@@ -25,16 +24,12 @@
 {{line-chart
     dimension=dimensions
     group=groups
-    seriesData=content
-    type='LAYERED'
     series=series
     colors=colors
     height=200
     xAxis=xAxis
     yAxis=yAxis
     onClick=(action onClick)
-    showComparisonLine=true
-    comparisonLine=comparisonLine
     currentInterval=currentInterval
     showCurrentIndicator=false
 }}
