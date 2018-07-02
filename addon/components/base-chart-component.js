@@ -99,8 +99,9 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`d3-tip #${this.get('elementId')}`))) {
-            this.$().parents().find(`.d3-tip #${this.get('elementId')}`).remove();
+        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
+            console.log('I did it');
+            this.$().parents().find(`.d3-tip#${this.get('elementId')}`).remove();
         }
     },
 
