@@ -57,7 +57,7 @@ The line chart uses an *array* of crossfilter groups to display different types 
 
 ##### COMING SOON
 * `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear to the left of the line on the y axis), `color` (Hex string)
+* `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear to the left of the line on the y axis), `color` (color of line, hex string), `textColor` (color of text, hex string)
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the line chart
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 
@@ -77,6 +77,8 @@ The row chart uses an *array* of crossfilter groups to display different types o
 * `showYGridLines` (boolean): whether to show y-axis grid lines on the chart
 * `showYTicks` (boolean): whether to show tick marks for each bar on the y axis
 * `showMaxMin`: whether or not to show max/min indicators for the maximum and minimum values of the row chart
+* `showComparisonLine` (boolean): whether or not to show a comparison line
+* `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear on the bottom of the line on the x axis), `color` (color of line, hex string), `textColor` (color of text, hex string)
 * `chartNotAvailableBars` (number): number of bars to show on the chart not available view
 
 ### Pie chart
