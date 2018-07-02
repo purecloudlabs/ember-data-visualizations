@@ -7,30 +7,6 @@
     height: 100%;
     width: 100%;
 
-    .chart-header,
-    .axis-title,
-    .x.axis {
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
-
-    .chart-canvas {
-        flex-grow: 1;
-        flex-shrink: 1;
-
-        overflow-x: hidden;
-        overflow-y: auto;
-        width: 100%;
-    }
-
-    .chart-canvas svg {
-        display: block;
-    }
-
-    .axis-title {
-        font-weight: bold;
-    }
-
     .axis line,
     .axis path {
         fill: none;
@@ -48,28 +24,10 @@
     }
 
     .x.axis {
+        flex-grow: 0;
+        flex-shrink: 0;
         margin-bottom: 5px;
         width: 100%;
-    }
-
-    .axes,
-    .y.axis,
-    .yr.axis {
-        opacity: 1;
-    }
-
-    .brush rect.background {
-        z-index: -999;
-    }
-
-    .brush rect.extent {
-        fill: steelblue;
-        fill-opacity: .125;
-    }
-
-    .brush .resize path {
-        fill: @gallery;
-        stroke: @dove-gray;
     }
 
     .chart-not-available {
@@ -85,81 +43,4 @@
         font-size: 12px;
         fill: #000;
     }
-
-    // TODO: move this to pie chart's style.less once it gets merged
-    .legend text,
-    .legend rect {
-        cursor: pointer;
-    }
-
-}
-
-// tooltip styles
-.d3-tip {
-    background: @text-color;
-    border-radius: 2px;
-    color: @white;
-    font-family: @font-family;
-    line-height: 1;
-    padding: 12px;
-    transition: opacity .25s ease-in-out, color .25s ease-in-out;
-
-    .tooltip-time {
-        background: #3f3f3f;
-        color: @silver-chalice;
-        display: flex;
-        justify-content: center;
-        font-size: 11px;
-        text-align: center;
-        margin: -12px -12px 10px -12px;
-        padding: 6px 12px;
-    }
-
-    .tooltip-list-item {
-        clear: both;
-        display: flex;
-        font-size: 14px;
-        margin: 10px 0;
-
-        &:last-of-type {
-            margin-bottom: 0;
-        }
-
-        &:only-of-type {
-            margin-top: 16px;
-        }
-
-        > * {
-            flex: 1 0 auto;
-        }
-    }
-
-    .tooltip-label {
-        color: @gallery;
-        font-weight: 300;
-    }
-
-    .tooltip-value {
-        text-align: right;
-        margin-left: 8px;
-    }
-
-    .primary-stat {
-        font-weight: 900;
-    }
-}
-
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-    box-sizing: border-box;
-    font-size: 10px;
-    width: 100%;
-    line-height: 1;
-    color: @text-color;
-    content: "\25BC";
-    position: absolute;
-    text-align: center;
-    margin-top: -3px;
-    top: 100%;
-    left: 0;
 }
