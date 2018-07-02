@@ -100,7 +100,6 @@ export default Component.extend({
         }
 
         if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
-            console.log('I did it');
             this.$().parents().find(`.d3-tip#${this.get('elementId')}`).remove();
         }
     },
