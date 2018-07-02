@@ -117,3 +117,10 @@ test('it can render both y ticks and y grid lines correctly', function (assert) 
     return wait();
 });
 
+test('it shows a comparison line', function (assert) {
+    this.render(hbs`{{row-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
+    // delayed to let all dc rendering processes finish
+    later(this, (() => assert.equal(this.$('.comparison-line').length, 3)), 1000);
+    return wait();
+});
+
