@@ -56,6 +56,12 @@ export default Ember.Controller.extend({
     domainString: '',
     groups: [],
     colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    statusColors: [
+        '#7ADB37', // available
+        '#FC0D1C', // busy
+        '#FDBA43', // away
+        '#2FCEF5'], // on queue
+    colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
         ticks: 5
@@ -121,6 +127,15 @@ export default Ember.Controller.extend({
             self._createGroups();
         });
 
+        d3.json('agents.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('agentContent', json);
+            self._createAgentDimensions();
+            self._createAgentGroups();
+        });
+
         d3.json('queuedata.json', function (error, json) {
             if (error) {
                 return Ember.Logger.log(error);
@@ -133,6 +148,16 @@ export default Ember.Controller.extend({
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
     },
 
+    _createAgentDimensions() {
+        let content = Ember.get(this, 'agentContent');
+        let cf = crossfilter(content);
+        this.set('agentDimensions', cf.dimension(d => d.status));
+    },
+
+    _createAgentGroups() {
+        const dimensions = this.get('agentDimensions');
+        this.set('agentGroups', dimensions.group().reduceCount(d => d.status));
+    },
     _createQueueDimensions() {
         let content = Ember.get(this, 'queueContent');
 

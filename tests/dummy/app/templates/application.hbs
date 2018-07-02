@@ -14,11 +14,10 @@
     height=200
     xAxis=xAxis
     yAxis=yAxis
-    onClick=(action onClick)
     showComparisonLine=true
     comparisonLine=comparisonLine
     currentInterval=currentInterval
-    showCurrentIndicator=false
+    showCurrentIndicator=true
 }}
 
 {{line-chart
@@ -32,6 +31,26 @@
     onClick=(action onClick)
     currentInterval=currentInterval
     showCurrentIndicator=false
+}}
+
+
+{{input type='checkbox' checked=donutChart}}Donut<br/>
+{{input type='checkbox' checked=showTotal}}Total<br/>
+{{input type='checkbox' checked=labels}}Labels<br/>
+{{input type='checkbox' checked=externalLabels}}External labels<br/>
+{{input type='checkbox' checked=legend}}Show Legend<br/>
+{{pie-chart
+    dimension=agentDimensions
+    group=agentGroups
+    colors=statusColors
+    colorMap=colorMap
+    height=400
+    width=800
+    showTotal=showTotal
+    donutChart=donutChart
+    externalLabels=externalLabels
+    labels=labels
+    legend=legend
 }}
 
 {{input type='checkbox' checked=hideXAxisLines}}Hide x tick lines<br/>

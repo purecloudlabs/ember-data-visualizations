@@ -1,4 +1,4 @@
-.row-chart {
+.pie-chart {
     .caret-icon {
         font-family: FontAwesome;
         font-size: 12px;
@@ -11,13 +11,13 @@
              -1px 1px 0 #fff,
              1px 1px 0 #fff;
     }
-    path {
-        fill: none;
-        stroke: @alto;
-        stroke-width: 1px;
-        shape-rendering: crispEdges;
+
+    g.pie-slice {
+        stroke: white;
+        stroke-width: 3;
+        color: black;
     }
-    .tick text {
-        fill: @silver-chalice
-    }
+}
+.pie-chart.d3-tip:after {
+    display: none;
 }
