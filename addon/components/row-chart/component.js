@@ -80,7 +80,7 @@ export default BaseChartComponent.extend({
         if (this.get('showMaxMin')) {
             this.addMaxMinLabels(chart.selectAll('g.row > rect')[0]);
         }
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
+        if (this.get('showComparisonLine') && this.get('comparisonLine')) {
             this.addComparisonLine();
         }
         this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'g.row > rect');

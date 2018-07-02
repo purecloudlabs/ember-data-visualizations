@@ -26,6 +26,11 @@ const getTestParameters = function () {
         groups,
         xAxis: {
             ticks: 3
+        },
+        comparisonLine: {
+            value: 15,
+            displayValue: '15',
+            color: '#2CD02C'
         }
     };
 };
