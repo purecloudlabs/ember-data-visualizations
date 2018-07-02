@@ -1,20 +1,18 @@
 .row-chart {
-    .caret-icon {
-        font-family: FontAwesome;
-        font-size: 12px;
-    }
-
-    .chart-not-available {
-        text-shadow:
-            -1px -1px 0 #fff,  
-             1px -1px 0 #fff,
-             -1px 1px 0 #fff,
-             1px 1px 0 #fff;
-    }
-    path {
+    path,
+    .grid-line {
         fill: none;
-        stroke: @alto;
-        stroke-width: 1px;
+        stroke: @silver;
         shape-rendering: crispEdges;
     }
+}
+
+.d3-tip.e {
+    margin-left: 10px;
+}
+
+.d3-tip.e:after {
+    transform: rotate(90deg);
+    top: 46%;
+    left: -52%;
 }
