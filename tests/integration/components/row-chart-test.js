@@ -87,7 +87,7 @@ test('it renders minimum and maximum value indicators', function (assert) {
 });
 
 test('it can hide x tick lines correctly', function (assert) {
-    this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  hideAxisLines=true instantRun=true}}`);
+    this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  hideXAxisLines=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
     later(this, (() => assert.equal(this.$('g.axis g.tick line.grid-line').length, 1)), 1000);
     return wait();
@@ -99,16 +99,16 @@ test('it can render y ticks correctly', function (assert) {
     return wait();
 });
 test('it can render y grid lines correctly', function (assert) {
-    this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYTickLines=true instantRun=true}}`);
+    this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYGridLines=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('path.yTickLine').length, 4)), 1000);
+    later(this, (() => assert.equal(this.$('path.yGridLine').length, 4)), 1000);
     return wait();
 });
 test('it can render both y ticks and y grid lines correctly', function (assert) {
-    this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYTickLines=true showYTicks=true instantRun=true}}`);
+    this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYGridLines=true showYTicks=true instantRun=true}}`);
 
     const runAssertions = () => {
-        assert.equal(this.$('path.yTickLine').length, 4);
+        assert.equal(this.$('path.yGridLine').length, 4);
         assert.equal(this.$('path.yTick').length, 4);
     };
 
