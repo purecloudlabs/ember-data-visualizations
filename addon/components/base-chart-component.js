@@ -2,7 +2,6 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import _ from 'lodash/lodash';
-import dc from 'dc';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -130,7 +129,7 @@ export default Component.extend({
         scheduleOnce('afterRender', this, this.setupResize);
 
         if (this.get('chart')) {
-            dc.redrawAll();
+            this.get('chart').redraw();
         }
     }
 });
