@@ -294,8 +294,8 @@ export default BaseChartComponent.extend({
         const chartBody = d3.select('.column-chart > svg > g');
         const line = this.get('comparisonLine');
 
-        d3.selectAll('.comparison-line').remove();
-        d3.selectAll('#comparison-text').remove();
+        this.get('chart').selectAll('.comparison-line').remove();
+        this.get('chart').selectAll('#comparison-text').remove();
 
         chartBody.append('svg:line')
             .attr('x1', 100)

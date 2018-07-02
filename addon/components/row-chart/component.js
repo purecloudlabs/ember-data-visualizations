@@ -19,9 +19,8 @@ export default BaseChartComponent.extend({
     showCurrentIndicator: false,
     maxMinSeries: null,
 
-    // Horizontal line to mark a target, average, or any kind of comparison value
+    // Vertical line to mark a target, average, or any kind of comparison value
     // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
-    // this is not currently implemented in this row chart but is here for potential future use
     comparisonLine: null,
 
     buildChart() {
@@ -81,6 +80,9 @@ export default BaseChartComponent.extend({
         if (this.get('showMaxMin')) {
             this.addMaxMinLabels(chart.selectAll('g.row > rect')[0]);
         }
+        if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
+            this.addComparisonLine();
+        }
         this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'g.row > rect');
     },
 
@@ -129,6 +131,47 @@ export default BaseChartComponent.extend({
                     .attr('transform', `translate(-0,${barHeight / 2})`);
             });
         }
+    },
+
+    addComparisonLine() {
+        const chartBody = d3.select('.row-chart > svg > g');
+        const line = this.get('comparisonLine');
+
+        this.get('chart').selectAll('.comparison-line').remove();
+        this.get('chart').selectAll('#comparison-text').remove();
+
+        chartBody.append('svg:line')
+            .attr('y1', 1)
+            .attr('y2', this.get('chart').height() - 41)
+            .attr('x1', this.get('chart').x()(line.value))
+            .attr('x2', this.get('chart').x()(line.value))
+            .attr('class', 'comparison-line')
+            .style('stroke', line.color || '#2CD02C');
+
+        chartBody.append('svg:line')
+            .attr('y1', 1)
+            .attr('y2', 1)
+            .attr('x1', this.get('chart').x()(line.value) + 5)
+            .attr('x2', this.get('chart').x()(line.value) - 5)
+            .attr('class', 'comparison-line')
+            .style('stroke', line.color || '#2CD02C');
+
+        chartBody.append('svg:line')
+            .attr('y1', this.get('chart').height() - 41)
+            .attr('y2', this.get('chart').height() - 41)
+            .attr('x1', this.get('chart').x()(line.value) + 5)
+            .attr('x2', this.get('chart').x()(line.value) - 5)
+            .attr('class', 'comparison-line')
+            .style('stroke', line.color || '#2CD02C');
+
+        chartBody.append('text')
+            .text(line.displayValue)
+            .attr('y', this.get('chart').height() - 25)
+            .attr('x', this.get('chart').x()(line.value))
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '12px')
+            .attr('id', 'comparison-text')
+            .attr('fill', line.textColor || '#000000');
     },
 
     addMaxMinLabels(bars) {
