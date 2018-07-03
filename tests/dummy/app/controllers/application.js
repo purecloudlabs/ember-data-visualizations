@@ -55,11 +55,13 @@ export default Ember.Controller.extend({
     dimensions: [],
     domainString: '',
     groups: [],
-    colors: [
+    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    statusColors: [
         '#7ADB37', // available
         '#FC0D1C', // busy
         '#FDBA43', // away
         '#2FCEF5'], // on queue
+    colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
         ticks: 5
@@ -71,6 +73,8 @@ export default Ember.Controller.extend({
     currentInterval: { start: moment('12/02/2016') },
 
     comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
+
+    queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
     series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
 

@@ -3,6 +3,8 @@ import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import moment from 'moment';
 import crossfilter from 'crossfilter';
+import wait from 'ember-test-helpers/wait';
+import { later } from '@ember/runloop';
 
 const getTestParameters = function () {
     const groupNames = ['fruits', 'citrus', 'oranges'];
@@ -61,6 +63,12 @@ const getTestParameters = function () {
 
         yAxis: {
             ticks: 3
+        },
+
+        comparisonLine: {
+            value: 15,
+            displayValue: '15',
+            color: '#2CD02C'
         }
     };
 };
@@ -96,4 +104,26 @@ test('it renders correct number of y axis ticks', function (assert) {
 test('it renders a point for each data point', function (assert) {
     this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.sub._0 .chart-body circle.dot').length, 3);
+});
+
+test('it shows a comparison line', function (assert) {
+    this.render(hbs`{{line-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    // delayed to let all dc rendering processes finish
+    later(this, (() => assert.equal(this.$('.comparison-line').length, 3)), 1000);
+    return wait();
+});
+
+test('it renders minimum and maximum value indicators', function (assert) {
+    this.render(hbs`{{line-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+
+    const runAssertions = () => {
+        assert.equal(this.$('.max-value-text').length, 1);
+        assert.equal(this.$('.max-value-indicator').length, 1);
+        assert.equal(this.$('.min-value-text').length, 1);
+        assert.equal(this.$('.min-value-indicator').length, 1);
+    };
+
+    // delayed to let all dc rendering processes finish
+    later(this, runAssertions, 1000);
+    return wait();
 });

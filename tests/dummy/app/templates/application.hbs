@@ -16,7 +16,6 @@
 {{column-chart
     dimension=dimensions
     group=groups
-    seriesData=content
     type='LAYERED'
     seriesMaxMin=2
     showMaxMin=true
@@ -35,54 +34,61 @@
     dimension=dimensions
     group=groups
     seriesData=content
-    type='LAYERED'
+    seriesMaxMin=2
+    showMaxMin=true
     series=series
     colors=colors
     height=200
     xAxis=xAxis
     yAxis=yAxis
-    showComparisonLine=true
-    comparisonLine=comparisonLine
+    onClick=(action onClick)
     currentInterval=currentInterval
     showCurrentIndicator=false
 }}
+
 
 {{input type='checkbox' checked=donutChart}}Donut<br/>
 {{input type='checkbox' checked=showTotal}}Total<br/>
 {{input type='checkbox' checked=labels}}Labels<br/>
 {{input type='checkbox' checked=externalLabels}}External labels<br/>
+{{input type='checkbox' checked=legend}}Show Legend<br/>
 {{pie-chart
     dimension=agentDimensions
     group=agentGroups
-    seriesData=agentContent
-    colors=colors
+    colors=statusColors
+    colorMap=colorMap
     height=400
     width=800
     showTotal=showTotal
     donutChart=donutChart
     externalLabels=externalLabels
     labels=labels
+    legend=legend
 }}
 
-{{input type='checkbox' checked=hideAxisLines}}Hide x tick lines<br/>
+{{input type='checkbox' checked=hideXAxisLines}}Hide x tick lines<br/>
 {{input type='checkbox' checked=showYTicks}}Show y ticks<br/>
-{{input type='checkbox' checked=showYTickLines}}Show y tick lines<br/>
+{{input type='checkbox' checked=showYGridLines}}Show y tick lines<br/>
 <button{{action "increaseQueue"}}>Increase</button>
 <button{{action "decreaseQueue"}}>Decrease</button>
+<div style='width: 40%'>
 {{row-chart
     dimension=queueDimensions
     group=queueGroups
     colors=colors
     height=400
-    width=600
     labelWidth=150
     xAxis=yAxis
     onClick=(action onClick)
-    hideAxisLines=hideAxisLines
+    hideXAxisLines=hideXAxisLines
     showYTicks=showYTicks
-    showYTickLines=showYTickLines
+    showYGridLines=showYGridLines
     showMaxMin=true
+    showComparisonLine=true
+    comparisonLine=queueComparisonLine
     chartNotAvailableBars=6
-}} --}}
+}}
+</div>
+--}}
 
 {{outlet}}

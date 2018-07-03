@@ -3,9 +3,5 @@ body {
 }
 
 body > .ember-view {
-    height: 100vh;
-}
-
- .line-chart {
-    fill: none;
+    height: 50%;
 }

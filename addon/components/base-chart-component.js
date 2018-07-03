@@ -2,7 +2,6 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import _ from 'lodash/lodash';
-import dc from 'dc';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -84,9 +83,8 @@ export default Component.extend({
             return;
         }
 
-        // NOTE: THIS BEING HERE IS ASSUMING ALL CHARTS WILL USE ALL OF THESE PROPERTIES. MAY NOT BE A VALID ASSUMPTION
-        // REQUIRED: group, dimension, xAxis.domain unless !isChartAvailable
-        if (!this.get('group') || /* !this.get('group.0.all') ||*/ !this.get('dimension')) {
+        // REQUIRED: group, dimension unless !isChartAvailable
+        if (!this.get('group') || !this.get('dimension')) {
             return false;
         }
 
@@ -143,7 +141,7 @@ export default Component.extend({
         scheduleOnce('afterRender', this, this.setupResize);
 
         if (this.get('chart')) {
-            dc.redrawAll();
+            this.get('chart').redraw();
         }
     }
 });
