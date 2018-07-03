@@ -128,11 +128,11 @@ The bubble chart is a dc-addons `bubbleCloud`, which is not as robustly supporte
 * `group`: crossfilter group to use for chart (not an array)
     * The `key` of each fact is a string that identifies the fact. It is also used as the title of the bubble, subject to the `titleFormatter` function (see optional parameters)
     * The `value` of each fact is an object with the following properties:
-        * `tooltip` (String): tooltips display the `key` property with a subtitle of whatever is contained in this property.
-        * `colorValue` (number): index of the `colors` array that this bubble is colored. e.g. if the `colors` array is `['#8b0000', '#ffff00', '#6495ed']`, a `banana` object might have a `colorValue` of `1`. See the dummy app for an example of color mapping.
+        * `tooltip` (String): tooltips display the `key` property with a subtitle of whatever is contained in this property. Optional.
+        * `colorValue` (number): index of the `colors` array that this bubble is colored. e.g. if the `colors` array is `['#8b0000', '#ffff00', '#6495ed']`, a `banana` object might have a `colorValue` of `1`. See the dummy app for an example of color mapping. Optional.
         * `radius` (String): Not necessarily a number value. This is the string value that will be transformed into a number based on `radiusFormat`. 
-            * e.g. if `radiusFormat = 'timestamp'`, `radius` should be a timestamp like `'2018-06-26T16:55:25-04:00'`.
-        * `subtitle` (String): Actual subtitle of bubble. This can be an empty string or omitted if only one label is desired.
+            * e.g. if `radiusFormat = 'timestamp'`, `radius` should be a timestamp like `'2018-06-26T16:55:25-04:00'`. Required.
+        * `subtitle` (String): Actual subtitle of bubble. Optional.
 
 
 #### Optional parameters

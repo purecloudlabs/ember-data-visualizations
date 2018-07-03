@@ -41,7 +41,6 @@ export default BaseChartComponent.extend({
             .radiusValueAccessor(d => this.getRadiusValue(d))
             // optional options
             .label(d => titleFormatter(d.key))
-            .valueAccessor(d => d.value.color)
             .colors(d3.scale.quantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => d.value.colorValue)
             .renderTitle(false);
