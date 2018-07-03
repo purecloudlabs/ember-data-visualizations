@@ -78,8 +78,9 @@ export default Ember.Controller.extend({
 
     series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
 
-    // format object tells the chart how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
-    // e.g. the 'title' property is 'entity' here, which tells the chart that the 'entity' property on the data objects should be used for the displayed title on each bubble
+    // format object tells the groups function how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
+    // e.g. the 'title' property is 'entity' here, which tells the grouping function that the 'entity' property on the data objects should be used for the displayed title on each bubble
+    // this isn't strictly necessary but it helps for parameterization of the group.
     _format: {
         title: 'entity', subtitle: 'milliseconds', radius: 'milliseconds', color: 'category'
     },
@@ -94,7 +95,7 @@ export default Ember.Controller.extend({
         return null;
     },
 
-    // this is the timestamp value format function. Takes a timestamp and returns a formatted display for the chart.
+    // timestamp format function. Takes a timestamp and returns a formatted display for the chart.
     timestampSubtitleFormatter(timestamp) {
         let duration = moment.duration(moment().diff(moment(timestamp)));
         let str = '';
@@ -115,10 +116,12 @@ export default Ember.Controller.extend({
         return str;
     },
 
+    // count format function
     countSubtitleFormatter(count) {
         return count.toString();
     },
 
+    // millisecond format function
     msSubtitleFormatter(ms) {
         let duration = moment.duration(ms);
         let str = '';
@@ -264,9 +267,10 @@ export default Ember.Controller.extend({
 
     _createStatusGroup() {
         const dimensions = this.get('statusDimension');
-        // const content = this.get('statusContent');
 
-        // generic color mapping code
+        // generic color mapping code: this is still here for potential future use
+
+        // const content = this.get('statusContent');
         // let colorsMap = {}, colorsArray = [], j = 0;
         // for (let i = 0; i < content.length; i++) {
         //     let color = content[i][this._format.color];

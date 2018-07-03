@@ -63,8 +63,7 @@ export default Component.extend({
 
         this.get('chart').selectAll(elementToApplyTip)
             .on('mouseover.tip', tip.show)
-            .on('mouseout.hideThisTip', tip.hide)
-            .on('mouseout.hideAllTips', this.get('chart').selectAll(elementToApplyTip).hide);
+            .on('mouseout.tip', tip.hide);
     },
 
     onClick() {},
