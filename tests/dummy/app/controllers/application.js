@@ -147,6 +147,15 @@ export default Ember.Controller.extend({
             self._createQueueGroups();
         });
 
+        d3.json('heatmapdata.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('heatContent', json);
+            self._createHeatDimensions();
+            self._createHeatGroups();
+        });
+
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
     },
 
@@ -177,5 +186,41 @@ export default Ember.Controller.extend({
         const dimensions = this.get('queueDimensions');
         const groupNames = ['interactions'];
         this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
+    },
+
+    _createHeatDimensions() {
+        let content = Ember.get(this, 'heatContent');
+
+        if (this._heatCrossfilter) {
+            this._heatCrossfilter.remove();
+            this._heatCrossfilter.add(content);
+        } else {
+            this._heatCrossfilter = crossfilter(content);
+        }
+
+        this.set('heatDimension', this._heatCrossfilter.dimension(d => [d.queue, d.date]));
+    },
+
+    _createHeatGroups() {
+        const dimensions = this.get('heatDimension');
+        const content = this.get('heatContent');
+        let colorsMap = {}, colorsArray = [], j = 0;
+        for (let i = 0; i < content.length; i++) {
+            let color = content[i].value;
+            if (colorsArray.indexOf(color) === -1) {
+                colorsArray.push(color);
+                colorsMap[color] = j;
+                j++;
+            }
+        }
+        this.set('heatGroup', dimensions.group().reduce(
+            (p, v) => {
+                p.value = v.value;
+                p.color = colorsMap[v.value];
+                return p;
+            },
+            () => { },
+            () => ({})
+        ));
     }
 });
