@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Lato:300,400,700');
-
 .d3-tip {
     background: @text-color;
     border-radius: 2px;
@@ -55,7 +53,11 @@
 }
 
 .d3-tip.n {
-    margin: -10px 0px 0px 0px;
+    margin-top: -10px;
+}
+
+.d3-tip.e {
+    margin-left: 10px;
 }
 
 /* Creates a small triangle extender for the tooltip */
@@ -71,4 +73,11 @@
     margin-top: -3px;
     top: 100%;
     left: 0;
+}
+
+/* rotates the triangle extender for eastward facing tooltips */
+.d3-tip.e:after {
+    transform: rotate(90deg);
+    top: 50%;
+    left: -52%;
 }
