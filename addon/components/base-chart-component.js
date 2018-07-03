@@ -18,7 +18,7 @@ export default Component.extend({
     resizeTimer: null,
     onResizeDebounced: null,
     isChartAvailable: true,
-    chartNotAvailableMessage: 'Chart not available for this view',
+    chartNotAvailableMessage: '',
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
     tooltipDateFormat: 'll LT',

@@ -81,10 +81,10 @@ export default Ember.Controller.extend({
     // format object tells the chart how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the chart that the 'entity' property on the data objects should be used for the displayed title on each bubble
     _format: {
-        title: 'entity', subtitle: 'value', radius: 'value', color: 'category'
+        title: 'entity', subtitle: 'milliseconds', radius: 'milliseconds', color: 'category'
     },
 
-    radiusFormat: 'timestamp',
+    radiusFormat: 'milliseconds',
 
     titleFormatter(agentName) {
         if (typeof agentName === 'string') {
@@ -95,8 +95,32 @@ export default Ember.Controller.extend({
     },
 
     // this is the timestamp value format function. Takes a timestamp and returns a formatted display for the chart.
-    subtitleFormatter(timestamp) {
+    timestampSubtitleFormatter(timestamp) {
         let duration = moment.duration(moment().diff(moment(timestamp)));
+        let str = '';
+        if (duration.days() !== 0) {
+            str = str.concat(`${duration.days()} `);
+            let qualifier = duration.days() === 1 ? 'day ' : 'days ';
+            str = str.concat(qualifier);
+        }
+        if (duration.hours() !== 0) {
+            str = str.concat(`${duration.hours()}h `);
+        }
+        if (duration.minutes() !== 0) {
+            str = str.concat(`${duration.minutes()}m `);
+        }
+        if (duration.seconds() !== 0) {
+            str = str.concat(`${duration.seconds()}s`);
+        }
+        return str;
+    },
+
+    countSubtitleFormatter(count) {
+        return count.toString();
+    },
+
+    msSubtitleFormatter(ms) {
+        let duration = moment.duration(ms);
         let str = '';
         if (duration.days() !== 0) {
             str = str.concat(`${duration.days()} `);

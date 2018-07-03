@@ -1,17 +1,6 @@
 {{domainString}}<br/>
 
-{{bubble-chart
-    dimension=statusDimension
-    group=statusGroup
-    radiusFormat=radiusFormat
-    width=1000
-    height=1000
-    titleFormatter=titleFormatter
-    subtitleFormatter=subtitleFormatter
-    colors=statusColors
-}}
-
-{{!-- <button{{action "increaseData"}}>Increase</button>
+<button{{action "increaseData"}}>Increase</button>
 <button{{action "decreaseData"}}>Decrease</button>
 
 {{column-chart
@@ -90,6 +79,17 @@
     chartNotAvailableBars=6
 }}
 </div>
---}}
+
+<div style='width: 40%'>
+{{bubble-chart
+    dimension=statusDimension
+    group=statusGroup
+    radiusFormat=radiusFormat
+    height=500
+    titleFormatter=titleFormatter
+    subtitleFormatter=msSubtitleFormatter
+    colors=statusColors
+}}
+</div>
 
 {{outlet}}

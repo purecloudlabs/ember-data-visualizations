@@ -1,10 +1,7 @@
-// import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
-// import { bubbleCloud } from 'dc-addons';
-// import $ from 'jquery';
 import moment from 'moment';
 /**
    @public
@@ -14,12 +11,6 @@ import moment from 'moment';
 */
 export default BaseChartComponent.extend({
     classNames: ['bubble-chart'],
-
-    showMaxMin: false,
-    showComparisonLine: false,
-    currentInterval: null,
-    showCurrentIndicator: false,
-    maxMinSeries: null,
 
     buildChart() {
         let bubbleChart = dc.bubbleCloud(`#${this.get('elementId')}`);
@@ -31,19 +22,20 @@ export default BaseChartComponent.extend({
         const titleFormatter = this.get('titleFormatter') || (value => value);
 
         bubbleChart
-            // required options
-            .width(this.get('width'))
             .height(this.get('height'))
             .dimension(this.get('dimension'))
             .group(this.get('group'))
             .x(d3.scale.ordinal())
-            .r(d3.scale.linear().domain([0, maxRadius * (this.get('group').size() / 5)]))
+            .r(d3.scale.linear().domain([0, maxRadius * (this.get('group').size() / 4)]))
             .radiusValueAccessor(d => this.getRadiusValue(d))
-            // optional options
             .label(d => titleFormatter(d.key))
             .colors(d3.scale.quantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => d.value.colorValue)
             .renderTitle(false);
+
+        if (this.get('width')) {
+            bubbleChart.width(this.get('width'));
+        }
 
         bubbleChart.on('renderlet', chart => this.onRenderlet(chart, this.createTooltip()));
 
@@ -146,8 +138,24 @@ export default BaseChartComponent.extend({
             // append text to chart
             svg.selectAll('text').remove();
             let bbox = svg.node().getBBox();
+            const textLength = chartNotAvailableMessage.length;
             svg
-                .append('text')
+                .append('rect')
+                .attr('y', bbox.y + (bbox.height / 2) - 30)
+                .attr('x', bbox.x + (bbox.width / 2) - textLength * 4)
+                .attr('stroke', chartNotAvailableColor)
+                .attr('height', '50px')
+                .attr('width', textLength * 8)
+                .attr('fill', '#fff');
+            svg
+                .append('rect')
+                .attr('y', bbox.y + (bbox.height / 2) - 30)
+                .attr('x', bbox.x + (bbox.width / 2) - textLength * 4)
+                .attr('stroke', chartNotAvailableColor)
+                .attr('height', '50px')
+                .attr('width', textLength * 8)
+                .attr('fill', 'url(#bubbleChartNotAvailableHatch');
+            svg.append('text')
                 .text(chartNotAvailableMessage)
                 .style('fill', chartNotAvailableTextColor)
                 .attr('class', 'chart-not-available')
