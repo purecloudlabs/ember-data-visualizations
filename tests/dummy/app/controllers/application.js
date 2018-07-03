@@ -80,19 +80,22 @@ export default Ember.Controller.extend({
 
     // format object tells the chart how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the chart that the 'entity' property on the data objects should be used for the displayed title on each bubble
-    format: {
-        valueFormat: 'timestamp', title: 'entity', subtitle: 'value', radius: 'value', color: 'category',
-        keyFormat: agentName => {
-            if (typeof agentName === 'string') {
-                let names = agentName.split(' ');
-                return `${names[0].charAt(0)}${names[1].charAt(0)}`;
-            }
-            return null;
+    _format: {
+        title: 'entity', subtitle: 'value', radius: 'value', color: 'category'
+    },
+
+    radiusFormat: 'timestamp',
+
+    titleFormatter(agentName) {
+        if (typeof agentName === 'string') {
+            let names = agentName.split(' ');
+            return `${names[0].charAt(0)}${names[1].charAt(0)}`;
         }
+        return null;
     },
 
     // this is the timestamp value format function. Takes a timestamp and returns a formatted display for the chart.
-    valueFormatter(timestamp) {
+    subtitleFormatter(timestamp) {
         let duration = moment.duration(moment().diff(moment(timestamp)));
         let str = '';
         if (duration.days() !== 0) {
@@ -186,8 +189,8 @@ export default Ember.Controller.extend({
                 return Ember.Logger.log(error);
             }
             self.set('statusContent', json);
-            self._createStatusDimensions();
-            self._createStatusGroups();
+            self._createStatusDimension();
+            self._createStatusGroup();
         });
 
         this.set('domainString', `${moment('10/31/2016').toISOString()} - ${moment('12/03/2016').toISOString()}`);
@@ -222,7 +225,7 @@ export default Ember.Controller.extend({
         this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
     },
 
-    _createStatusDimensions() {
+    _createStatusDimension() {
         let content = Ember.get(this, 'statusContent');
 
         if (this._StatusCrossfilter) {
@@ -232,17 +235,17 @@ export default Ember.Controller.extend({
             this._StatusCrossfilter = crossfilter(content);
         }
 
-        this.set('statusDimension', this._StatusCrossfilter.dimension(d => d[this.format.title]));
+        this.set('statusDimension', this._StatusCrossfilter.dimension(d => d[this._format.title]));
     },
 
-    _createStatusGroups() {
+    _createStatusGroup() {
         const dimensions = this.get('statusDimension');
         // const content = this.get('statusContent');
 
         // generic color mapping code
         // let colorsMap = {}, colorsArray = [], j = 0;
         // for (let i = 0; i < content.length; i++) {
-        //     let color = content[i][this.format.color];
+        //     let color = content[i][this._format.color];
         //     if (colorsArray.indexOf(color) === -1) {
         //         colorsArray.push(color);
         //         colorsMap[color] = j;
@@ -253,21 +256,17 @@ export default Ember.Controller.extend({
         // status color mapping code
         let colorsMap = { 'Available': 0, 'Busy': 1, 'Away': 2, 'On Queue': 3 };
 
-        let groups = [];
-        groups.push(dimensions.group().reduce(
+        let group = dimensions.group().reduce(
             (p, v) => {
-                p.radius = v[this.format.radius];
-                p.subtitle = v[this.format.subtitle];
-                p.color = v[this.format.color];
-                p.colorValue = colorsMap[v[this.format.color]];
-                p.keyFormat = this.format.keyFormat;
+                p.radius = v[this._format.radius];
+                p.subtitle = v[this._format.subtitle];
+                p.tooltip = v[this._format.color];
+                p.colorValue = colorsMap[v[this._format.color]];
                 return p;
             },
             () => { },
             () => ({})
-        )
         );
-        // this.set('format', this.format);
-        this.set('statusGroups', groups);
+        this.set('statusGroup', group);
     }
 });

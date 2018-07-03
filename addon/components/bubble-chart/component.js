@@ -25,20 +25,22 @@ export default BaseChartComponent.extend({
         let bubbleChart = dc.bubbleCloud(`#${this.get('elementId')}`);
 
         let radii = [];
-        this.get('group')[0].all().forEach(d => radii.push(this.getRadiusValue(d)));
+        this.get('group').all().forEach(d => radii.push(this.getRadiusValue(d)));
         let maxRadius = Math.max(...radii);
+
+        const titleFormatter = this.get('titleFormatter') || (value => value);
 
         bubbleChart
             // required options
             .width(this.get('width'))
             .height(this.get('height'))
             .dimension(this.get('dimension'))
-            .group(this.get('group')[0])
+            .group(this.get('group'))
             .x(d3.scale.ordinal())
-            .r(d3.scale.linear().domain([0, maxRadius * (this.get('group')[0].size() / 5)]))
+            .r(d3.scale.linear().domain([0, maxRadius * (this.get('group').size() / 5)]))
             .radiusValueAccessor(d => this.getRadiusValue(d))
             // optional options
-            .label(d => d.value.keyFormat(d.key))
+            .label(d => titleFormatter(d.key))
             .valueAccessor(d => d.value.color)
             .colors(d3.scale.quantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => d.value.colorValue)
@@ -50,26 +52,29 @@ export default BaseChartComponent.extend({
     },
 
     getRadiusValue(d) {
-        switch (this.get('format.valueFormat')) {
+        switch (this.get('radiusFormat')) {
         case 'timestamp':
             return moment.duration(moment().diff(moment(d.value.radius))).asMilliseconds();
         case 'milliseconds':
-            return d.value.radius;
+            return parseInt(d.value.radius);
         case 'count':
-            return d.value.radius;
+            return parseInt(d.value.radius);
         default:
-            return d.value.radius;
+            return parseInt(d.value.radius);
         }
     },
 
     onRenderlet(chart, tip) {
         // add subtitle
-        if (chart.selectAll('.node > text.title').empty()) {
-            chart.selectAll('.node > text').attr('class', 'title').attr('dy', null);
-            chart.selectAll('.node').append('text')
-                .text(d => this.get('valueFormatter')(d.value.subtitle))
-                .attr('class', 'subtitle')
-                .attr('dy', '1em');
+        if (this.get('group').all()[0].value.subtitle) {
+            const subtitleFormatter = this.get('subtitleFormatter') || (value => value);
+            if (chart.selectAll('.node > text.title').empty()) {
+                chart.selectAll('.node > text').attr('class', 'title').attr('dy', null);
+                chart.selectAll('.node').append('text')
+                    .text(d => subtitleFormatter(d.value.subtitle))
+                    .attr('class', 'subtitle')
+                    .attr('dy', '1em');
+            }
         }
 
         this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'circle.bubble');
@@ -78,7 +83,7 @@ export default BaseChartComponent.extend({
     createTooltip() {
         return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
             .style('text-align', 'center')
-            .html(d => `<span class="tooltip-value">${d.key}</span><br/><span class="tooltip-label">${d.value.color}</span>`);
+            .html(d => `<span class="tooltip-value">${d.key}</span><br/><span class="tooltip-label">${d.value.tooltip}</span>`);
     },
 
     showChartNotAvailable() {
@@ -96,7 +101,6 @@ export default BaseChartComponent.extend({
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d.label);
         const group = dimension.group().reduceCount();
-        dc.disableTransitions = true;
 
         bubbleChart
             .width(this.get('width'))
@@ -110,8 +114,6 @@ export default BaseChartComponent.extend({
             .label(() => '')
             .colors(chartNotAvailableColor)
             .transitionDuration(0);
-
-        // bubbleChart.on('pretransition')
 
         bubbleChart.on('renderlet', () => {
             // This is outside the Ember run loop so check if component is destroyed
@@ -137,7 +139,10 @@ export default BaseChartComponent.extend({
                 .attr('fill', chartNotAvailableColor);
 
             // apply hatching pattern to chart
-            svg.selectAll('.bubble').attr('fill', 'url(#bubbleChartNotAvailableHatch');
+            svg.append('rect')
+                .attr('width', 1000)
+                .attr('height', 1000)
+                .attr('fill', 'url(#bubbleChartNotAvailableHatch');
 
             // append text to chart
             svg.selectAll('text').remove();
