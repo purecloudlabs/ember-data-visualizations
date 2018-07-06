@@ -52,10 +52,24 @@ export default Ember.Controller.extend({
         }
     },
 
+    minBoxWidth: 4,
+    title: 'Service Level % Trend',
+    colors: ['#084081',
+        // '#0868AC',
+        // '#2B8CBE',
+        // '#4EB3D3',
+        '#80CDC1',
+        // '#C7EAE5',
+        '#F6E8C3',
+        // '#DFC27D',
+        '#BF812D',
+        // '#8C510A',
+        // '#543005',
+        '#38200D'],
     dimensions: [],
     domainString: '',
     groups: [],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    // colors: ['#B9B9B9', '#A0C0CF', '#105470'],
     statusColors: [
         '#7ADB37', // available
         '#FC0D1C', // busy
@@ -64,10 +78,13 @@ export default Ember.Controller.extend({
     colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
-        ticks: 5
+        ticks: 3,
+        tickMarks: 3,
+        label: 'Time (Interval)'
     },
     yAxis: {
-        ticks: 3
+        ticks: 3,
+        label: 'Queues'
     },
 
     currentInterval: { start: moment('12/02/2016') },
@@ -213,10 +230,10 @@ export default Ember.Controller.extend({
                 j++;
             }
         }
+        this.set('colorMap', colorsArray);
         this.set('heatGroup', dimensions.group().reduce(
             (p, v) => {
                 p.value = v.value;
-                p.color = colorsMap[v.value];
                 return p;
             },
             () => { },

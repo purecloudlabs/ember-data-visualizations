@@ -1,14 +1,22 @@
 {{domainString}}<br/>
 
+<div style="width: 50%">
 {{heat-map
     dimension=heatDimension
     group=heatGroup
-    height=200
+    height=400
+    legend=true
+    legendWidth=200
     colors=colors
+    colorMap=colorMap
     xAxis=xAxis
+    yAxis=yAxis
+    minBoxWidth=minBoxWidth
+    title=title
     currentInterval=currentInterval
     showCurrentIndicator=true
 }}
+</div>
 
 <button{{action "increaseData"}}>Increase</button>
 <button{{action "decreaseData"}}>Decrease</button>
