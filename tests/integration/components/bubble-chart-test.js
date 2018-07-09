@@ -6,11 +6,12 @@ import wait from 'ember-test-helpers/wait';
 import { later } from '@ember/runloop';
 
 const getTestParameters = function () {
-    const rawData
-    = [{ 'fruit': 'blueberries', 'radius': 40, 'description': 'delicious' },
+    const rawData = [
+        { 'fruit': 'blueberries', 'radius': 40, 'description': 'delicious' },
         { 'fruit': 'oranges', 'radius': 30, 'description': 'ew' },
         { 'fruit': 'apples', 'radius': 10, 'description': 'tasty' },
-        { 'fruit': 'strawberries', 'radius': 50, 'description': 'no good' }];
+        { 'fruit': 'strawberries', 'radius': 50, 'description': 'no good' }
+    ];
 
     const crossfilterData = crossfilter(rawData);
     const dimension = crossfilterData.dimension(d => d.fruit);

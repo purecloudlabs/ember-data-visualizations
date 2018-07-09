@@ -43,16 +43,10 @@ export default BaseChartComponent.extend({
     },
 
     getRadiusValue(d) {
-        switch (this.get('radiusFormat')) {
-        case 'timestamp':
+        if (this.get('radiusFormat') === 'timestamp') {
             return moment.duration(moment().diff(moment(d.value.radius))).asMilliseconds();
-        case 'milliseconds':
-            return parseInt(d.value.radius);
-        case 'count':
-            return parseInt(d.value.radius);
-        default:
-            return parseInt(d.value.radius);
         }
+        return parseInt(d.value.radius);
     },
 
     onRenderlet(chart, tip) {

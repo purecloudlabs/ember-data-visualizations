@@ -268,19 +268,6 @@ export default Ember.Controller.extend({
     _createStatusGroup() {
         const dimensions = this.get('statusDimension');
 
-        // generic color mapping code: this is still here for potential future use
-
-        // const content = this.get('statusContent');
-        // let colorsMap = {}, colorsArray = [], j = 0;
-        // for (let i = 0; i < content.length; i++) {
-        //     let color = content[i][this._format.color];
-        //     if (colorsArray.indexOf(color) === -1) {
-        //         colorsArray.push(color);
-        //         colorsMap[color] = j;
-        //         j++;
-        //     }
-        // }
-
         // status color mapping code
         let colorsMap = { 'Available': 0, 'Busy': 1, 'Away': 2, 'On Queue': 3 };
 
