@@ -84,13 +84,14 @@ export default BaseChartComponent.extend({
 
         heatMap
             .on('pretransition', chart => this.onPretransition(chart, labelWidth, numbRows, numbCols))
-            .on('renderlet', () => this.onRenderlet(tip));
+            .on('renderlet', chart => this.onRenderlet(tip, chart));
 
         this.set('chart', heatMap);
     },
 
     createTooltip() {
-        return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
+        return d3.tip().attr('class', 'd3-tip')
+            .attr('id', this.get('elementId'))
             .style('text-align', 'center')
             .html(d => `<span class='row-tip-key'>${d.key[0]}</span><br/><span class='row-tip-value'>${d.value.value}</span>`);
     },
@@ -103,39 +104,12 @@ export default BaseChartComponent.extend({
 
         this.addXAxis(chart, labelWidth, numbCols);
         this.addYAxis(chart, numbRows);
-        this.addLegend(chart);
-    },
 
-    addLegend(chart) {
-        // const width = this.get('legendWidth') || 150;
-        console.log(this.get('colorMap'));
         const legendDimension = 18;
-        const numberRectangles = Object.keys(this.get('colorMap')).length;
         let legendG = chart.select('g')
             .append('g')
-            .attr('class', 'legend')
             .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
-        for (let i = 0; i < numberRectangles; i++) {
-            legendG.append('rect')
-                .attr('y', (i + 1) * 22)
-                .attr('height', legendDimension)
-                .attr('width', legendDimension)
-                .attr('fill', this.get('colors')[i])
-                .on('click', () => {
-                    let match = chart.selectAll('.heat-box').filter(d => d.value.value == this.get('colorMap')[i]);
-                    let matchLegend = chart.selectAll('.legend > rect').filter(d => {console.log(this); d.value.value == this.get('colorMap')[i]});
-                    match.classed('selected', !match.classed('selected'));
-                    // matchLegend.classed('')
-
-                    let noMatch = chart.selectAll('.heat-box').filter(d => d.value.value !== this.get('colorMap')[i]);
-                    let noMatchLegend = chart.selectAll('.legend > rect').filter(d => d.value.value !== this.get('colorMap')[i]);
-                    noMatch.classed('hidden', !noMatch.classed('hidden'));
-                });
-            legendG.append('text')
-                .attr('x', legendDimension + 2)
-                .attr('y', (i + 1) * 22 + (legendDimension * 0.75))
-                .text(this.get('colorMap')[i]);
-        }
+        this.addLegend(chart, '.heat-box', legendG, legendDimension);
     },
 
     isIntervalIncluded(ticks, interval) {
@@ -273,7 +247,7 @@ export default BaseChartComponent.extend({
             .attr('transform', `translate(${-1 * (chart.margins().left - 5)},0)`);
     },
 
-    onRenderlet(tip) {
+    onRenderlet(tip, chart) {
         this.addClickHandlersAndTooltips(this.get('chart').select('svg'), tip, 'rect.heat-box');
     }
 });

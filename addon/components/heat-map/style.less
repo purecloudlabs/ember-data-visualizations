@@ -5,11 +5,20 @@
     }
 
     .hidden {
-        display: none;
+        opacity: 0;
     }
+
+    .deselected {
+        opacity: .5;
+        stroke-width: 0px;
+    }
+
     .selected {
-        display: inline;
+        opacity: 1;
+        stroke: black;
+        stroke-width: 1px;
     }
+
     .legend {
         rect {
             stroke-width: 1.5px;
