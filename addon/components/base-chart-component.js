@@ -19,7 +19,7 @@ export default Component.extend({
     resizeTimer: null,
     onResizeDebounced: null,
     isChartAvailable: true,
-    chartNotAvailableMessage: '',
+    chartNotAvailableMessage: 'Chart is not available for this view',
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
     tooltipDateFormat: 'll LT',
@@ -72,36 +72,38 @@ export default Component.extend({
         const colors = this.get('colors');
 
         legendG.attr('class', 'legend');
-        legendG.selectAll('rect')
-            .data(colors)
-            .enter().append('rect')
+        let legendGs = legendG.selectAll('g')
+            .data(colorMap)
+            .enter().append('g')
+            .attr('class', 'legendItem');
+        legendGs.append('rect')
+            .attr('class', 'legendRect')
             .attr('y', (d, i) => (i + 1) * 22)
             .attr('height', legendDimension)
             .attr('width', legendDimension)
-            .attr('fill', d => d)
+            .attr('fill', (d, i) => colors[i])
             .on('click', legendClickHandler);
-        legendG.selectAll('text')
-            .data(colors)
-            .enter().append('text')
-            .attr('x', legendDimension + 2)
+        legendGs.append('text')
+            .attr('unselectable', 'on')
+            .attr('x', legendDimension + 6)
             .attr('y', (d, i) => (i + 1) * 22 + (legendDimension * 0.75))
-            .text((d, i) => colorMap[i]);
+            .text(d => d);
 
         function legendClickHandler() {
-            const allLegendRects = chart.selectAll('.legend > rect');
+            const allLegendRects = chart.selectAll('rect.legendRect');
             const allChartElements = chart.selectAll(chartElement);
 
             const all = allLegendRects;
             const clicked = d3.select(this);
-            const allOthers = allLegendRects.filter(d => d !== clicked.attr('fill'));
+            const allOthers = allLegendRects.filter(d => colors[colorMap.indexOf(d)] !== clicked.attr('fill'));
             all[0].push(...allChartElements[0]);
-            allOthers[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value.value)] !== clicked.attr('fill'))[0]);
-            clicked[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value.value)] == clicked.attr('fill'))[0]);
+            allOthers[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value)] !== clicked.attr('fill'))[0]);
+            clicked[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value)] == clicked.attr('fill'))[0]);
 
             // determine if any other groups are selected
             let isAnyLegendRectSelected = false;
             allOthers.each(function () {
-                if (d3.select(this).attr('class') === 'selected') {
+                if (d3.select(this).classed('selected')) {
                     isAnyLegendRectSelected = true;
                 }
             });
@@ -118,21 +120,17 @@ export default Component.extend({
             }
 
             // class the groups based on what is currently selected and what was clicked
-            switch (clicked.attr('class')) {
-            case 'deselected':
-                toggleSelection(clicked);
-                break;
-            case 'selected':
+            if (clicked.classed('selected')) {
                 if (isAnyLegendRectSelected) {
                     toggleSelection(clicked);
                 } else {
                     returnToNeutral(all);
                 }
-                break;
-            default:
+            } else if (clicked.classed('deselected')) {
+                toggleSelection(clicked);
+            } else {
                 clicked.classed('selected', true);
                 allOthers.classed('deselected', true);
-                break;
             }
         }
     },
