@@ -92,19 +92,21 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3.tip().attr('class', `d3-tip #${this.get('elementId')}`).html(d => {
-            if (!_.isEmpty(titles)) {
-                let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
-                titles.forEach((title, i) => {
-                    const datum = formatter(this.get('data')[d.data.key][i]);
-                    const secondaryClass = d.y === datum ? 'primary-stat' : '';
-                    str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
-                });
-                return str;
-            }
+        let tip = d3.tip().attr('class', 'd3-tip')
+            .attr('id', this.get('elementId'))
+            .html(d => {
+                if (!_.isEmpty(titles)) {
+                    let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
+                    titles.forEach((title, i) => {
+                        const datum = formatter(this.get('data')[d.data.key][i]);
+                        const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                    });
+                    return str;
+                }
 
-            return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${d.data.value}</span>`;
-        });
+                return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${d.data.value}</span>`;
+            });
 
         return tip;
     },
