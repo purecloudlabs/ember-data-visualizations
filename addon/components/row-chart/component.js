@@ -68,8 +68,9 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
+        return d3.tip().attr('class', 'd3-tip')
             .style('text-align', 'center')
+            .attr('id', this.get('elementId'))
             .html(d => `<span class="row-tip-key">${d.key}</span><br/><span class="row-tip-value">${d.value}</span>`)
             .direction('e');
     },
