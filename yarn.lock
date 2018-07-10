@@ -2401,14 +2401,14 @@ dc-addons@^0.13.5:
 
 dc@^2.1.8:
   version "2.2.0"
-  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/dc/-/dc-2.2.0.tgz?dl=https://registry.yarnpkg.com/dc/-/dc-2.2.0.tgz#93b8ee05ad411ac44d747e9fb94ef2686bb0bcbd"
+  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/dc/-/dc-2.2.0.tgz#93b8ee05ad411ac44d747e9fb94ef2686bb0bcbd"
   dependencies:
     crossfilter2 "~1.4"
     d3 "^3"
 
 "dc@https://github.com/dc-js/dc.js/tarball/master":
-  version "3.0.4"
-  resolved "https://github.com/dc-js/dc.js/tarball/master#90693eacd4a22d50be10e7eecdf99bcd4f15e8b6"
+  version "3.0.5"
+  resolved "https://github.com/dc-js/dc.js/tarball/master#278f363fb557c98cb3e595bb36b8235039901465"
   dependencies:
     crossfilter2 "^1.4.5"
     d3 "^5.4.0"
