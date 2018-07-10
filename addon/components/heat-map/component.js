@@ -241,7 +241,7 @@ export default BaseChartComponent.extend({
                 .attr('class', yAxisLabelClass)
                 .attr('dx', parseInt(axisY.select('text').attr('dx')));
         }
-        if (this.get('yAxis').label && axisYLab.text() !== this.get('yAxisLabel')) {
+        if (this.get('yAxis').label && axisYLab.text() !== this.get('yAxis').label) {
             axisYLab.text(this.get('yAxis').label);
         }
 
