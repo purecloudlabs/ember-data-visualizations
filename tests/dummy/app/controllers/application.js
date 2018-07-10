@@ -54,7 +54,8 @@ export default Ember.Controller.extend({
 
     minBoxWidth: 4,
     keyFormat: key => moment(key.toString()).format('MMM DD'),
-    colors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
+    heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
     dimensions: [],
     domainString: '',
     groups: [],
