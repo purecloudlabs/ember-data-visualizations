@@ -106,12 +106,14 @@ export default BaseChartComponent.extend({
         this.addYAxis(chart, numbRows);
 
         // add legend
-        chart.select('g.legend').remove();
-        const legendDimension = 18;
-        let legendG = chart.select('g')
-            .append('g')
-            .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
-        this.addLegend(chart, '.heat-box', legendG, legendDimension);
+        if (this.get('legend')) {
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
+            this.addLegend(chart, '.heat-box', legendG, legendDimension);
+        }
     },
 
     isIntervalIncluded(ticks, interval) {
@@ -161,12 +163,12 @@ export default BaseChartComponent.extend({
 
         // hide ticks and labels that aren't necessary
         axisX.selectAll('text.tickLabel')
-            .filter(d => ticksLabels.map(Number).indexOf(+moment(d.toString()).toDate()) === -1)
+            .filter(d => ticksLabels.map(dd => this.get('keyFormat')(dd)).indexOf(this.get('keyFormat')(d)) === -1)
             .classed('hidden', true);
         axisXG.selectAll('line.tickMark')
             .filter((d, i) =>
-                ticks.map(Number).indexOf(+moment(textValues[i].toString()).toDate()) === -1
-                && ticksLabels.map(Number).indexOf(+moment(textValues[i].toString()).toDate()) === -1)
+                ticks.map(dd => this.get('keyFormat')(dd)).indexOf(this.get('keyFormat')(textValues[i])) === -1
+                && ticksLabels.map(Number).indexOf(this.get('keyFormat')(textValues[i])) === -1)
             .classed('hidden', true);
 
         // add current period indicator
