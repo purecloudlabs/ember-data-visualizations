@@ -17,7 +17,7 @@ export default Component.extend({
     instantRun: false,
     resizeTimer: null,
     onResizeDebounced: null,
-    isChartAvailable: false,
+    isChartAvailable: true,
     chartNotAvailableMessage: 'Chart not available for this view',
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
