@@ -52,7 +52,7 @@ export default BaseChartComponent.extend({
             })
             .keyAccessor(d => d.key[1])
             .valueAccessor(d => d.key[0])
-            .colors(d3.scale.quantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
+            .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => colorMap.indexOf(d.value))
             .renderTitle(false)
             .height(this.get('height'))
@@ -147,11 +147,11 @@ export default BaseChartComponent.extend({
         let numberOfTickLabels = (this.get('xAxis').ticks || this.get('group').size()) + 1;
         let ticksLabels;
         do {
-            ticksLabels = d3.time.scale().domain(this.get('xAxis').domain).ticks(numberOfTickLabels);
+            ticksLabels = d3.scaleTime().domain(this.get('xAxis').domain).ticks(numberOfTickLabels);
             numberOfTickLabels--;
         } while (ticksLabels.length * Math.max(...textLengths) * 11 > chart.effectiveWidth());
 
-        const ticks = d3.time.scale().domain(this.get('xAxis').domain).ticks(this.get('xAxis').tickMarks);
+        const ticks = d3.scaleTime().domain(this.get('xAxis').domain).ticks(this.get('xAxis').tickMarks);
         for (let i = 0; i <= numbCols - 1; i++) {
             axisXG.append('line')
                 .attr('class', 'tickMark')
@@ -277,7 +277,7 @@ export default BaseChartComponent.extend({
 
         const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
         const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
-        let data = cartesian(d3.time.scale().domain(xAxis.domain).ticks(ticks), [1, 2, 3, 4, 5, 6]);
+        let data = cartesian(d3.scaleTime().domain(xAxis.domain).ticks(ticks), [1, 2, 3, 4, 5, 6]);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => [d[1], d[0]]);
         const group = dimension.group().reduceCount(g => g);
