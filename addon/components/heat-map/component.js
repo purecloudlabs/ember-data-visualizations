@@ -190,19 +190,21 @@ export default BaseChartComponent.extend({
         }
 
         // add x axis label
-        const xAxisLabelClass = 'xLabel';
+        if (this.get('isChartAvailable')) {
+            const xAxisLabelClass = 'xLabel';
 
-        let axisXLab = axisX.selectAll(`text.${xAxisLabelClass}`);
-        if (axisXLab.empty() && this.get('xAxis').label) {
-            axisXLab = axisX.append('text')
-                .attr('class', xAxisLabelClass)
-                .attr('y', parseInt(axisX.select('text').attr('y')) + parseInt(axisX.select('text').attr('dy')))
-                .attr('dy', '2.5em')
-                .attr('x', chart.width() / 2 - labelWidth)
-                .attr('text-anchor', 'middle');
-        }
-        if (this.get('xAxis').label && axisXLab.text() !== this.get('xAxisLabel')) {
-            axisXLab.text(this.get('xAxis').label);
+            let axisXLab = axisX.selectAll(`text.${xAxisLabelClass}`);
+            if (axisXLab.empty() && this.get('xAxis').label) {
+                axisXLab = axisX.append('text')
+                    .attr('class', xAxisLabelClass)
+                    .attr('y', parseInt(axisX.select('text').attr('y')) + parseInt(axisX.select('text').attr('dy')))
+                    .attr('dy', '2.5em')
+                    .attr('x', chart.width() / 2 - labelWidth)
+                    .attr('text-anchor', 'middle');
+            }
+            if (this.get('xAxis').label && axisXLab.text() !== this.get('xAxisLabel')) {
+                axisXLab.text(this.get('xAxis').label);
+            }
         }
     },
 
@@ -233,16 +235,18 @@ export default BaseChartComponent.extend({
         }
 
         // add y axis label
-        const yAxisLabelClass = 'yLabel';
+        if (this.get('isChartAvailable')) {
+            const yAxisLabelClass = 'yLabel';
 
-        let axisYLab = axisY.selectAll(`text.${yAxisLabelClass}`);
-        if (axisYLab.empty() && this.get('yAxis').label) {
-            axisYLab = axisY.append('text')
-                .attr('class', yAxisLabelClass)
-                .attr('dx', parseInt(axisY.select('text').attr('dx')));
-        }
-        if (this.get('yAxis').label && axisYLab.text() !== this.get('yAxis').label) {
-            axisYLab.text(this.get('yAxis').label);
+            let axisYLab = axisY.selectAll(`text.${yAxisLabelClass}`);
+            if (axisYLab.empty() && this.get('yAxis').label) {
+                axisYLab = axisY.append('text')
+                    .attr('class', yAxisLabelClass)
+                    .attr('dx', parseInt(axisY.select('text').attr('dx')));
+            }
+            if (this.get('yAxis').label && axisYLab.text() !== this.get('yAxis').label) {
+                axisYLab.text(this.get('yAxis').label);
+            }
         }
 
         axisY.selectAll('text')
