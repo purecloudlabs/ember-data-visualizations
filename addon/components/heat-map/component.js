@@ -65,6 +65,7 @@ export default BaseChartComponent.extend({
 
         const minBoxWidth = this.get('minBoxWidth') || 4;
         const minEffectiveWidth = minBoxWidth * numbCols;
+        heatMap.minWidth(minEffectiveWidth + heatMap.margins().right + heatMap.margins().left);
         const shortenLabels = minEffectiveWidth > heatMap.effectiveWidth();
         // if there isn't enough room for each box to be minBoxWidth wide with full labels, truncate labels until there is
         heatMap.rowsLabel(d =>
