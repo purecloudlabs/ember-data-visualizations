@@ -1,5 +1,23 @@
 {{domainString}}<br/>
 
+<div style="width: 50%">
+{{heat-map
+    dimension=heatDimension
+    group=heatGroup
+    height=400
+    legend=true
+    legendWidth=200
+    keyFormat=keyFormat
+    colors=heatColors
+    colorMap=colorMap
+    xAxis=xAxis
+    yAxis=yAxis
+    minBoxWidth=minBoxWidth
+    currentInterval=currentInterval
+    showCurrentIndicator=true
+}}
+</div>
+
 <button{{action "increaseData"}}>Increase</button>
 <button{{action "decreaseData"}}>Decrease</button>
 
@@ -31,6 +49,8 @@
     height=200
     xAxis=xAxis
     yAxis=yAxis
+    showComparisonLine=true
+    comparisonLine=comparisonLine
     onClick=(action onClick)
     currentInterval=currentInterval
     showCurrentIndicator=false
@@ -77,6 +97,18 @@
     showComparisonLine=true
     comparisonLine=queueComparisonLine
     chartNotAvailableBars=6
+}}
+</div>
+
+<div style='width: 40%'>
+{{bubble-chart
+    dimension=statusDimension
+    group=statusGroup
+    radiusFormat=radiusFormat
+    height=500
+    titleFormatter=titleFormatter
+    subtitleFormatter=msSubtitleFormatter
+    colors=statusColors
 }}
 </div>
 

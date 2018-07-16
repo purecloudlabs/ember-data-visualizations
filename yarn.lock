@@ -2407,8 +2407,8 @@ dc@^2.1.8:
     d3 "^3"
 
 "dc@https://github.com/dc-js/dc.js/tarball/master":
-  version "3.0.5"
-  resolved "https://github.com/dc-js/dc.js/tarball/master#278f363fb557c98cb3e595bb36b8235039901465"
+  version "3.0.6"
+  resolved "https://github.com/dc-js/dc.js/tarball/master#e01dd1541368066ee4f2feb13f6b4b150992c59f"
   dependencies:
     crossfilter2 "^1.4.5"
     d3 "^5.4.0"

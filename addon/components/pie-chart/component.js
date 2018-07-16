@@ -34,7 +34,7 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('colorMap')) {
-            chart.colors(d3.scale.ordinal().domain(this.get('colorMap')).range(this.get('colors')));
+            chart.colors(d3.scaleOrdinal().domain(this.get('colorMap')).range(this.get('colors')));
         }
 
         if (this.get('externalLabels')) {
@@ -65,7 +65,7 @@ export default BaseChartComponent.extend({
             chart.select('g.pie-slice-group')
                 .append('text')
                 .attr('class', 'totalText')
-                .attr({ 'text-anchor': 'middle' })
+                .style('text-anchor', 'middle')
                 .text(this.get('data').total);
         }
         this.addClickHandlersAndTooltips(chart.select('svg'), tip);

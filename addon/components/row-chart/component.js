@@ -26,6 +26,11 @@ export default BaseChartComponent.extend({
     buildChart() {
         let rowChart = dc.rowChart(`#${this.get('elementId')}`);
 
+        let labels = [];
+        this.get('group')[0].all().forEach(d => labels.push(d.key));
+        const labelWidth = Math.max(...(labels.map(el => el.length))) * 8;
+        const tickWidth = 15;
+
         rowChart
             .transitionDuration(0)
             .elasticX(true)
@@ -35,35 +40,35 @@ export default BaseChartComponent.extend({
             .colors(this.get('colors')[2])
             .height(this.get('height'))
             .renderLabel(false)
-            .renderTitle(false);
+            .renderTitle(false)
+            .margins({
+                top: 5,
+                right: 50,
+                bottom: 20,
+                left: labelWidth + tickWidth
+            });
 
         if (this.get('width')) {
             rowChart.width(this.get('width'));
         }
-
-        const labelWidth = this.get('labelWidth') || 150;
-        const totalWidth = rowChart.width();
-        const chartWidth = totalWidth - labelWidth;
-        rowChart.width(chartWidth);
 
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             rowChart.xAxis().ticks(this.get('xAxis').ticks);
         }
 
         rowChart.on('pretransition', chart => {
-            // move svg over to make room for labels
-            chart.select('svg').attr('width', totalWidth);
-            chart.select('svg > g').attr('transform', `translate(${labelWidth},0)`).attr('width', totalWidth);
-
+            // add x class to x axis
+            chart.select('.axis').attr('class', 'axis x');
             // hide x axis grid lines
             if (this.get('hideXAxisLines')) {
                 chart.select('svg').selectAll('g.tick > line.grid-line').filter(d => d !== 0.0).remove();
             }
+            this.addYAxis(chart, tickWidth);
         });
 
         const tip = this.createTooltip();
 
-        rowChart.on('renderlet', chart => this.onRenderlet(chart, tip));
+        rowChart.on('renderlet', chart => this.onRenderlet(chart, tip, tickWidth));
         this.set('chart', rowChart);
     },
 
@@ -76,99 +81,104 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(chart, tip) {
-        this.addYAxis(chart);
+
         $(`#${this.get('elementId')} #inline-labels`).remove();
         if (this.get('showMaxMin')) {
-            this.addMaxMinLabels(chart.selectAll('g.row > rect')[0]);
+            this.addMaxMinLabels(chart.selectAll('g.row > rect')._groups[0]);
         }
         if (this.get('showComparisonLine') && this.get('comparisonLine')) {
-            this.addComparisonLine();
+            this.addComparisonLine(chart);
         }
+
         this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'g.row > rect');
     },
 
-    addYAxis(chart) {
+    addYAxis(chart, tickWidth) {
+        let yAxisG = chart.select('svg > g').append('g').attr('class', 'axis y');
+
+        let labels = [];
+        this.get('group')[0].all().forEach(d => labels.push(d.key));
+        const barHeight = chart.select('svg g.row > rect').attr('height');
+        const getYValue = i => barHeight * (i + .5) + ((i + 1) * chart.gap());
+
         // add labels to corresponding bar groups and move them appropriately
-        let barHeight = chart.select('svg g.row > rect').attr('height');
-        if (chart.selectAll('svg g.row > g.tick').empty()) {
-            chart.selectAll('svg g.row')
-                .append('g').attr('class', 'tick')
-                .append('text')
-                .text(d => d.key)
-                .attr('y', barHeight / 2)
+        if (yAxisG.selectAll('g.tick').empty()) {
+            // create tick groups
+            let tickGs = yAxisG.selectAll('g')
+                .data(labels)
+                .enter()
+                .append('g')
+                .attr('class', 'tick');
+
+            // add labels to tick groups
+            tickGs.append('text')
+                .text(d => d)
+                .attr('y', (d, i) => getYValue(i))
                 .attr('dy', '.35em')
                 .attr('x', function () {
-                    return -1 * d3.select(this)[0][0].clientWidth - 15;
+                    return -1 * d3.select(this).text().length * 8 - tickWidth;
                 });
         }
 
         // add y ticks and grid lines
-        let ticksGroups = chart.selectAll('svg g.row > g.tick');
-        const lineFunction = d3.svg.line()
-            .y(0)
-            .x(d => d.x)
-            .interpolate('linear');
+        let ticksGroups = yAxisG.selectAll('g.tick');
+
         if (this.get('showYTicks')) {
-            ticksGroups.append('path')
-                .attr('d', lineFunction([{ x: 0 }, { x: 6 }]))
-                .attr('class', 'yTick')
-                .attr('transform', `translate(-6,${barHeight / 2})`);
+            ticksGroups.append('line')
+                .attr('x1', 0)
+                .attr('x2', -6)
+                .attr('y1', (d, i) => getYValue(i))
+                .attr('y2', (d, i) => getYValue(i))
+                .attr('class', 'yTick');
         }
 
-        // this is a bit hack-y; it only draws the line from the end of the bar to the length of the longest bar.
-        // the lines must be added after the bars, though, to know where to position them, and making them the full
-        // length causes them to show on top of the bars.
-        // d3 v4 has a sendToBack function which would solve this problem.
         if (this.get('showYGridLines')) {
-            let widths = [];
-            chart.selectAll('svg g.row > rect').each(function () {
-                widths.push(d3.select(this).attr('width'));
-            });
-            const maxBarWidth = Math.max(...chart.selectAll('g.row > rect')[0].map(rect => parseInt(rect.getAttribute('width'), 10)));
-            ticksGroups.each(function (d, i) {
-                d3.select(this).append('path')
-                    .attr('d', lineFunction([{ x: parseInt(widths[i]) + 1 }, { x: maxBarWidth + 1 }]))
-                    .attr('class', 'yGridLine')
-                    .attr('transform', `translate(-0,${barHeight / 2})`);
-            });
+            ticksGroups.append('line')
+                .attr('x1', 0)
+                .attr('x2', chart.effectiveWidth())
+                .attr('y1', (d, i) => getYValue(i))
+                .attr('y2', (d, i) => getYValue(i))
+                .attr('class', 'y grid-line');
+            yAxisG.lower();
         }
     },
 
-    addComparisonLine() {
+    addComparisonLine(chart) {
         const chartBody = d3.select('.row-chart > svg > g');
         const line = this.get('comparisonLine');
 
-        this.get('chart').selectAll('.comparison-line').remove();
-        this.get('chart').selectAll('#comparison-text').remove();
+        chart.selectAll('.comparison-line').remove();
+        chart.selectAll('#comparison-text').remove();
+        const lineG = chartBody.append('g').attr('class', 'comparisonLine');
 
-        chartBody.append('svg:line')
+        lineG.append('line')
             .attr('y1', 1)
-            .attr('y2', this.get('chart').height() - 41)
-            .attr('x1', this.get('chart').x()(line.value))
-            .attr('x2', this.get('chart').x()(line.value))
+            .attr('y2', chart.effectiveHeight())
+            .attr('x1', chart.x()(line.value))
+            .attr('x2', chart.x()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
+        lineG.append('line')
             .attr('y1', 1)
             .attr('y2', 1)
-            .attr('x1', this.get('chart').x()(line.value) + 5)
-            .attr('x2', this.get('chart').x()(line.value) - 5)
+            .attr('x1', chart.x()(line.value) + 5)
+            .attr('x2', chart.x()(line.value) - 5)
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('y1', this.get('chart').height() - 41)
-            .attr('y2', this.get('chart').height() - 41)
-            .attr('x1', this.get('chart').x()(line.value) + 5)
-            .attr('x2', this.get('chart').x()(line.value) - 5)
+        lineG.append('line')
+            .attr('y1', chart.effectiveHeight())
+            .attr('y2', chart.effectiveHeight())
+            .attr('x1', chart.x()(line.value) + 5)
+            .attr('x2', chart.x()(line.value) - 5)
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('text')
+        lineG.append('text')
             .text(line.displayValue)
-            .attr('y', this.get('chart').height() - 25)
-            .attr('x', this.get('chart').x()(line.value))
+            .attr('y', chart.effectiveHeight() + 15)
+            .attr('x', chart.x()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('id', 'comparison-text')
@@ -192,7 +202,11 @@ export default BaseChartComponent.extend({
 
         // Choose the longest bar in the stack (largest width value) and place the max/min labels to the right of that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.max(...bars.map(rect => parseInt(rect.getAttribute('width'), 10))) + 25;
+        let yValues = [];
+        this.get('chart').selectAll('g.row > rect').each(function () {
+            yValues.push(parseInt(d3.select(this).attr('width')));
+        });
+        const maxLabelY = Math.max(...yValues) + 25;
 
         if (b) {
             gLabels.append('text')
