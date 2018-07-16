@@ -62,7 +62,7 @@ export default BaseChartComponent.extend({
             }
         }
 
-        this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'g.node');
+        this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'circle.bubble');
     },
 
     createTooltip() {
