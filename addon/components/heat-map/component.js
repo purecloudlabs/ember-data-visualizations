@@ -113,8 +113,24 @@ export default BaseChartComponent.extend({
             let legendG = chart.select('g')
                 .append('g')
                 .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
-            this.addLegend(chart, '.heat-box', legendG, legendDimension);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        let alreadyDone = [];
+        for (let i = 0; i < chart.data().length; i++) {
+            if (alreadyDone.indexOf(chart.data()[i].value) === -1) {
+                let legendable = {};
+                legendable.title = chart.data()[i].value;
+                legendable.color = chart.getColor(chart.data()[i]);
+                legendable.elements = chart.selectAll('.heat-box').filter(d => d.value === legendable.title);
+                legendables.push(legendable);
+                alreadyDone.push(chart.data()[i].value);
+            }
+        }
+        return legendables;
     },
 
     isIntervalIncluded(ticks, interval) {

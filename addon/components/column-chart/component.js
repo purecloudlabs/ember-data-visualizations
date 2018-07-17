@@ -30,6 +30,8 @@ export default BaseChartComponent.extend({
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
+        const rightMargin = this.get('showLegend') && this.get('legendWidth') ? this.get('legendWidth') : 100;
+
         compositeChart
             .transitionDuration(0)
             .renderTitle(false)
@@ -37,7 +39,7 @@ export default BaseChartComponent.extend({
             .height(this.get('height'))
             .margins({
                 top: 10,
-                right: 100,
+                right: rightMargin,
                 bottom: 50,
                 left: 100
             })
@@ -180,7 +182,7 @@ export default BaseChartComponent.extend({
 
     handleBarWidth(chart) {
         const gap = 2;
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
         const seriesCount = this.get('group').length;
 
         if (bars[0]) {
@@ -190,7 +192,7 @@ export default BaseChartComponent.extend({
             if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
-                chart.selectAll('rect.bar')[0].forEach(bar => {
+                chart.selectAll('rect.bar')._groups[0].forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
                     barD3.attr('x', x - barWidth * (this.get('group').length - 1) / 2 + 1);
@@ -229,7 +231,7 @@ export default BaseChartComponent.extend({
         this.handleBarWidth(chart);
 
         let svg = chart.select('svg > defs');
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
@@ -240,12 +242,45 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
-            this.addComparisonLine();
+            this.addComparisonLine(chart);
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
+
+        if (this.get('showLegend')) {
+            this.get('series').forEach((series, index) => chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`).classed(series.title, true));
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+        }
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        const formatter = this.get('xAxis.formatter') || (value => value);
+        const data = this.get('data');
+        const titles = this.get('series').map(entry => entry.title);
+
+        for (let i = 0; i < titles.length; i++) {
+            let legendable = {};
+            const rectangles = chart.selectAll('rect.bar')
+                .filter(function (d) {
+                    let fill = d3.select(this).attr('fill');
+                    if (d.y === formatter(data[d.data.key][i]) && d3.select(this).classed(titles[i])) {
+                        legendable.title = titles[i];
+                        legendable.color = fill;
+                        return true;
+                    }
+                });
+            legendable.elements = rectangles;
+            legendables.push(legendable);
+        }
+        return legendables;
     },
 
     getIndexForHatch(idx) {
@@ -293,41 +328,41 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addComparisonLine() {
-        const chartBody = d3.select('.column-chart > svg > g');
+    addComparisonLine(chart) {
+        const chartBody = chart.select('svg > g');
         const line = this.get('comparisonLine');
 
-        this.get('chart').selectAll('.comparison-line').remove();
-        this.get('chart').selectAll('#comparison-text').remove();
+        chart.selectAll('.comparison-line').remove();
+        chart.selectAll('#comparison-text').remove();
 
         chartBody.append('svg:line')
-            .attr('x1', 100)
-            .attr('x2', this.get('chart').width() - 95)
-            .attr('y1', 10 + this.get('chart').y()(line.value))
-            .attr('y2', 10 + this.get('chart').y()(line.value))
+            .attr('x1', chart.margins().left)
+            .attr('x2', chart.width() - chart.margins().right)
+            .attr('y1', chart.margins().top + chart.y()(line.value))
+            .attr('y2', chart.margins().top + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
-            .attr('x1', 100)
-            .attr('x2', 100)
-            .attr('y1', 15 + this.get('chart').y()(line.value))
-            .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('x1', chart.margins().left)
+            .attr('x2', chart.margins().left)
+            .attr('y1', 15 + chart.y()(line.value))
+            .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
-            .attr('x1', this.get('chart').width() - 95)
-            .attr('x2', this.get('chart').width() - 95)
-            .attr('y1', 15 + this.get('chart').y()(line.value))
-            .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('x1', chart.width() - chart.margins().right)
+            .attr('x2', chart.width() - chart.margins().right)
+            .attr('y1', 15 + chart.y()(line.value))
+            .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('text')
             .text(line.displayValue)
             .attr('x', 80)
-            .attr('y', 14 + this.get('chart').y()(line.value))
+            .attr('y', 14 + chart.y()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('id', 'comparison-text')
@@ -451,7 +486,7 @@ export default BaseChartComponent.extend({
             .transitionDuration(0);
 
         if (this.get('width')) {
-            this.get('chart').width(this.get('width'));
+            this.get('chart').effectiveWidth(this.get('width'));
         }
 
         columnChart.on('pretransition', chart => {

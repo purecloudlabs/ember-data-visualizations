@@ -18,6 +18,7 @@ export default BaseChartComponent.extend({
         let radii = [];
         this.get('group').all().forEach(d => radii.push(this.getRadiusValue(d)));
         let maxRadius = Math.max(...radii);
+        const rightMargin = this.get('showLegend') && this.get('legendWidth') ? this.get('legendWidth') : 50;
 
         const titleFormatter = this.get('titleFormatter') || (value => value);
 
@@ -31,7 +32,13 @@ export default BaseChartComponent.extend({
             .label(d => titleFormatter(d.key))
             .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => d.value.colorValue)
-            .renderTitle(false);
+            .renderTitle(false)
+            .margins({
+                top: 10,
+                right: rightMargin,
+                bottom: 50,
+                left: 50
+            });
 
         if (this.get('width')) {
             bubbleChart.width(this.get('width'));
@@ -62,7 +69,32 @@ export default BaseChartComponent.extend({
             }
         }
 
+        if (this.get('showLegend')) {
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+        }
+
         this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'circle.bubble');
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        let alreadyDone = [];
+        for (let i = 0; i < chart.data().length; i++) {
+            if (alreadyDone.indexOf(chart.data()[i].value.tooltip) === -1) {
+                let legendable = {};
+                legendable.title = chart.data()[i].value.tooltip;
+                legendable.color = chart.getColor(chart.data()[i]);
+                legendable.elements = chart.selectAll('circle.bubble').filter(d => d.value.tooltip === legendable.title);
+                legendables.push(legendable);
+                alreadyDone.push(chart.data()[i].value.tooltip);
+            }
+        }
+        return legendables;
     },
 
     createTooltip() {
