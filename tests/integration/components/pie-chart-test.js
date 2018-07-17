@@ -68,7 +68,7 @@ test('it shows chart not available', function (assert) {
 
 test('it can show a legend', function (assert) {
     this.render(hbs`{{pie-chart dimension=params.dimensions group=params.groups legend=true instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('.dc-legend').length, 1)), 1000);
+    later(this, (() => assert.equal(this.$('g.legend').length, 1)), 1000);
     return wait();
 });
 
