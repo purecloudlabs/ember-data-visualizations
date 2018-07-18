@@ -229,7 +229,7 @@ export default BaseChartComponent.extend({
         this.handleBarWidth(chart);
 
         let svg = chart.select('svg > defs');
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
