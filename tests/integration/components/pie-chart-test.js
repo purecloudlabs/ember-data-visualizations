@@ -66,9 +66,9 @@ test('it shows chart not available', function (assert) {
     return wait();
 });
 
-test('it can show a legend', function (assert) {
-    this.render(hbs`{{pie-chart dimension=params.dimensions group=params.groups showLegend=true legendWidth=200 instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('g.legend').length, 1)), 1000);
+test('it renders a legend with the correct number of boxes', function (assert) {
+    this.render(hbs`{{pie-chart dimension=params.dimensions group=params.groups showLegend=true instantRun=true}}`);
+    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 4)), 1000);
     return wait();
 });
 

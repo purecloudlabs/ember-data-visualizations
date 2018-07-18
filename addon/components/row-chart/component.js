@@ -307,9 +307,7 @@ export default BaseChartComponent.extend({
             rowChart.width(this.get('width'));
         }
 
-        let labels = [];
-        this.get('group')[0].all().forEach(d => labels.push(d.key));
-        const labelWidth = Math.max(...(labels.map(el => el.length))) * 8;
+        const labelWidth = 100;
         const totalWidth = rowChart.width();
         const chartWidth = totalWidth - labelWidth;
         rowChart.width(chartWidth);

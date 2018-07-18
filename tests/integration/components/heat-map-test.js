@@ -75,12 +75,12 @@ test('it renders a rectangle for each data point', function (assert) {
 
 test('it renders correct number of x axis ticks', function (assert) {
     this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('.cols text.tickLabel:not(.hidden)').length, 3)), 1000);
+    later(this, (() => assert.equal(this.$('.cols text.tickLabel:not(.hidden)').length, 2)), 1000);
     return wait();
 });
 
-test('it renders a legend', function (assert) {
-    this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat legend=true instantRun=true}}`);
+test('it renders a legend with the correct number of boxes', function (assert) {
+    this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
     later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 5)), 1000);
     return wait();
 });

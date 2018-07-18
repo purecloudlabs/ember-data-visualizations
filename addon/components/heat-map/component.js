@@ -343,7 +343,7 @@ export default BaseChartComponent.extend({
             }
 
             // Set up any necessary hatching patterns
-            let svg = d3.select('.heat-map > svg').append('defs');
+            let svg = chart.select('svg').append('defs');
 
             svg
                 .append('clippath')
@@ -374,14 +374,14 @@ export default BaseChartComponent.extend({
                 .attr('stroke', 'white');
         });
 
-        heatMap.on('postRender', () => {
+        heatMap.on('postRender', chart => {
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
             }
 
-            d3.select('.heat-map > svg > text').remove();
-            let svg = d3.select('.heat-map > svg');
+            chart.select('svg > text').remove();
+            let svg = chart.select('svg');
             let bbox = svg.node().getBBox();
             svg
                 .append('text')
