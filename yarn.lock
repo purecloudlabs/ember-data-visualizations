@@ -2029,7 +2029,7 @@ cross-spawn@^6.0.0:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-crossfilter2@^1.4.5, crossfilter2@~1.4:
+crossfilter2@^1.4.5:
   version "1.4.6"
   resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/crossfilter2/-/crossfilter2-1.4.6.tgz?dl=https://registry.yarnpkg.com/crossfilter2/-/crossfilter2-1.4.6.tgz#c173f0d75a04344ad226b1f8ae747f0386f98750"
   dependencies:
@@ -2300,10 +2300,6 @@ d3-zoom@1, d3-zoom@1.7.1:
     d3-selection "1"
     d3-transition "1"
 
-d3@^3, d3@^3.5.17, d3@^3.5.5:
-  version "3.5.17"
-  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/d3/-/d3-3.5.17.tgz?dl=https://registry.yarnpkg.com/d3/-/d3-3.5.17.tgz#bc46748004378b21a360c9fc7cf5231790762fb8"
-
 d3@^4.2:
   version "4.13.0"
   resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/d3/-/d3-4.13.0.tgz?dl=https://registry.yarnpkg.com/d3/-/d3-4.13.0.tgz#ab236ff8cf0cfc27a81e69bf2fb7518bc9b4f33d"
@@ -2339,9 +2335,9 @@ d3@^4.2:
     d3-voronoi "1.1.2"
     d3-zoom "1.7.1"
 
-d3@^5.4.0:
+d3@^5.4.0, d3@^5.5.0:
   version "5.5.0"
-  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/d3/-/d3-5.5.0.tgz#948413b91b988a6597f3e4c3e941d3b530bfee63"
+  resolved "https://registry.yarnpkg.com/d3/-/d3-5.5.0.tgz#948413b91b988a6597f3e4c3e941d3b530bfee63"
   dependencies:
     d3-array "1"
     d3-axis "1"
@@ -2385,13 +2381,13 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
-dc-addons@^0.13.5:
-  version "0.13.5"
-  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/dc-addons/-/dc-addons-0.13.5.tgz#545a04981fb25f715632cfe941ac6ae12faef463"
+dc-addons-bubble-chart@^0.1.0:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/dc-addons-bubble-chart/-/dc-addons-bubble-chart-0.1.3.tgz#bc0b22055f152e456e317f48cc4626a986aea138"
   dependencies:
     crossfilter "^1.3.11"
-    d3 "^3.5.5"
-    dc "https://github.com/dc-js/dc.js/tarball/master"
+    d3 "^5.5.0"
+    dc "^3.0.2"
     express "^4.13.1"
     jsdom "^8.0.0"
     moment "^2.10.3"
@@ -2399,16 +2395,9 @@ dc-addons@^0.13.5:
     request "^2.67.0"
     socket.io "^1.3.5"
 
-dc@^2.1.8:
-  version "2.2.0"
-  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/dc/-/dc-2.2.0.tgz#93b8ee05ad411ac44d747e9fb94ef2686bb0bcbd"
-  dependencies:
-    crossfilter2 "~1.4"
-    d3 "^3"
-
-"dc@https://github.com/dc-js/dc.js/tarball/master":
+dc@^3.0.2, dc@^3.0.5:
   version "3.0.6"
-  resolved "https://github.com/dc-js/dc.js/tarball/master#e01dd1541368066ee4f2feb13f6b4b150992c59f"
+  resolved "https://registry.yarnpkg.com/dc/-/dc-3.0.6.tgz#4723c70575478dbf3e0ffa1848bb986c6377b8e7"
   dependencies:
     crossfilter2 "^1.4.5"
     d3 "^5.4.0"
@@ -2924,18 +2913,18 @@ ember-cli@~3.1.3:
     watch-detector "^0.1.0"
     yam "^0.0.24"
 
-ember-dc-shim@^0.2.0:
-  version "0.2.0"
-  resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/ember-dc-shim/-/ember-dc-shim-0.2.0.tgz#d56fa203f7900b39a25d810b443fdfa165456b4f"
+ember-dc-shim@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ember-dc-shim/-/ember-dc-shim-1.0.0.tgz#17349145d3bea6dae154636bb14a86150b311d2d"
   dependencies:
     broccoli-funnel "^2.0.0"
     broccoli-merge-trees "^2.0.0"
     broccoli-source "^1.1.0"
     crossfilter "^1.3.12"
-    d3 "^3.5.17"
+    d3 "^5.5.0"
     d3-tip "^0.7.1"
-    dc "^2.1.8"
-    dc-addons "^0.13.5"
+    dc "^3.0.5"
+    dc-addons-bubble-chart "^0.1.0"
     ember-cli-babel "^6.3.0"
     ember-cli-import-polyfill "^0.2.0"
 
