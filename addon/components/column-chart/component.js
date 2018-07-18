@@ -25,7 +25,7 @@ export default BaseChartComponent.extend({
     // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
     comparisonLine: null,
 
-    type: 'GROUPED', // GROUPED, LAYERED (overlapping, first series in back -- should only be used for proportions), TODO: add STACKED
+    type: 'GROUPED', // GROUPED, LAYERED, STACKED
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
@@ -120,15 +120,8 @@ export default BaseChartComponent.extend({
         }
 
         compositeChart
-            .on('renderlet', () => this.onRenderlet(tip))
+            .on('pretransition', chart => this.onPretransition(chart, tip))
             .compose(columnCharts);
-
-        if (this.get('type') === 'STACKED') {
-            const colors = this.get('colors');
-            compositeChart.on('pretransition', (chart) => {
-                chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
-            });
-        }
 
         this.set('chart', compositeChart);
     },
@@ -154,14 +147,10 @@ export default BaseChartComponent.extend({
 
         return tip;
     },
-    onRenderlet(tip) {
-        // This is outside the Ember run loop so check if component is destroyed
-        if (this.get('isDestroyed') || this.get('isDestroying')) {
-            return;
-        }
 
+    doHatching(chart) {
         // Set up any necessary hatching patterns
-        let svg = this.get('chart').select('svg > defs');
+        let svg = chart.select('svg > defs');
 
         this.get('series').forEach((series, index) => {
             if (series.hatch) {
@@ -178,16 +167,18 @@ export default BaseChartComponent.extend({
                     .attr('height', 4)
                     .attr('fill', this.get('colors')[index]);
 
-                this.get('chart').selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
+                chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
                     .attr('fill', `url(#diagonalHatch${index})`)
                     .attr('opacity', '.7');
             }
         });
 
-        this.get('chart').selectAll('rect.bar')
+        chart.selectAll('rect.bar')
             .attr('rx', '2')
             .attr('stroke', 'white');
+    },
 
+    handleBarWidth(chart) {
         const gap = 2;
         let bars = this.get('chart').selectAll('.sub._0 rect.bar')._groups[0];
         const seriesCount = this.get('group').length;
@@ -212,21 +203,38 @@ export default BaseChartComponent.extend({
 
             for (let i = 0; i < seriesCount; i++) {
                 if (this.get('type') === 'GROUPED') {
-                    this.get('chart').selectAll(`g.sub._${i}`)
+                    chart.selectAll(`g.sub._${i}`)
                         .attr('transform', `translate(${position},0)`);
                 }
 
                 position = position + (barWidth + gap);
             }
-            this.get('chart').selectAll('rect.bar')
+            chart.selectAll('rect.bar')
                 .attr('width', barWidth);
         }
+    },
+
+    onPretransition(chart, tip) {
+        // This is outside the Ember run loop so check if component is destroyed
+        if (this.get('isDestroyed') || this.get('isDestroying')) {
+            return;
+        }
+
+        if (this.get('type') === 'STACKED') {
+            const colors = this.get('colors');
+            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+        }
+
+        this.doHatching(chart);
+        this.handleBarWidth(chart);
+
+        let svg = chart.select('svg > defs');
+        let bars = chart.selectAll('.sub._0 rect.bar')[0];
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
-        // Show min and max values over bars
         if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin')) && bars.length > 0) {
             this.addMaxMinLabels(bars);
         }
@@ -238,13 +246,6 @@ export default BaseChartComponent.extend({
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
-
-        // example for individual bar coloration, maybe implemented in the future
-        // const _this = this;
-        // this.get('chart').selectAll('rect.bar').filter(function (d) {
-        //     return d.x.toString() === _this.get('currentInterval.start._d').toString();
-        // })
-        //     .attr('fill', 'red');
     },
 
     getIndexForHatch(idx) {
@@ -446,13 +447,14 @@ export default BaseChartComponent.extend({
             .xUnits(() => data.length + 1)
             .y(d3.scaleLinear().domain([0, 1]))
             .group(group)
-            .dimension(dimension);
+            .dimension(dimension)
+            .transitionDuration(0);
 
         if (this.get('width')) {
             this.get('chart').width(this.get('width'));
         }
 
-        columnChart.on('renderlet', chart => {
+        columnChart.on('pretransition', chart => {
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
@@ -491,16 +493,13 @@ export default BaseChartComponent.extend({
         });
 
         columnChart.on('postRender', () => {
-            // reenable transitions once we're done... it's a global.
-            dc.disableTransitions = false;
-
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
             }
 
-            d3.select('.column-chart > svg > text').remove();
-            let svg = d3.select('.column-chart > svg');
+            this.get('chart').select('svg > text').remove();
+            let svg = this.get('chart').select('svg');
             let bbox = svg.node().getBBox();
             svg
                 .append('text')
@@ -518,8 +517,6 @@ export default BaseChartComponent.extend({
             this.get('chart').yAxis().ticks(yAxis.ticks);
         }
 
-        // we don't want to animate the transitions for the "no chart" view.
-        dc.disableTransitions = true;
         columnChart.render();
     }
 });

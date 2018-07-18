@@ -273,7 +273,8 @@ export default BaseChartComponent.extend({
             .renderLabel(false)
             .height(this.get('height'))
             .group(group)
-            .dimension(dimension);
+            .dimension(dimension)
+            .transitionDuration(0);
 
         if (this.get('width')) {
             rowChart.width(this.get('width'));
@@ -289,16 +290,14 @@ export default BaseChartComponent.extend({
         }
 
         rowChart.on('pretransition', chart => {
-            // move it the same distance over as it would be if it did have labels (for consistency)
-            chart.select('svg').attr('width', totalWidth);
-            chart.select('svg > g').attr('transform', `translate(${labelWidth},0)`).attr('width', totalWidth);
-        });
-
-        rowChart.on('renderlet', (chart) => {
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
             }
+
+            // move it the same distance over as it would be if it did have labels (for consistency)
+            chart.select('svg').attr('width', totalWidth);
+            chart.select('svg > g').attr('transform', `translate(${labelWidth},0)`).attr('width', totalWidth);
 
             let svg = chart.select('svg');
 

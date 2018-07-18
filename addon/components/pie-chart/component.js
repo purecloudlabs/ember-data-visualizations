@@ -171,13 +171,14 @@ export default BaseChartComponent.extend({
             .dimension(dimension)
             .colors(chartNotAvailableColor)
             .renderTitle(false)
-            .renderLabel(false);
+            .renderLabel(false)
+            .transitionDuration(0);
 
         if (this.get('donutChart')) {
             pieChart.innerRadius(this.get('height') / 3);
         }
 
-        pieChart.on('renderlet', () => {
+        pieChart.on('pretransition', () => {
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
