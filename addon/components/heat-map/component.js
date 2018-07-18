@@ -38,7 +38,7 @@ export default BaseChartComponent.extend({
 
         const labelWidth = Math.max(...(yAxisTickLabels.map(el => el.length))) * 8;
         const tickWidth = 10;
-        const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
+        const rightMargin = this.get('legendWidth') || 250;
         const colorMap = this.get('colorMap');
 
         heatMap
@@ -107,14 +107,13 @@ export default BaseChartComponent.extend({
         this.addYAxis(chart, numbRows);
 
         // add legend
-        if (this.get('legend')) {
-            chart.select('g.legend').remove();
-            const legendDimension = 18;
-            let legendG = chart.select('g')
-                .append('g')
-                .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
-            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
-        }
+        chart.select('g.legend').remove();
+        const legendDimension = 18;
+        let legendG = chart.select('g')
+            .append('g')
+            .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
+        this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+
     },
 
     getLegendables(chart) {

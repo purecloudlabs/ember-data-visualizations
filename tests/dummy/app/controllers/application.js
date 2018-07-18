@@ -66,8 +66,6 @@ export default Ember.Controller.extend({
         '#FDBA43', // away
         '#2FCEF5'], // on queue
     colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
-    defaultColorMap: ['Offered Calls', 'Answered Calls', 'Skilled Answered Calls'],
-    queueColorMap: ['Offered Calls'],
 
     // axes
     xAxis: {

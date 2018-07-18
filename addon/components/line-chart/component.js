@@ -28,7 +28,8 @@ export default BaseChartComponent.extend({
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
-        const rightMargin = this.get('showLegend') && this.get('legendWidth') ? this.get('legendWidth') : 100;
+        const legendWidth = this.get('legendWidth') || 250;
+        const rightMargin = this.get('showLegend') ? legendWidth : 100;
 
         compositeChart
             .renderTitle(false)

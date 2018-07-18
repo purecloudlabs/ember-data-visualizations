@@ -18,7 +18,8 @@ export default BaseChartComponent.extend({
         let radii = [];
         this.get('group').all().forEach(d => radii.push(this.getRadiusValue(d)));
         let maxRadius = Math.max(...radii);
-        const rightMargin = this.get('showLegend') && this.get('legendWidth') ? this.get('legendWidth') : 50;
+        const legendWidth = this.get('legendWidth') || 250;
+        const rightMargin = this.get('showLegend') ? legendWidth : 5;
 
         const titleFormatter = this.get('titleFormatter') || (value => value);
 
@@ -158,8 +159,8 @@ export default BaseChartComponent.extend({
 
             // apply hatching pattern to chart
             svg.append('rect')
-                .attr('width', 1000)
-                .attr('height', 1000)
+                .attr('width', svg.attr('width'))
+                .attr('height', svg.attr('height'))
                 .attr('fill', 'url(#bubbleChartNotAvailableHatch');
 
             // append text to chart
@@ -168,7 +169,7 @@ export default BaseChartComponent.extend({
             const textLength = chartNotAvailableMessage.length;
             svg
                 .append('rect')
-                .attr('y', bbox.y + (bbox.height / 2) - 30)
+                .attr('y', bbox.y + (bbox.height / 2) + 25)
                 .attr('x', bbox.x + (bbox.width / 2) - textLength * 4)
                 .attr('stroke', chartNotAvailableColor)
                 .attr('height', '50px')
@@ -176,7 +177,7 @@ export default BaseChartComponent.extend({
                 .attr('fill', '#fff');
             svg
                 .append('rect')
-                .attr('y', bbox.y + (bbox.height / 2) - 30)
+                .attr('y', bbox.y + (bbox.height / 2) + 25)
                 .attr('x', bbox.x + (bbox.width / 2) - textLength * 4)
                 .attr('stroke', chartNotAvailableColor)
                 .attr('height', '50px')
@@ -187,7 +188,7 @@ export default BaseChartComponent.extend({
                 .style('fill', chartNotAvailableTextColor)
                 .attr('class', 'chart-not-available')
                 .attr('text-anchor', 'middle')
-                .attr('y', bbox.y + (bbox.height / 2))
+                .attr('y', bbox.y + (bbox.height / 2) + 55)
                 .attr('x', bbox.x + (bbox.width / 2));
         });
         bubbleChart.render();

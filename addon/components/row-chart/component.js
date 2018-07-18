@@ -30,7 +30,8 @@ export default BaseChartComponent.extend({
         this.get('group')[0].all().forEach(d => labels.push(d.key));
         const labelWidth = Math.max(...(labels.map(el => el.length))) * 8;
         const tickWidth = 15;
-        const rightMargin = this.get('showLegend') && this.get('legendWidth') ? this.get('legendWidth') : 50;
+        const legendWidth = this.get('legendWidth') || 250;
+        const rightMargin = this.get('showLegend') ? legendWidth : 5;
 
         rowChart
             .transitionDuration(0)
@@ -306,7 +307,9 @@ export default BaseChartComponent.extend({
             rowChart.width(this.get('width'));
         }
 
-        const labelWidth = this.get('labelWidth') || 150;
+        let labels = [];
+        this.get('group')[0].all().forEach(d => labels.push(d.key));
+        const labelWidth = Math.max(...(labels.map(el => el.length))) * 8;
         const totalWidth = rowChart.width();
         const chartWidth = totalWidth - labelWidth;
         rowChart.width(chartWidth);

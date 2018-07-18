@@ -19,21 +19,12 @@ export default BaseChartComponent.extend({
     buildChart() {
         let chart = dc.pieChart(`#${this.get('elementId')}`);
 
-        // const rightMargin = this.get('showLegend') && this.get('legendWidth') ? this.get('legendWidth') : 100;
-
         chart
             .radius(this.get('height') / 2)
             .ordinalColors(this.get('colors'))
             .dimension(this.get('dimension'))
             .group(this.get('group'))
             .renderTitle(false);
-
-        // if (this.get('legend')) {
-        //     chart.legend(dc.legend()
-        //         .gap(15)
-        //         .y(10)
-        //         .x(30));
-        // }
 
         if (this.get('colorMap')) {
             chart.colors(d3.scaleOrdinal().domain(this.get('colorMap')).range(this.get('colors')));
@@ -74,9 +65,10 @@ export default BaseChartComponent.extend({
         if (this.get('showLegend')) {
             chart.select('g.legend').remove();
             const legendDimension = 18;
+            const legendWidth = this.get('legendWidth') || 250;
             let legendG = chart.select('g')
                 .append('g')
-                .attr('transform', `translate(${chart.width() / 2 - (this.get('legendWidth'))},${-1 * chart.height() / 4})`);
+                .attr('transform', `translate(${chart.width() / 2 - legendWidth},${-1 * chart.height() / 4})`);
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
         this.addClickHandlersAndTooltips(chart.select('svg'), tip);
