@@ -1,0 +1,1 @@
+export { default } from 'ember-data-visualizations/components/bubble-chart/component';
