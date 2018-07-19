@@ -147,6 +147,32 @@ The bubble chart is a dc-addons `bubbleCloud`, which is not as robustly supporte
         * e.g. if the `subtitle` is a timestamp, `subtitleFormatter` takes an input of a timestamp and returns a formatted duration.
 * `width` (number): width in pixels of the chart. It is recommended that the chart be roughly square for best display of the bubbles. If not specified, the chart will fill to the width of its container.
 
+
+### Heat map
+The heatmap does *not* use an array of crossfilter groups. It uses a singular group.
+
+##### Required parameters
+* `dimension`: crossfilter dimension to use for chart
+* `group`: crossfilter group to use for chart (not an array)
+    * The `key` of each fact is an array that tells the heatmap the position of the fact on the chart. `key[0]` will tell the chart the y position, and `key[1]` the x position.
+    * The `value` property of each fact will be used to determine the color of the fact. All possible `value` properties should be included in the `colorMap` array (see below). This can be a string, number, whatever, as long as it is included in the `colorMap` object.
+* `colorMap` (Array): order in which to show the colors of the properties. Each element in the array is a string which matches one of the `value` types in the group. For example, if the color value on your heatmap represents intensity from 1 to 10, your `colorMap` might be `[1,2,3,4,5,6,7,8,9,10]` (or the numbers in any order). The heatmap will use the index of this array to determine the index of the `colors` property with which to use each number.
+* `xAxis` (Object) describes the x axis. Properties: 
+    * `domain` (Array): describes the domain of the x axis. This property is REQUIRED.
+    * `ticks` (number): number of tick LABELS to show on the x axis. This property is optional, and if left out, the chart will automatically show as many labels as will comfortably fit based on the chart's width.
+    * `tickMarks` (number): number of ticks to show on the x axis. This property is optional, and if left out, the chart will show a tick for each data point.
+    * `label` (String): a label for the x axis. This property is optional.
+* `keyFormat` (function): function to apply to `key[1]` in order to attain the desired format on the screen. For example, if `key[1]` of each fact on your `group` is a date formatted like `20161109`, `keyFormat` might be `key => moment(key.toString()).format('MMM DD')`.
+
+##### Optional parameters
+* `yAxis` (Object): `label` property shows a label on the y axis (optional).
+* `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
+* `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
+* `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
+* `legend` (boolean): whether or not to show an interactive legend to the right of the heatmap. If `true`, `legendWidth` must also be specified for the legend to appear.
+* `legendWidth` (number): width in pixels that legend should take up on the right side of the chart. This width is subtracted from the chart's overall width when drawing the chart, so it cannot be larger than the `width` parameter.
+* `minBoxWidth` (number): minimum width in pixels for each box in the heatmap. If not specified, defaults to 4.
+
 Contributing
 ------------------------------------------------------------------------------
 

@@ -52,10 +52,13 @@ export default Ember.Controller.extend({
         }
     },
 
+    minBoxWidth: 4,
+    keyFormat: key => moment(key.toString()).format('MMM DD'),
+    heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
     dimensions: [],
     domainString: '',
     groups: [],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
     statusColors: [
         '#7ADB37', // available
         '#FC0D1C', // busy
@@ -64,10 +67,13 @@ export default Ember.Controller.extend({
     colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
-        ticks: 5
+        ticks: 3,
+        tickMarks: 3,
+        label: 'Time (Interval)'
     },
     yAxis: {
-        ticks: 3
+        ticks: 3,
+        label: 'Queues'
     },
 
     currentInterval: { start: moment('12/02/2016') },
@@ -211,6 +217,15 @@ export default Ember.Controller.extend({
             self._createQueueGroups();
         });
 
+        d3.json('heatmapdata.json', function (error, json) {
+            if (error) {
+                return Ember.Logger.log(error);
+            }
+            self.set('heatContent', json);
+            self._createHeatDimensions();
+            self._createHeatGroups();
+        });
+
         d3.json('agentStatus.json', function (error, json) {
             if (error) {
                 return Ember.Logger.log(error);
@@ -252,6 +267,41 @@ export default Ember.Controller.extend({
         this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
     },
 
+    _createHeatDimensions() {
+        let content = Ember.get(this, 'heatContent');
+
+        if (this._heatCrossfilter) {
+            this._heatCrossfilter.remove();
+            this._heatCrossfilter.add(content);
+        } else {
+            this._heatCrossfilter = crossfilter(content);
+        }
+
+        this.set('heatDimension', this._heatCrossfilter.dimension(d => [d.queue, d.date]));
+    },
+
+    _createHeatGroups() {
+        const dimensions = this.get('heatDimension');
+        const content = this.get('heatContent');
+        let colorsMap = {}, colorsArray = [], j = 0;
+        for (let i = 0; i < content.length; i++) {
+            let color = content[i].value;
+            if (colorsArray.indexOf(color) === -1) {
+                colorsArray.push(color);
+                colorsMap[color] = j;
+                j++;
+            }
+        }
+        this.set('colorMap', colorsArray);
+        this.set('heatGroup', dimensions.group().reduce(
+            (p, v) => {
+                return v.value;
+            },
+            () => { },
+            () => ({})
+        ));
+    },
+
     _createStatusDimension() {
         let content = Ember.get(this, 'statusContent');
 
@@ -283,5 +333,6 @@ export default Ember.Controller.extend({
             () => ({})
         );
         this.set('statusGroup', group);
+
     }
 });

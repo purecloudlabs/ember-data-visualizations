@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import _ from 'lodash/lodash';
+import d3 from 'd3';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -64,6 +65,74 @@ export default Component.extend({
         this.get('chart').selectAll(elementToApplyTip)
             .on('mouseover.tip', tip.show)
             .on('mouseout.tip', tip.hide);
+    },
+
+    addLegend(chart, chartElement, legendG, legendDimension) {
+        const colorMap = this.get('colorMap');
+        const colors = this.get('colors');
+
+        legendG.attr('class', 'legend');
+        let legendGs = legendG.selectAll('g')
+            .data(colorMap)
+            .enter().append('g')
+            .attr('class', 'legendItem');
+        legendGs.append('rect')
+            .attr('class', 'legendRect')
+            .attr('y', (d, i) => (i + 1) * 22)
+            .attr('height', legendDimension)
+            .attr('width', legendDimension)
+            .attr('fill', (d, i) => colors[i])
+            .on('click', legendClickHandler);
+        legendGs.append('text')
+            .attr('unselectable', 'on')
+            .attr('x', legendDimension + 6)
+            .attr('y', (d, i) => (i + 1) * 22 + (legendDimension * 0.75))
+            .text(d => d);
+
+        function legendClickHandler() {
+            const allLegendRects = chart.selectAll('rect.legendRect');
+            const allChartElements = chart.selectAll(chartElement);
+
+            const all = allLegendRects;
+            const clicked = d3.select(this);
+            const allOthers = allLegendRects.filter(d => colors[colorMap.indexOf(d)] !== clicked.attr('fill'));
+            all[0].push(...allChartElements[0]);
+            allOthers[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value)] !== clicked.attr('fill'))[0]);
+            clicked[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value)] == clicked.attr('fill'))[0]);
+
+            // determine if any other groups are selected
+            let isAnyLegendRectSelected = false;
+            allOthers.each(function () {
+                if (d3.select(this).classed('selected')) {
+                    isAnyLegendRectSelected = true;
+                }
+            });
+
+            // helper functions
+            function toggleSelection(element) {
+                element.classed('selected', !element.classed('selected'));
+                element.classed('deselected', !element.classed('deselected'));
+            }
+
+            function returnToNeutral(element) {
+                element.classed('selected', false);
+                element.classed('deselected', false);
+            }
+
+            // class the groups based on what is currently selected and what was clicked
+            if (clicked.classed('selected')) {
+                if (isAnyLegendRectSelected) {
+                    toggleSelection(clicked);
+                } else {
+                    returnToNeutral(all);
+                }
+            } else if (clicked.classed('deselected')) {
+                toggleSelection(clicked);
+            } else {
+                clicked.classed('selected', true);
+                allOthers.classed('deselected', true);
+            }
+        }
     },
 
     onClick() {},
