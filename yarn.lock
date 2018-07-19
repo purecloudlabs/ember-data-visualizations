@@ -2407,8 +2407,8 @@ dc@^2.1.8:
     d3 "^3"
 
 "dc@https://github.com/dc-js/dc.js/tarball/master":
-  version "3.0.5"
-  resolved "https://github.com/dc-js/dc.js/tarball/master#278f363fb557c98cb3e595bb36b8235039901465"
+  version "3.0.6"
+  resolved "https://github.com/dc-js/dc.js/tarball/master#e01dd1541368066ee4f2feb13f6b4b150992c59f"
   dependencies:
     crossfilter2 "^1.4.5"
     d3 "^5.4.0"
@@ -5759,13 +5759,10 @@ number-is-nan@^1.0.0:
 oauth-sign@~0.8.1, oauth-sign@~0.8.2:
   version "0.8.2"
   resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
-<<<<<<< HEAD
-=======
 
 object-assign@4.1.0:
   version "4.1.0"
   resolved "https://purecloud.artifactoryonline.com/purecloud/api/npm/inin-internal-npm/object-assign/-/object-assign-4.1.0.tgz#7a3b3d0e98063d43f4c03f2e8ae6cd51a86883a0"
->>>>>>> upgrade-ember-dc-shim
 
 object-assign@4.1.1, object-assign@^4.0.1, object-assign@^4.1.0:
   version "4.1.1"

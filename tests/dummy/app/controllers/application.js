@@ -217,7 +217,6 @@ export default Ember.Controller.extend({
             self._createQueueGroups();
         });
 
-
         d3.json('heatmapdata.json', function (error, json) {
             if (error) {
                 return Ember.Logger.log(error);
@@ -225,6 +224,7 @@ export default Ember.Controller.extend({
             self.set('heatContent', json);
             self._createHeatDimensions();
             self._createHeatGroups();
+        });
 
         d3.json('agentStatus.json', function (error, json) {
             if (error) {
@@ -267,7 +267,6 @@ export default Ember.Controller.extend({
         this.set('queueGroups', groupNames.map(name => dimensions.group().reduceCount(item => item[name])));
     },
 
-
     _createHeatDimensions() {
         let content = Ember.get(this, 'heatContent');
 
@@ -301,6 +300,7 @@ export default Ember.Controller.extend({
             () => { },
             () => ({})
         ));
+    },
 
     _createStatusDimension() {
         let content = Ember.get(this, 'statusContent');
