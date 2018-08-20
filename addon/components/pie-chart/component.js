@@ -142,36 +142,6 @@ export default BaseChartComponent.extend({
             .on('mouseout.tip', tip.hide);
     },
 
-    onClick() {
-        // const allSlices = this.get('chart').selectAll('.pie-slice');
-        // const thisSlice = allSlices.filter(pieD => pieD == d);
-        // const siblings = allSlices.filter(pieD => pieD !== d);
-        // const legendItems = this.get('chart').selectAll('.dc-legend-item');
-        // const thisLegendItem = legendItems.filter(legendD => legendD.data == d.value);
-        // const siblingLegendItems = legendItems.filter(legendD => legendD.data !== d.value);
-
-        // if (thisSlice.style('opacity') == 1) {
-        //     // either there is no selection or this slice is selected
-        //     if (siblings.style('opacity') == 1) {
-        //         // no selection yet: select this element
-        //         thisLegendItem.style('opacity', 1);
-        //         thisSlice.style('opacity', 1);
-        //         siblingLegendItems.style('opacity', .5);
-        //         siblings.style('opacity', .5);
-        //     } else {
-        //         // this is selected: unselect all
-        //         allSlices.style('opacity', 1);
-        //         legendItems.style('opacity', 1);
-        //     }
-        // } else {
-        //     // another slice is selected: select this one instead
-        //     thisSlice.style('opacity', 1);
-        //     thisLegendItem.style('opacity', 1);
-        //     siblings.style('opacity', .5);
-        //     siblingLegendItems.style('opacity', .5);
-        // }
-    },
-
     showChartNotAvailable() {
         const chartNotAvailableMessage = this.get('chartNotAvailableMessage');
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
