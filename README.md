@@ -147,7 +147,6 @@ The bubble chart is a dc-addons `bubbleCloud`, which is not as robustly supporte
         * e.g. if the `subtitle` is a timestamp, `subtitleFormatter` takes an input of a timestamp and returns a formatted duration.
 * `width` (number): width in pixels of the chart. It is recommended that the chart be roughly square for best display of the bubbles. If not specified, the chart will fill to the width of its container.
 
-
 ### Heat map
 The heatmap does *not* use an array of crossfilter groups. It uses a singular group.
 

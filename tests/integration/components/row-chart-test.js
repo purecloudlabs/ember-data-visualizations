@@ -55,7 +55,7 @@ test('it renders', function (assert) {
 
 test('it renders correct number of x axis ticks', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
-    assert.equal(this.$('g.axis g.tick').length, 3);
+    assert.equal(this.$('g.axis.x g.tick').length, 3);
 });
 
 test('it renders a bar for each data point', function (assert) {
@@ -65,7 +65,7 @@ test('it renders a bar for each data point', function (assert) {
 
 test('it renders a label for each data point', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('g.row g.tick text').length, 4)), 1000);
+    later(this, (() => assert.equal(this.$('g.axis.y g.tick text').length, 4)), 1000);
     return wait();
 });
 
@@ -94,27 +94,27 @@ test('it renders minimum and maximum value indicators', function (assert) {
 test('it can hide x tick lines correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  hideXAxisLines=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('g.axis g.tick line.grid-line').length, 1)), 1000);
+    later(this, (() => assert.equal(this.$('g.axis.x g.tick line.grid-line').length, 1)), 1000);
     return wait();
 });
 test('it can render y ticks correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYTicks=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('path.yTick').length, 4)), 1000);
+    later(this, (() => assert.equal(this.$('line.yTick').length, 4)), 1000);
     return wait();
 });
 test('it can render y grid lines correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYGridLines=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('path.yGridLine').length, 4)), 1000);
+    later(this, (() => assert.equal(this.$('line.y.grid-line').length, 4)), 1000);
     return wait();
 });
 test('it can render both y ticks and y grid lines correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYGridLines=true showYTicks=true instantRun=true}}`);
 
     const runAssertions = () => {
-        assert.equal(this.$('path.yGridLine').length, 4);
-        assert.equal(this.$('path.yTick').length, 4);
+        assert.equal(this.$('line.y.grid-line').length, 4);
+        assert.equal(this.$('line.yTick').length, 4);
     };
 
     // delayed to let all dc rendering processes finish

@@ -52,7 +52,7 @@ export default BaseChartComponent.extend({
             })
             .keyAccessor(d => d.key[1])
             .valueAccessor(d => d.key[0])
-            .colors(d3.scale.quantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
+            .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => colorMap.indexOf(d.value))
             .renderTitle(false)
             .height(this.get('height'))
@@ -65,6 +65,7 @@ export default BaseChartComponent.extend({
 
         const minBoxWidth = this.get('minBoxWidth') || 4;
         const minEffectiveWidth = minBoxWidth * numbCols;
+        heatMap.minWidth(minEffectiveWidth + heatMap.margins().right + heatMap.margins().left);
         const shortenLabels = minEffectiveWidth > heatMap.effectiveWidth();
         // if there isn't enough room for each box to be minBoxWidth wide with full labels, truncate labels until there is
         heatMap.rowsLabel(d =>
@@ -147,11 +148,11 @@ export default BaseChartComponent.extend({
         let numberOfTickLabels = (this.get('xAxis').ticks || this.get('group').size()) + 1;
         let ticksLabels;
         do {
-            ticksLabels = d3.time.scale().domain(this.get('xAxis').domain).ticks(numberOfTickLabels);
+            ticksLabels = d3.scaleTime().domain(this.get('xAxis').domain).ticks(numberOfTickLabels);
             numberOfTickLabels--;
         } while (ticksLabels.length * Math.max(...textLengths) * 11 > chart.effectiveWidth());
 
-        const ticks = d3.time.scale().domain(this.get('xAxis').domain).ticks(this.get('xAxis').tickMarks);
+        const ticks = d3.scaleTime().domain(this.get('xAxis').domain).ticks(this.get('xAxis').tickMarks);
         for (let i = 0; i <= numbCols - 1; i++) {
             axisXG.append('line')
                 .attr('class', 'tickMark')
@@ -190,19 +191,21 @@ export default BaseChartComponent.extend({
         }
 
         // add x axis label
-        const xAxisLabelClass = 'xLabel';
+        if (this.get('isChartAvailable')) {
+            const xAxisLabelClass = 'xLabel';
 
-        let axisXLab = axisX.selectAll(`text.${xAxisLabelClass}`);
-        if (axisXLab.empty() && this.get('xAxis').label) {
-            axisXLab = axisX.append('text')
-                .attr('class', xAxisLabelClass)
-                .attr('y', parseInt(axisX.select('text').attr('y')) + parseInt(axisX.select('text').attr('dy')))
-                .attr('dy', '2.5em')
-                .attr('x', chart.width() / 2 - labelWidth)
-                .attr('text-anchor', 'middle');
-        }
-        if (this.get('xAxis').label && axisXLab.text() !== this.get('xAxisLabel')) {
-            axisXLab.text(this.get('xAxis').label);
+            let axisXLab = axisX.selectAll(`text.${xAxisLabelClass}`);
+            if (axisXLab.empty() && this.get('xAxis').label) {
+                axisXLab = axisX.append('text')
+                    .attr('class', xAxisLabelClass)
+                    .attr('y', parseInt(axisX.select('text').attr('y')) + parseInt(axisX.select('text').attr('dy')))
+                    .attr('dy', '2.5em')
+                    .attr('x', chart.width() / 2 - labelWidth)
+                    .attr('text-anchor', 'middle');
+            }
+            if (this.get('xAxis').label && axisXLab.text() !== this.get('xAxisLabel')) {
+                axisXLab.text(this.get('xAxis').label);
+            }
         }
     },
 
@@ -233,16 +236,18 @@ export default BaseChartComponent.extend({
         }
 
         // add y axis label
-        const yAxisLabelClass = 'yLabel';
+        if (this.get('isChartAvailable')) {
+            const yAxisLabelClass = 'yLabel';
 
-        let axisYLab = axisY.selectAll(`text.${yAxisLabelClass}`);
-        if (axisYLab.empty() && this.get('yAxis').label) {
-            axisYLab = axisY.append('text')
-                .attr('class', yAxisLabelClass)
-                .attr('dx', parseInt(axisY.select('text').attr('dx')));
-        }
-        if (this.get('yAxis').label && axisYLab.text() !== this.get('yAxis').label) {
-            axisYLab.text(this.get('yAxis').label);
+            let axisYLab = axisY.selectAll(`text.${yAxisLabelClass}`);
+            if (axisYLab.empty() && this.get('yAxis').label) {
+                axisYLab = axisY.append('text')
+                    .attr('class', yAxisLabelClass)
+                    .attr('dx', parseInt(axisY.select('text').attr('dx')));
+            }
+            if (this.get('yAxis').label && axisYLab.text() !== this.get('yAxis').label) {
+                axisYLab.text(this.get('yAxis').label);
+            }
         }
 
         axisY.selectAll('text')
@@ -277,7 +282,7 @@ export default BaseChartComponent.extend({
 
         const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
         const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
-        let data = cartesian(d3.time.scale().domain(xAxis.domain).ticks(ticks), [1, 2, 3, 4, 5, 6]);
+        let data = cartesian(d3.scaleTime().domain(xAxis.domain).ticks(ticks), [1, 2, 3, 4, 5, 6]);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => [d[1], d[0]]);
         const group = dimension.group().reduceCount(g => g);

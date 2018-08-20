@@ -38,7 +38,7 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(this.get('xAxis').domain))
+            .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
             .elasticY(true)
             .yAxisPadding('20%')
@@ -49,19 +49,19 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
-            compositeChart.y(d3.scale.linear().domain(this.get('yAxis').domain));
+            compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
         }
 
         if (this.get('currentInterval') && this.get('showCurrentIndicator') && this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks).tickValues(this.addTickForCurrentInterval());
         }
 
-        compositeChart.xAxis().outerTickSize(0);
+        compositeChart.xAxis().tickSizeOuter(0);
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks);
         }
 
-        compositeChart.yAxis().outerTickSize(0);
+        compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
         }
@@ -120,7 +120,7 @@ export default BaseChartComponent.extend({
 
         this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip, 'circle.dot');
 
-        let dots = this.get('chart').selectAll('.sub._0 circle.dot')[0];
+        let dots = this.get('chart').selectAll('.sub._0 circle.dot')._groups[0];
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
@@ -147,7 +147,7 @@ export default BaseChartComponent.extend({
 
     addTickForCurrentInterval() {
         // if indicatorDate is in range but not already in the scale, add it.
-        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+        let xTimeScale = d3.scaleTime().domain(this.get('xAxis').domain);
         let indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
         let ticks = xTimeScale.ticks(this.get('xAxis').ticks);
         if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xTimeScale, indicatorDate)) {
@@ -159,7 +159,7 @@ export default BaseChartComponent.extend({
     changeTickForCurrentInterval() {
         // this method should be called on renderlet
         let indicatorDate = this.get('currentInterval.start._d');
-        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+        let xTimeScale = d3.scaleTime().domain(this.get('xAxis').domain);
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = d3.select('.line-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
@@ -234,7 +234,11 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest circle in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any line in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll('circle.dot')[0].map(dot => parseInt(dot.getAttribute('cy'), 10)));
+        let yValues = [];
+        this.get('chart').selectAll('circle.dot').each(function () {
+            yValues.push(parseInt(d3.select(this).attr('cy')));
+        });
+        const maxLabelY = Math.min(...yValues);
 
         if (d) {
             gLabels.append('text')
@@ -297,9 +301,9 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(xAxis.domain))
+            .x(d3.scaleTime().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
-            .y(d3.scale.linear().domain([0, 1]));
+            .y(d3.scaleLinear().domain([0, 1]));
 
         if (this.get('width')) {
             compositeChart.width(this.get('width'));
@@ -317,7 +321,7 @@ export default BaseChartComponent.extend({
         }
 
         // create horizontal line groups
-        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const data = d3.scaleTime().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         let groups = [];
@@ -341,7 +345,7 @@ export default BaseChartComponent.extend({
                 .dimension(dimension)
                 .colors(chartNotAvailableColor)
                 .renderTitle(false)
-                .x(d3.time.scale().domain(this.get('xAxis').domain));
+                .x(d3.scaleTime().domain(this.get('xAxis').domain));
 
             lineCharts.push(lineChart);
         });

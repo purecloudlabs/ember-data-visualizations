@@ -25,11 +25,11 @@ export default BaseChartComponent.extend({
             .height(this.get('height'))
             .dimension(this.get('dimension'))
             .group(this.get('group'))
-            .x(d3.scale.ordinal())
-            .r(d3.scale.linear().domain([0, maxRadius * (this.get('group').size() / 4)]))
+            .x(d3.scaleOrdinal().range([0, maxRadius * this.get('group').size()]))
+            .r(d3.scaleLinear().domain([0, maxRadius * this.get('group').size() / 3]))
             .radiusValueAccessor(d => this.getRadiusValue(d))
             .label(d => titleFormatter(d.key))
-            .colors(d3.scale.quantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
+            .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => d.value.colorValue)
             .renderTitle(false);
 
@@ -66,7 +66,8 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip().attr('class', `d3-tip #${this.get('elementId')}`)
+        return d3.tip().attr('class', 'd3-tip')
+            .attr('id', this.get('elementId'))
             .style('text-align', 'center')
             .html(d => `<span class="tooltip-value">${d.key}</span><br/><span class="tooltip-label">${d.value.tooltip}</span>`);
     },
@@ -92,8 +93,8 @@ export default BaseChartComponent.extend({
             .height(this.get('height'))
             .dimension(dimension)
             .group(group)
-            .x(d3.scale.ordinal())
-            .r(d3.scale.linear().domain([0, 3]))
+            .x(d3.scaleOrdinal())
+            .r(d3.scaleLinear().domain([0, 3]))
             .radiusValueAccessor(d => d.value)
             .renderTitle(false)
             .label(() => '')

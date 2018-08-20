@@ -41,7 +41,7 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(this.get('xAxis').domain))
+            .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
             .dimension(this.get('dimension'))
             .elasticY(true)
@@ -52,19 +52,19 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
-            compositeChart.y(d3.scale.linear().domain(this.get('yAxis').domain));
+            compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
         }
 
         if (this.get('currentInterval') && this.get('showCurrentIndicator') && this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks).tickValues(this.addTickForCurrentInterval());
         }
 
-        compositeChart.xAxis().outerTickSize(0);
+        compositeChart.xAxis().tickSizeOuter(0);
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks);
         }
 
-        compositeChart.yAxis().outerTickSize(0);
+        compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
         }
@@ -180,7 +180,7 @@ export default BaseChartComponent.extend({
 
     handleBarWidth(chart) {
         const gap = 2;
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = this.get('chart').selectAll('.sub._0 rect.bar')._groups[0];
         const seriesCount = this.get('group').length;
 
         if (bars[0]) {
@@ -190,7 +190,7 @@ export default BaseChartComponent.extend({
             if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
-                chart.selectAll('rect.bar')[0].forEach(bar => {
+                this.get('chart').selectAll('rect.bar')._groups[0].forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
                     barD3.attr('x', x - barWidth * (this.get('group').length - 1) / 2 + 1);
@@ -229,7 +229,7 @@ export default BaseChartComponent.extend({
         this.handleBarWidth(chart);
 
         let svg = chart.select('svg > defs');
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
@@ -268,10 +268,10 @@ export default BaseChartComponent.extend({
 
     addTickForCurrentInterval() {
         // if indicatorDate is in range but not already in the scale, add it.
-        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+        let xscaleTime = d3.scaleTime().domain(this.get('xAxis').domain);
         let indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
-        let ticks = xTimeScale.ticks(this.get('xAxis').ticks);
-        if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xTimeScale, indicatorDate)) {
+        let ticks = xscaleTime.ticks(this.get('xAxis').ticks);
+        if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xscaleTime, indicatorDate)) {
             ticks.push(indicatorDate);
         }
         return ticks;
@@ -280,13 +280,13 @@ export default BaseChartComponent.extend({
     changeTickForCurrentInterval() {
         // this method should be called on renderlet
         let indicatorDate = this.get('currentInterval.start._d');
-        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
-        if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
+        let xscaleTime = d3.scaleTime().domain(this.get('xAxis').domain);
+        if (this.isIntervalInRange(xscaleTime, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
             if (!currentTick.empty()) {
                 if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                    let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                    let tickHtml = this.isIntervalIncluded(xscaleTime.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
                     currentTick.select('text').html(tickHtml);
                 }
             }
@@ -357,7 +357,11 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll('.sub rect.bar')[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+        let yValues = [];
+        this.get('chart').selectAll('.sub rect.bar').each(function () {
+            yValues.push(parseInt(d3.select(this).attr('y')));
+        });
+        const maxLabelY = Math.min(...yValues);
 
         if (b) {
             gLabels.append('text')
@@ -421,7 +425,7 @@ export default BaseChartComponent.extend({
             ticks = 24;
         }
 
-        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const data = d3.scaleTime().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
@@ -439,9 +443,9 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(xAxis.domain))
+            .x(d3.scaleTime().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
-            .y(d3.scale.linear().domain([0, 1]))
+            .y(d3.scaleLinear().domain([0, 1]))
             .group(group)
             .dimension(dimension)
             .transitionDuration(0);

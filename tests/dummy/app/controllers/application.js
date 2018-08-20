@@ -190,46 +190,30 @@ export default Ember.Controller.extend({
 
     init() {
         let self = this;
-        d3.json('data.json', function (error, json) {
-            if (error) {
-                return Ember.Logger.log(error);
-            }
+        d3.json('data.json').then(function (json) {
             self.set('content', json);
             self._createDimensions();
             self._createGroups();
         });
 
-        d3.json('agents.json', function (error, json) {
-            if (error) {
-                return Ember.Logger.log(error);
-            }
+        d3.json('agents.json').then(function (json) {
             self.set('agentContent', json);
             self._createAgentDimensions();
             self._createAgentGroups();
         });
 
-        d3.json('queuedata.json', function (error, json) {
-            if (error) {
-                return Ember.Logger.log(error);
-            }
+        d3.json('queuedata.json').then(function (json) {
             self.set('queueContent', json);
             self._createQueueDimensions();
             self._createQueueGroups();
         });
 
-        d3.json('heatmapdata.json', function (error, json) {
-            if (error) {
-                return Ember.Logger.log(error);
-            }
+        d3.json('heatmapdata.json').then(function (json) {
             self.set('heatContent', json);
             self._createHeatDimensions();
             self._createHeatGroups();
         });
-
-        d3.json('agentStatus.json', function (error, json) {
-            if (error) {
-                return Ember.Logger.log(error);
-            }
+        d3.json('agentStatus.json').then(function (json) {
             self.set('statusContent', json);
             self._createStatusDimension();
             self._createStatusGroup();
@@ -301,7 +285,6 @@ export default Ember.Controller.extend({
             () => ({})
         ));
     },
-
     _createStatusDimension() {
         let content = Ember.get(this, 'statusContent');
 
@@ -333,6 +316,5 @@ export default Ember.Controller.extend({
             () => ({})
         );
         this.set('statusGroup', group);
-
     }
 });

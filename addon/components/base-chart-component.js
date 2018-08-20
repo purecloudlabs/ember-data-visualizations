@@ -90,15 +90,17 @@ export default Component.extend({
             .text(d => d);
 
         function legendClickHandler() {
-            const allLegendRects = chart.selectAll('rect.legendRect');
-            const allChartElements = chart.selectAll(chartElement);
+            const all = chart.selectAll(`rect.legendRect,${chartElement}`);
 
-            const all = allLegendRects;
-            const clicked = d3.select(this);
-            const allOthers = allLegendRects.filter(d => colors[colorMap.indexOf(d)] !== clicked.attr('fill'));
-            all[0].push(...allChartElements[0]);
-            allOthers[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value)] !== clicked.attr('fill'))[0]);
-            clicked[0].push(...allChartElements.filter(d => colors[colorMap.indexOf(d.value)] == clicked.attr('fill'))[0]);
+            const clicked = all.filter(d => {
+                let color = d.value || d;
+                return colors[colorMap.indexOf(color)] == d3.select(this).attr('fill');
+            });
+
+            const allOthers = all.filter(d => {
+                let color = d.value || d;
+                return colors[colorMap.indexOf(color)] !== d3.select(this).attr('fill');
+            });
 
             // determine if any other groups are selected
             let isAnyLegendRectSelected = false;
