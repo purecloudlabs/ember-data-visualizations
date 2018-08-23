@@ -1,10 +1,10 @@
 import moment from 'moment';
-import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
+import { isEmpty } from '@ember/utils';
 
 /**
    @public
@@ -77,7 +77,7 @@ export default BaseChartComponent.extend({
         if (this.get('type') !== 'STACKED') {
             groups.forEach((g, index) => {
                 // If we are hatching, we need to display a white bar behind the hatched bar
-                if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+                if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
                     columnChart = dc.barChart(compositeChart);
 
                     columnChart
@@ -132,7 +132,7 @@ export default BaseChartComponent.extend({
         let tip = d3.tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
-                if (!_.isEmpty(titles)) {
+                if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
                     titles.forEach((title, i) => {
                         const datum = formatter(this.get('data')[d.data.key][i]);
@@ -235,11 +235,11 @@ export default BaseChartComponent.extend({
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
-        if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin')) && bars.length > 0) {
+        if (this.get('showMaxMin') && this.get('seriesMaxMin') && bars.length > 0) {
             this.addMaxMinLabels(bars);
         }
 
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
+        if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
             this.addComparisonLine();
         }
 
@@ -339,14 +339,14 @@ export default BaseChartComponent.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
         groups.forEach((g, index) => {
-            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
+            if (this.get('showMaxMin') && this.get('seriesMaxMin')) {
                 if (index === this.get('seriesMaxMin')) {
                     values = g.all().map(gElem => gElem.value);
                     nonZeroValues = values.filter(v => v > 0);
-                    maxValue = _.max(nonZeroValues);
+                    maxValue = Math.max(...nonZeroValues);
                     maxIdx = values.indexOf(maxValue);
                     maxValue = formatter(maxValue);
-                    minValue = _.min(nonZeroValues);
+                    minValue = Math.min(...nonZeroValues);
                     minIdx = values.indexOf(minValue);
                     minValue = formatter(minValue);
                 }

@@ -1,8 +1,9 @@
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
-import _ from 'lodash/lodash';
 import d3 from 'd3';
+import { A } from '@ember/array';
+import { isEmpty } from '@ember/utils';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -170,7 +171,7 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
+        if (this.$() && this.$().parents() && !isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
             this.$().parents().find(`.d3-tip#${this.get('elementId')}`).remove();
         }
     },
@@ -185,8 +186,8 @@ export default Component.extend({
         this._super(...arguments);
         let data = {};
         if (Array.isArray(this.get('group'))) {
-            _.forEach(this.get('group'), g => {
-                _.forEach(g.all(), datum => {
+            A(this.get('group')).forEach(g => {
+                A(g.all()).forEach(datum => {
                     if (data[datum.key]) {
                         data[datum.key].push(datum.value);
                     } else {
@@ -196,7 +197,7 @@ export default Component.extend({
             });
         } else if (this.get('group')) {
             data.total = 0;
-            _.forEach(this.get('group').all(), datum => {
+            A(this.get('group').all()).forEach(datum => {
                 if (data[datum.key]) {
                     data[datum.key].push(datum.value);
                     data.total += datum.value;
