@@ -125,7 +125,7 @@ export default BaseChartComponent.extend({
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
         // Show min and max values over lines
-        if (this.get('showMaxMin') && this.get('seriesMaxMin') && dots.length > 0) {
+        if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && dots.length > 0) {
             this.addMaxMinLabels(dots);
         }
 

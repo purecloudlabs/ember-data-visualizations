@@ -235,7 +235,7 @@ export default BaseChartComponent.extend({
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
-        if (this.get('showMaxMin') && this.get('seriesMaxMin') && bars.length > 0) {
+        if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addMaxMinLabels(bars);
         }
 
