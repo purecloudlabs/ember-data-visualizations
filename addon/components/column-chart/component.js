@@ -339,17 +339,15 @@ export default BaseChartComponent.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
         groups.forEach((g, index) => {
-            if (this.get('showMaxMin') && this.get('seriesMaxMin')) {
-                if (index === this.get('seriesMaxMin')) {
-                    values = g.all().map(gElem => gElem.value);
-                    nonZeroValues = values.filter(v => v > 0);
-                    maxValue = Math.max(...nonZeroValues);
-                    maxIdx = values.indexOf(maxValue);
-                    maxValue = formatter(maxValue);
-                    minValue = Math.min(...nonZeroValues);
-                    minIdx = values.indexOf(minValue);
-                    minValue = formatter(minValue);
-                }
+            if (index === this.get('seriesMaxMin')) {
+                values = g.all().map(gElem => gElem.value);
+                nonZeroValues = values.filter(v => v > 0);
+                maxValue = Math.max(...nonZeroValues);
+                maxIdx = values.indexOf(maxValue);
+                maxValue = formatter(maxValue);
+                minValue = Math.min(...nonZeroValues);
+                minIdx = values.indexOf(minValue);
+                minValue = formatter(minValue);
             }
         });
         let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
