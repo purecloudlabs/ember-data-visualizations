@@ -26,7 +26,6 @@ export default Component.extend({
     tooltipDateFormat: 'll LT',
     group: null,
     dimension: null,
-    seriesData: null,
     data: null,
     series: [],
     height: 200,
