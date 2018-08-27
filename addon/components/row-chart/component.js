@@ -147,7 +147,7 @@ export default BaseChartComponent.extend({
         const line = this.get('comparisonLine');
 
         chart.selectAll('.comparison-line').remove();
-        chart.selectAll('#comparison-text').remove();
+        chart.selectAll('.comparison-text').remove();
         const lineG = chartBody.append('g').attr('class', 'comparisonLine');
 
         lineG.append('line')
@@ -180,7 +180,7 @@ export default BaseChartComponent.extend({
             .attr('x', chart.x()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
-            .attr('id', 'comparison-text')
+            .attr('class', 'comparison-text')
             .attr('fill', line.textColor || '#000000');
     },
 
