@@ -21,6 +21,8 @@ See the dummy app for an example of each type of chart. The code for the dummy c
 ##### Optional parameters
 * `height` (number): height in pixels of the chart
 * `colors` (Array): Hex strings to color the chart
+* `showLegend` (boolean): Whether or not to show an interactive legend. Heatmaps do not have this option, however, as a heatmap doesn't make sense without a legend.
+* `legendWidth` (number): width in pixels of the legend. Not applicable if `showLegend` is `false`. If not specified, defaults to 250.
 * `isChartAvailable` (boolean, defaults to `true`): if `true`, shows normal view. If `false`, shows chart-not-available view.
 * `chartNotAvailableMessage` (String): message to display on top of chart if `isChartAvailable` is false
 * `chartNotAvailableTextColor` (String): Hexadecimal color value to color the text of `chartNotAvailableMessage`

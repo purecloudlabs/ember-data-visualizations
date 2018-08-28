@@ -28,13 +28,16 @@ export default BaseChartComponent.extend({
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
+        const legendWidth = this.get('legendWidth') || 250;
+        const rightMargin = this.get('showLegend') ? legendWidth : 100;
+
         compositeChart
             .renderTitle(false)
             .brushOn(false)
             .height(this.get('height'))
             .margins({
                 top: 10,
-                right: 100,
+                right: rightMargin,
                 bottom: 50,
                 left: 100
             })
@@ -83,7 +86,7 @@ export default BaseChartComponent.extend({
         });
 
         compositeChart
-            .on('renderlet', () => this.onRenderlet(tip))
+            .on('renderlet', chart => this.onRenderlet(chart, tip))
             .compose(lineCharts);
 
         this.set('chart', compositeChart);
@@ -111,7 +114,7 @@ export default BaseChartComponent.extend({
         return tip;
     },
 
-    onRenderlet(tip) {
+    onRenderlet(chart, tip) {
 
         // This is outside the Ember run loop so check if component is destroyed
         if (this.get('isDestroyed') || this.get('isDestroying')) {
@@ -120,7 +123,7 @@ export default BaseChartComponent.extend({
 
         this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip, 'circle.dot');
 
-        let dots = this.get('chart').selectAll('.sub._0 circle.dot')._groups[0];
+        let dots = chart.selectAll('.sub._0 circle.dot')._groups[0];
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
@@ -130,11 +133,33 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
-            this.addComparisonLine();
+            this.addComparisonLine(chart);
         }
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
+
+        if (this.get('showLegend')) {
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+        }
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        const titles = this.get('series').map(entry => entry.title);
+        chart.selectAll('path.line').filter(function (d, i) {
+            let legendable = {};
+            legendable.title = titles[i];
+            legendable.color = d3.select(this).attr('stroke');
+            legendable.elements = d3.select(this);
+            legendables.push(legendable);
+        });
+        return legendables;
     },
 
     isIntervalIncluded(ticks, interval) {
@@ -170,41 +195,41 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addComparisonLine() {
-        const chartBody = d3.select('.line-chart > svg > g');
+    addComparisonLine(chart) {
+        const chartBody = chart.select('svg > g');
         const line = this.get('comparisonLine');
 
-        this.get('chart').selectAll('.comparison-line').remove();
-        this.get('chart').selectAll('.comparison-text').remove();
+        chart.selectAll('.comparison-line').remove();
+        chart.selectAll('.comparison-text').remove();
 
         chartBody.append('svg:line')
-            .attr('x1', 100)
-            .attr('x2', this.get('chart').width() - 95)
-            .attr('y1', 10 + this.get('chart').y()(line.value))
-            .attr('y2', 10 + this.get('chart').y()(line.value))
+            .attr('x1', chart.margins().left)
+            .attr('x2', chart.width() - chart.margins().right)
+            .attr('y1', chart.margins().top + chart.y()(line.value))
+            .attr('y2', chart.margins().top + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
-            .attr('x1', 100)
-            .attr('x2', 100)
-            .attr('y1', 15 + this.get('chart').y()(line.value))
-            .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('x1', chart.margins().left)
+            .attr('x2', chart.margins().left)
+            .attr('y1', 15 + chart.y()(line.value))
+            .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
-            .attr('x1', this.get('chart').width() - 95)
-            .attr('x2', this.get('chart').width() - 95)
-            .attr('y1', 15 + this.get('chart').y()(line.value))
-            .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('x1', chart.width() - chart.margins().right)
+            .attr('x2', chart.width() - chart.margins().right)
+            .attr('y1', 15 + chart.y()(line.value))
+            .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('text')
             .text(line.displayValue)
             .attr('x', 80)
-            .attr('y', 14 + this.get('chart').y()(line.value))
+            .attr('y', 14 + chart.y()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('class', 'comparison-text')

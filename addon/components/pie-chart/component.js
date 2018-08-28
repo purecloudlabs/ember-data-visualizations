@@ -26,13 +26,6 @@ export default BaseChartComponent.extend({
             .group(this.get('group'))
             .renderTitle(false);
 
-        if (this.get('legend')) {
-            chart.legend(dc.legend()
-                .gap(15)
-                .y(10)
-                .x(30));
-        }
-
         if (this.get('colorMap')) {
             chart.colors(d3.scaleOrdinal().domain(this.get('colorMap')).range(this.get('colors')));
         }
@@ -68,7 +61,33 @@ export default BaseChartComponent.extend({
                 .style('text-anchor', 'middle')
                 .text(this.get('data').total);
         }
+
+        if (this.get('showLegend')) {
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            const legendWidth = this.get('legendWidth') || 250;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.width() / 2 - legendWidth},${-1 * chart.height() / 4})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+        }
         this.addClickHandlersAndTooltips(chart.select('svg'), tip);
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        let alreadyDone = [];
+        for (let i = 0; i < chart.data().length; i++) {
+            if (alreadyDone.indexOf(chart.data()[i].key) === -1) {
+                let legendable = {};
+                legendable.title = chart.data()[i].key;
+                legendable.color = chart.getColor(chart.data()[i]);
+                legendable.elements = chart.selectAll('.pie-slice').filter(d => d.data.key === legendable.title);
+                legendables.push(legendable);
+                alreadyDone.push(chart.data()[i].key);
+            }
+        }
+        return legendables;
     },
 
     createTooltip() {
@@ -121,36 +140,6 @@ export default BaseChartComponent.extend({
                 tip.style('left', (`${centerOfChartX + centroidX + offsetX}px`));
             })
             .on('mouseout.tip', tip.hide);
-    },
-
-    onClick(d) {
-        const allSlices = this.get('chart').selectAll('.pie-slice');
-        const thisSlice = allSlices.filter(pieD => pieD == d);
-        const siblings = allSlices.filter(pieD => pieD !== d);
-        const legendItems = this.get('chart').selectAll('.dc-legend-item');
-        const thisLegendItem = legendItems.filter(legendD => legendD.data == d.value);
-        const siblingLegendItems = legendItems.filter(legendD => legendD.data !== d.value);
-
-        if (thisSlice.style('opacity') == 1) {
-            // either there is no selection or this slice is selected
-            if (siblings.style('opacity') == 1) {
-                // no selection yet: select this element
-                thisLegendItem.style('opacity', 1);
-                thisSlice.style('opacity', 1);
-                siblingLegendItems.style('opacity', .5);
-                siblings.style('opacity', .5);
-            } else {
-                // this is selected: unselect all
-                allSlices.style('opacity', 1);
-                legendItems.style('opacity', 1);
-            }
-        } else {
-            // another slice is selected: select this one instead
-            thisSlice.style('opacity', 1);
-            thisLegendItem.style('opacity', 1);
-            siblings.style('opacity', .5);
-            siblingLegendItems.style('opacity', .5);
-        }
     },
 
     showChartNotAvailable() {

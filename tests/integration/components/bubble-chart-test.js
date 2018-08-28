@@ -68,6 +68,12 @@ test('it renders a subtitle for each data point', function (assert) {
     return wait();
 });
 
+test('it renders a legend with the correct number of boxes', function (assert) {
+    this.render(hbs`{{bubble-chart showLegend=true dimension=params.dimension group=params.group instantRun=true}}`);
+    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 4)), 1000);
+    return wait();
+});
+
 test('it shows chart not available', function (assert) {
     this.render(hbs`{{bubble-chart isChartAvailable=false instantRun=true}}`);
     // delayed to let all dc rendering processes finish

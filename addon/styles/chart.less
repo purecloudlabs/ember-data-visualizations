@@ -47,11 +47,18 @@
 
     .deselected {
         opacity: .5;
-        stroke-width: 0px;
     }
     .selected {
         opacity: 1;
+    }
+    .deselected:not(.line) {
+        stroke-width: 0px;
+    }
+    .selected:not(.line) {
+        stroke-width: 1.5px;
         stroke: black;
-        stroke-width: 1px;
+    }
+    .selected.line {
+        stroke-width: 2px;
     }
 }
