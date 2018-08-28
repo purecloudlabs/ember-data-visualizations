@@ -1,10 +1,10 @@
 import moment from 'moment';
-import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
+import { isEmpty } from '@ember/utils';
 
 /**
    @public
@@ -98,7 +98,7 @@ export default BaseChartComponent.extend({
         let tip = d3.tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
-                if (!_.isEmpty(titles)) {
+                if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
                     titles.forEach((title, i) => {
                         const datum = formatter(this.get('data')[d.data.key][i]);
@@ -128,11 +128,11 @@ export default BaseChartComponent.extend({
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
         // Show min and max values over lines
-        if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin')) && dots.length > 0) {
+        if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && dots.length > 0) {
             this.addMaxMinLabels(dots);
         }
 
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
+        if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
             this.addComparisonLine(chart);
         }
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
@@ -241,17 +241,15 @@ export default BaseChartComponent.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
         groups.forEach((g, index) => {
-            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
-                if (index === this.get('seriesMaxMin')) {
-                    values = g.all().map(gElem => gElem.value);
-                    nonZeroValues = values.filter(v => v > 0);
-                    maxValue = _.max(nonZeroValues);
-                    maxIdx = values.indexOf(maxValue);
-                    maxValue = formatter(maxValue);
-                    minValue = _.min(nonZeroValues);
-                    minIdx = values.indexOf(minValue);
-                    minValue = formatter(minValue);
-                }
+            if (index === this.get('seriesMaxMin')) {
+                values = g.all().map(gElem => gElem.value);
+                nonZeroValues = values.filter(v => v > 0);
+                maxValue = Math.max(...nonZeroValues);
+                maxIdx = values.indexOf(maxValue);
+                maxValue = formatter(maxValue);
+                minValue = Math.min(...nonZeroValues);
+                minIdx = values.indexOf(minValue);
+                minValue = formatter(minValue);
             }
         });
         let gLabels = d3.select(dots[0].parentNode).append('g').attr('id', 'inline-labels');

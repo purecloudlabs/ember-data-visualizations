@@ -25,8 +25,8 @@
   "dependencies": {
     "ember-cli-babel": "^6.3.0",
     "ember-dc-shim": "^1.0.0",
-    "ember-element-resize-detector": "0.1.5",
-    "ember-tether": "1.0.0-beta.0"
+    "ember-element-resize-detector": "^0.2.0",
+    "ember-tether": "^1.0.0"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
@@ -43,10 +43,8 @@
     "ember-cli-sri": "^2.1.0",
     "ember-cli-uglify": "^2.0.0",
     "ember-disable-prototype-extensions": "^1.1.2",
-    "ember-export-application-global": "^2.0.0",
     "ember-font-awesome": "4.0.0-alpha.3",
     "ember-load-initializers": "^1.0.0",
-    "ember-lodash": "^0.0.11",
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-resolver": "^4.0.0",
     "ember-source": "~3.1.0",

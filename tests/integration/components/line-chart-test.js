@@ -36,7 +36,6 @@ const getTestParameters = function () {
     return {
         dimensions,
         groups,
-        seriesData: rawData,
         type: 'LAYERED',
 
         series: [
@@ -92,22 +91,22 @@ test('it renders', function (assert) {
 });
 
 test('it renders correct number of x axis ticks', function (assert) {
-    this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.x.axis g.tick').length, 5);
 });
 
 test('it renders correct number of y axis ticks', function (assert) {
-    this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.y.axis g.tick').length, 4);
 });
 
 test('it renders a point for each data point', function (assert) {
-    this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    this.render(hbs`{{line-chart dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     assert.equal(this.$('g.sub._0 .chart-body circle.dot').length, 3);
 });
 
 test('it shows a comparison line', function (assert) {
-    this.render(hbs`{{line-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    this.render(hbs`{{line-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
     later(this, (() => assert.equal(this.$('.comparison-line').length, 3)), 1000);
     return wait();
@@ -121,7 +120,7 @@ test('it renders a legend with the correct number of boxes', function (assert) {
 });
 
 test('it renders minimum and maximum value indicators', function (assert) {
-    this.render(hbs`{{line-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    this.render(hbs`{{line-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
 
     const runAssertions = () => {
         assert.equal(this.$('.max-value-text').length, 1);

@@ -1,4 +1,3 @@
-import _ from 'lodash/lodash';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
@@ -218,10 +217,10 @@ export default BaseChartComponent.extend({
         let g = this.get('group')[0];
         values = g.all().map(gElem => gElem.value);
         nonZeroValues = values.filter(v => v > 0);
-        maxValue = _.max(nonZeroValues);
+        maxValue = Math.max(...nonZeroValues);
         maxIdx = values.indexOf(maxValue);
         maxValue = formatter(maxValue);
-        minValue = _.min(nonZeroValues);
+        minValue = Math.min(...nonZeroValues);
         minIdx = values.indexOf(minValue);
         minValue = formatter(minValue);
         let gLabels = this.get('chart').select('svg > g').append('g').attr('id', 'inline-labels');
