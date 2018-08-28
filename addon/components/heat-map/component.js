@@ -38,7 +38,7 @@ export default BaseChartComponent.extend({
 
         const labelWidth = Math.max(...(yAxisTickLabels.map(el => el.length))) * 8;
         const tickWidth = 10;
-        const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
+        const rightMargin = this.get('legendWidth') || 250;
         const colorMap = this.get('colorMap');
 
         heatMap
@@ -107,14 +107,29 @@ export default BaseChartComponent.extend({
         this.addYAxis(chart, numbRows);
 
         // add legend
-        if (this.get('legend')) {
-            chart.select('g.legend').remove();
-            const legendDimension = 18;
-            let legendG = chart.select('g')
-                .append('g')
-                .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
-            this.addLegend(chart, '.heat-box', legendG, legendDimension);
+        chart.select('g.legend').remove();
+        const legendDimension = 18;
+        let legendG = chart.select('g')
+            .append('g')
+            .attr('transform', `translate(${chart.effectiveWidth()},${chart.effectiveHeight() / 4})`);
+        this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        let alreadyDone = [];
+        for (let i = 0; i < chart.data().length; i++) {
+            if (alreadyDone.indexOf(chart.data()[i].value) === -1) {
+                let legendable = {};
+                legendable.title = chart.data()[i].value;
+                legendable.color = chart.getColor(chart.data()[i]);
+                legendable.elements = chart.selectAll('.heat-box').filter(d => d.value === legendable.title);
+                legendables.push(legendable);
+                alreadyDone.push(chart.data()[i].value);
+            }
         }
+        return legendables;
     },
 
     isIntervalIncluded(ticks, interval) {
@@ -328,7 +343,7 @@ export default BaseChartComponent.extend({
             }
 
             // Set up any necessary hatching patterns
-            let svg = d3.select('.heat-map > svg').append('defs');
+            let svg = chart.select('svg').append('defs');
 
             svg
                 .append('clippath')
@@ -359,14 +374,14 @@ export default BaseChartComponent.extend({
                 .attr('stroke', 'white');
         });
 
-        heatMap.on('postRender', () => {
+        heatMap.on('postRender', chart => {
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
             }
 
-            d3.select('.heat-map > svg > text').remove();
-            let svg = d3.select('.heat-map > svg');
+            chart.select('svg > text').remove();
+            let svg = chart.select('svg');
             let bbox = svg.node().getBBox();
             svg
                 .append('text')
