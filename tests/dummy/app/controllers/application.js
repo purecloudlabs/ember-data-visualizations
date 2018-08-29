@@ -51,20 +51,23 @@ export default Ember.Controller.extend({
             this._createQueueGroups();
         }
     },
-
-    minBoxWidth: 4,
-    keyFormat: key => moment(key.toString()).format('MMM DD'),
-    heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470', '#FF0000'],
     dimensions: [],
     domainString: '',
     groups: [],
+    minBoxWidth: 4,
+    keyFormat: key => moment(key.toString()).format('MMM DD'),
+
+    // color stuff
+    heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470', '#FF0000'],
     statusColors: [
         '#7ADB37', // available
         '#FC0D1C', // busy
         '#FDBA43', // away
         '#2FCEF5'], // on queue
     colorMap: ['Available', 'Busy', 'Away', 'On Queue'],
+
+    // axes
     xAxis: {
         domain: [moment('10/31/2016'), moment('12/03/2016')],
         ticks: 3,
@@ -288,7 +291,7 @@ export default Ember.Controller.extend({
                 j++;
             }
         }
-        this.set('colorMap', colorsArray);
+        this.set('heatColorMap', colorsArray);
         this.set('heatGroup', dimensions.group().reduce(
             (p, v) => {
                 return v.value;

@@ -5,11 +5,10 @@
     dimension=heatDimension
     group=heatGroup
     height=400
-    legend=true
     legendWidth=200
     keyFormat=keyFormat
     colors=heatColors
-    colorMap=colorMap
+    colorMap=heatColorMap
     xAxis=xAxis
     yAxis=yAxis
     minBoxWidth=minBoxWidth
@@ -19,8 +18,8 @@
 </div>
 
 <button{{action "increaseData"}}>Increase</button>
-<button{{action "decreaseData"}}>Decrease</button>
-
+<button{{action "decreaseData"}}>Decrease</button><br/>
+{{input type='checkbox' checked=showColumnLegend}}Show Legend<br/>
 {{column-chart
     dimension=dimensions
     group=groups
@@ -37,12 +36,14 @@
     currentInterval=currentInterval
     showCurrentIndicator=true
     colorBelowComparisonLine=true
+    showLegend=showColumnLegend
+    legendWidth=250
 }}
 
+{{input type='checkbox' checked=showLineLegend}}Show Legend<br/>
 {{line-chart
     dimension=dimensions
     group=groups
-    seriesData=content
     seriesMaxMin=2
     showMaxMin=true
     series=series
@@ -52,9 +53,10 @@
     yAxis=yAxis
     showComparisonLine=true
     comparisonLine=comparisonLine
-    onClick=(action onClick)
     currentInterval=currentInterval
     showCurrentIndicator=false
+    showLegend=showLineLegend
+    legendWidth=250
 }}
 
 
@@ -62,7 +64,7 @@
 {{input type='checkbox' checked=showTotal}}Total<br/>
 {{input type='checkbox' checked=labels}}Labels<br/>
 {{input type='checkbox' checked=externalLabels}}External labels<br/>
-{{input type='checkbox' checked=legend}}Show Legend<br/>
+{{input type='checkbox' checked=showPieLegend}}Show Legend<br/>
 {{pie-chart
     dimension=agentDimensions
     group=agentGroups
@@ -74,12 +76,14 @@
     donutChart=donutChart
     externalLabels=externalLabels
     labels=labels
-    legend=legend
+    showLegend=showPieLegend
+    legendWidth=200
 }}
 
 {{input type='checkbox' checked=hideXAxisLines}}Hide x tick lines<br/>
 {{input type='checkbox' checked=showYTicks}}Show y ticks<br/>
 {{input type='checkbox' checked=showYGridLines}}Show y tick lines<br/>
+{{input type='checkbox' checked=showRowLegend}}Show Legend<br/>
 <button{{action "increaseQueue"}}>Increase</button>
 <button{{action "decreaseQueue"}}>Decrease</button>
 <div style='width: 40%'>
@@ -88,9 +92,7 @@
     group=queueGroups
     colors=colors
     height=400
-    labelWidth=150
     xAxis=yAxis
-    onClick=(action onClick)
     hideXAxisLines=hideXAxisLines
     showYTicks=showYTicks
     showYGridLines=showYGridLines
@@ -98,9 +100,12 @@
     showComparisonLine=true
     comparisonLine=queueComparisonLine
     chartNotAvailableBars=6
+    showLegend=showRowLegend
+    legendWidth=300
 }}
 </div>
 
+{{input type='checkbox' checked=showBubbleLegend}}Show Legend<br/>
 <div style='width: 40%'>
 {{bubble-chart
     dimension=statusDimension
@@ -110,6 +115,8 @@
     titleFormatter=titleFormatter
     subtitleFormatter=msSubtitleFormatter
     colors=statusColors
+    showLegend=showBubbleLegend
+    legendWidth=200
 }}
 </div>
 

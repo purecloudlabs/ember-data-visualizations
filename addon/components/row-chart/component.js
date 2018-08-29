@@ -29,6 +29,8 @@ export default BaseChartComponent.extend({
         this.get('group')[0].all().forEach(d => labels.push(d.key));
         const labelWidth = Math.max(...(labels.map(el => el.length))) * 8;
         const tickWidth = 15;
+        const legendWidth = this.get('legendWidth') || 250;
+        const rightMargin = this.get('showLegend') ? legendWidth : 5;
 
         rowChart
             .transitionDuration(0)
@@ -36,13 +38,13 @@ export default BaseChartComponent.extend({
             .group(this.get('group')[0])
             .dimension(this.get('dimension'))
             .ordering(d => d.key)
-            .colors(this.get('colors')[2])
+            .colors(this.get('colors')[0])
             .height(this.get('height'))
             .renderLabel(false)
             .renderTitle(false)
             .margins({
                 top: 5,
-                right: 50,
+                right: rightMargin,
                 bottom: 20,
                 left: labelWidth + tickWidth
             });
@@ -89,7 +91,32 @@ export default BaseChartComponent.extend({
             this.addComparisonLine(chart);
         }
 
+        if (this.get('showLegend')) {
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.effectiveWidth() + 50},${chart.effectiveHeight() / 4})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+        }
+
         this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'g.row > rect');
+    },
+
+    getLegendables(chart) {
+        let legendables = [];
+        let alreadyDone = [];
+        for (let i = 0; i < chart.data().length; i++) {
+            if (alreadyDone.indexOf(chart.data()[i].key) === -1) {
+                let legendable = {};
+                legendable.title = chart.data()[i].key;
+                legendable.color = chart.getColor(chart.data()[i]);
+                legendable.elements = chart.selectAll('g.row > rect').filter(d => d.key === legendable.title);
+                legendables.push(legendable);
+                alreadyDone.push(chart.data()[i].key);
+            }
+        }
+        return legendables;
     },
 
     addYAxis(chart, tickWidth) {
@@ -279,7 +306,7 @@ export default BaseChartComponent.extend({
             rowChart.width(this.get('width'));
         }
 
-        const labelWidth = this.get('labelWidth') || 150;
+        const labelWidth = 100;
         const totalWidth = rowChart.width();
         const chartWidth = totalWidth - labelWidth;
         rowChart.width(chartWidth);

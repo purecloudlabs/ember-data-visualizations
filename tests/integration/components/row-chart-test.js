@@ -129,3 +129,9 @@ test('it shows a comparison line', function (assert) {
     return wait();
 });
 
+test('it renders a legend with the correct number of boxes', function (assert) {
+    this.render(hbs`{{row-chart showLegend=true dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
+    // delayed to let all dc rendering processes finish
+    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 4)), 1000);
+    return wait();
+});

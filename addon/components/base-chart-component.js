@@ -26,7 +26,6 @@ export default Component.extend({
     tooltipDateFormat: 'll LT',
     group: null,
     dimension: null,
-    seriesData: null,
     data: null,
     series: [],
     height: 200,
@@ -68,13 +67,10 @@ export default Component.extend({
             .on('mouseout.tip', tip.hide);
     },
 
-    addLegend(chart, chartElement, legendG, legendDimension) {
-        const colorMap = this.get('colorMap');
-        const colors = this.get('colors');
-
+    addLegend(chart, legendables, legendG, legendDimension) {
         legendG.attr('class', 'legend');
         let legendGs = legendG.selectAll('g')
-            .data(colorMap)
+            .data(legendables)
             .enter().append('g')
             .attr('class', 'legendItem');
         legendGs.append('rect')
@@ -82,26 +78,24 @@ export default Component.extend({
             .attr('y', (d, i) => (i + 1) * 22)
             .attr('height', legendDimension)
             .attr('width', legendDimension)
-            .attr('fill', (d, i) => colors[i])
+            .attr('fill', d => d.color)
             .on('click', legendClickHandler);
         legendGs.append('text')
             .attr('unselectable', 'on')
             .attr('x', legendDimension + 6)
             .attr('y', (d, i) => (i + 1) * 22 + (legendDimension * 0.75))
-            .text(d => d);
+            .text(d => d.title);
 
-        function legendClickHandler() {
-            const all = chart.selectAll(`rect.legendRect,${chartElement}`);
-
-            const clicked = all.filter(d => {
-                let color = d.value || d;
-                return colors[colorMap.indexOf(color)] == d3.select(this).attr('fill');
-            });
-
-            const allOthers = all.filter(d => {
-                let color = d.value || d;
-                return colors[colorMap.indexOf(color)] !== d3.select(this).attr('fill');
-            });
+        function legendClickHandler(d) {
+            const clicked = d3.select(this);
+            const clickedElements = d.elements;
+            const allOthers = chart.selectAll('rect.legendRect').filter(legendD => legendD.color !== d.color);
+            let allOtherElements = [];
+            for (let i = 0; i < legendables.length; i++) {
+                if (legendables[i].color !== d.color) {
+                    allOtherElements.push(legendables[i].elements);
+                }
+            }
 
             // determine if any other groups are selected
             let isAnyLegendRectSelected = false;
@@ -126,14 +120,25 @@ export default Component.extend({
             if (clicked.classed('selected')) {
                 if (isAnyLegendRectSelected) {
                     toggleSelection(clicked);
+                    toggleSelection(clickedElements);
                 } else {
-                    returnToNeutral(all);
+                    returnToNeutral(clicked);
+                    returnToNeutral(clickedElements);
+                    returnToNeutral(allOthers);
+                    for (let i = 0; i < allOtherElements.length; i++) {
+                        returnToNeutral(allOtherElements[i]);
+                    }
                 }
             } else if (clicked.classed('deselected')) {
                 toggleSelection(clicked);
+                toggleSelection(clickedElements);
             } else {
                 clicked.classed('selected', true);
+                clickedElements.classed('selected', true);
                 allOthers.classed('deselected', true);
+                for (let i = 0; i < allOtherElements.length; i++) {
+                    allOtherElements[i].classed('deselected', true);
+                }
             }
         }
     },
