@@ -178,7 +178,7 @@ export default BaseChartComponent.extend({
                     .attr('width', 2)
                     .attr('height', 4)
                     .attr('fill', index < this.get('colors').length ? this.get('colors')[index] : this.get('colors')[this.get('colors').length - 1]);
-                if (!series.alert) {
+                if (!series.alert || !this.get('colorBelowComparisonLine')) {
                     chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
@@ -241,8 +241,7 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('type') === 'STACKED') {
-            const colors = this.get('colors');
-            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => this.get('colors')[d.layer]);
         }
 
         this.doHatching(chart);

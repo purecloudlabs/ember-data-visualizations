@@ -189,18 +189,8 @@ export default Ember.Controller.extend({
         const dimensions = this.get('dimensions');
         const groupNames = ['calls', 'chats', 'emails'];
         this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
-
-        // this.set('groups', groupNames.map(name =>
-        //     dimensions.group().reduce(
-        //         (p, v) => {
-        //             p.value = v[name];
-        //             p.color = v.color;
-        //             return p;
-        //         },
-        //         () => { },
-        //         () => ({})
-        //     )
-        // ));
+        // below is for viewing a GROUPED chart with only one metric; also, remove the 'series' param from application.hbs
+        // this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
     },
 
     init() {
