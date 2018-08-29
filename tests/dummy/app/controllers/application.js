@@ -78,7 +78,7 @@ export default Ember.Controller.extend({
 
     currentInterval: { start: moment('12/02/2016') },
 
-    comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
+    comparisonLine: { value: 50, displayValue: '50', color: '#2CD02C' },
 
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
@@ -187,17 +187,17 @@ export default Ember.Controller.extend({
         const groupNames = ['calls', 'chats', 'emails'];
         this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
 
-        this.set('groups', groupNames.map(name =>
-            dimensions.group().reduce(
-                (p, v) => {
-                    p.value = v[name];
-                    p.color = v.color;
-                    return p;
-                },
-                () => { },
-                () => ({})
-            )
-        ));
+        // this.set('groups', groupNames.map(name =>
+        //     dimensions.group().reduce(
+        //         (p, v) => {
+        //             p.value = v[name];
+        //             p.color = v.color;
+        //             return p;
+        //         },
+        //         () => { },
+        //         () => ({})
+        //     )
+        // ));
     },
 
     init() {

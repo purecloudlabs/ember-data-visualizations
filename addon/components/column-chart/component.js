@@ -86,8 +86,7 @@ export default BaseChartComponent.extend({
                         .group(g)
                         .colors('white')
                         .renderTitle(false)
-                        .elasticY(true)
-                        .valueAccessor(d => typeof d.value === 'number' ? d.value : d.value.value);
+                        .elasticY(true);
 
                     columnCharts.push(columnChart);
                 }
@@ -98,11 +97,15 @@ export default BaseChartComponent.extend({
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors(this.get('colors'))
+                    .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
                     .renderTitle(false)
                     .elasticY(true)
-                    .colorAccessor(d => typeof d.value === 'number' ? index : d.value.color)
-                    .valueAccessor(d => typeof d.value === 'number' ? d.value : d.value.value);
+                    .colorAccessor(d => {
+                        return this.get('colorBelowComparisonLine')
+                        && this.get('comparisonLine.value') > d.value
+                            ? this.get('colors').length - 1
+                            : index;
+                    });
 
                 columnCharts.push(columnChart);
             });
@@ -137,15 +140,17 @@ export default BaseChartComponent.extend({
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
-                    titles.forEach((title, i) => {
-                        const datum = formatter(this.get('data')[d.data.key][i]);
-                        const secondaryClass = d.y === datum ? 'primary-stat' : '';
-                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                    this.get('series').forEach((series, i) => {
+                        if (!series.alert) {
+                            const datum = formatter(this.get('data')[d.data.key][i]);
+                            const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                            str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${series.title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                        }
                     });
                     return str;
                 }
 
-                return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${typeof d.data.value === 'object' ? d.data.value.value : d.data.value}</span>`;
+                return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${d.data.value}</span>`;
             });
 
         return tip;
@@ -158,6 +163,7 @@ export default BaseChartComponent.extend({
         this.get('series').forEach((series, index) => {
             if (series.hatch) {
                 let rotateAngle = series.hatch === 'pos' ? 45 : -45;
+                let comparisonValue = this.get('comparisonLine.value');
 
                 svg.append('pattern')
                     .attr('id', `diagonalHatch${index}`)
@@ -176,8 +182,7 @@ export default BaseChartComponent.extend({
                 } else {
                     chart.selectAll('rect.bar').filter(function (d) {
                         return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                        && ((d.data.value.color === index - 1 && series.hatch === 'neg')
-                        || (d.data.value.color === index && series.hatch === 'pos'));
+                        && d.data.value < comparisonValue;
                     })
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
