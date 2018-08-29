@@ -282,22 +282,29 @@ export default BaseChartComponent.extend({
         let legendables = [];
         const formatter = this.get('xAxis.formatter') || (value => value);
         const data = this.get('data');
-        const titles = this.get('series').map(entry => entry.title);
 
-        for (let i = 0; i < titles.length; i++) {
-            let legendable = {};
-            const rectangles = chart.selectAll('rect.bar')
-                .filter(function (d) {
-                    let fill = d3.select(this).attr('fill');
-                    if (d.y === formatter(data[d.data.key][i]) && d3.select(this).classed(titles[i])) {
-                        legendable.title = titles[i];
-                        legendable.color = fill;
-                        return true;
-                    }
-                });
-            legendable.elements = rectangles;
-            legendables.push(legendable);
-        }
+        this.get('series').forEach((series, i) => {
+            if (!series.alert) {
+                let legendable = {};
+                let colors = this.get('colors');
+                const rectangles = chart.selectAll('rect.bar')
+                    .filter(function (d) {
+                        let fill;
+                        if (d3.select(this).attr('fill').indexOf('url(#diagonalHatch') !== -1) {
+                            fill = `url(#diagonalHatch${i})`;
+                        } else {
+                            fill = colors[i];
+                        }
+                        if (d.y === formatter(data[d.data.key][i]) && d3.select(this).classed(series.title)) {
+                            legendable.title = series.title;
+                            legendable.color = fill;
+                            return true;
+                        }
+                    });
+                legendable.elements = rectangles;
+                legendables.push(legendable);
+            }
+        });
         return legendables;
     },
 
