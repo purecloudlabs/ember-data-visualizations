@@ -55,7 +55,7 @@ export default Ember.Controller.extend({
     minBoxWidth: 4,
     keyFormat: key => moment(key.toString()).format('MMM DD'),
     heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470', '#FF0000'],
     dimensions: [],
     domainString: '',
     groups: [],
@@ -82,7 +82,7 @@ export default Ember.Controller.extend({
 
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
-    series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+    series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }, { title: 'pos alert hatch', hatch: 'pos', alert: true, replaceIndex: 0 }, { title: 'neg alert hatch', hatch: 'neg', alert: true, replaceIndex: 1 }],
 
     // format object tells the groups function how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the grouping function that the 'entity' property on the data objects should be used for the displayed title on each bubble
@@ -186,6 +186,18 @@ export default Ember.Controller.extend({
         const dimensions = this.get('dimensions');
         const groupNames = ['calls', 'chats', 'emails'];
         this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
+
+        this.set('groups', groupNames.map(name =>
+            dimensions.group().reduce(
+                (p, v) => {
+                    p.value = v[name];
+                    p.color = v.color;
+                    return p;
+                },
+                () => { },
+                () => ({})
+            )
+        ));
     },
 
     init() {

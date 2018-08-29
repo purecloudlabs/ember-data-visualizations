@@ -86,7 +86,8 @@ export default BaseChartComponent.extend({
                         .group(g)
                         .colors('white')
                         .renderTitle(false)
-                        .elasticY(true);
+                        .elasticY(true)
+                        .valueAccessor(d => typeof d.value === 'number' ? d.value : d.value.value);
 
                     columnCharts.push(columnChart);
                 }
@@ -97,9 +98,11 @@ export default BaseChartComponent.extend({
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors(this.get('colors')[index])
+                    .colors(this.get('colors'))
                     .renderTitle(false)
-                    .elasticY(true);
+                    .elasticY(true)
+                    .colorAccessor(d => typeof d.value === 'number' ? index : d.value.color)
+                    .valueAccessor(d => typeof d.value === 'number' ? d.value : d.value.value);
 
                 columnCharts.push(columnChart);
             });
@@ -142,7 +145,7 @@ export default BaseChartComponent.extend({
                     return str;
                 }
 
-                return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${d.data.value}</span>`;
+                return `<span>${moment(d.data.key).format('L')}</span><br/><span class="tooltip-value">${typeof d.data.value === 'object' ? d.data.value.value : d.data.value}</span>`;
             });
 
         return tip;
@@ -165,11 +168,20 @@ export default BaseChartComponent.extend({
                     .append('rect')
                     .attr('width', 2)
                     .attr('height', 4)
-                    .attr('fill', this.get('colors')[index]);
-
-                chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
-                    .attr('fill', `url(#diagonalHatch${index})`)
-                    .attr('opacity', '.7');
+                    .attr('fill', index < this.get('colors').length ? this.get('colors')[index] : this.get('colors')[this.get('colors').length - 1]);
+                if (!series.alert) {
+                    chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
+                        .attr('fill', `url(#diagonalHatch${index})`)
+                        .attr('opacity', '.7');
+                } else {
+                    chart.selectAll('rect.bar').filter(function (d) {
+                        return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
+                        && ((d.data.value.color === index - 1 && series.hatch === 'neg')
+                        || (d.data.value.color === index && series.hatch === 'pos'));
+                    })
+                        .attr('fill', `url(#diagonalHatch${index})`)
+                        .attr('opacity', '.7');
+                }
             }
         });
 
