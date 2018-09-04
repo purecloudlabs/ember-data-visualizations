@@ -357,7 +357,7 @@ export default BaseChartComponent.extend({
         const line = this.get('comparisonLine');
 
         chart.selectAll('.comparison-line').remove();
-        chart.selectAll('#comparison-text').remove();
+        chart.selectAll('.comparison-text').remove();
 
         chartBody.append('svg:line')
             .attr('x1', chart.margins().left)
@@ -389,7 +389,7 @@ export default BaseChartComponent.extend({
             .attr('y', 14 + chart.y()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
-            .attr('id', 'comparison-text')
+            .attr('class', 'comparison-text')
             .attr('fill', line.textColor || '#000000');
     },
 
