@@ -59,7 +59,7 @@ export default Ember.Controller.extend({
 
     // color stuff
     heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470'],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470', '#FF0000'],
     statusColors: [
         '#7ADB37', // available
         '#FC0D1C', // busy
@@ -81,11 +81,11 @@ export default Ember.Controller.extend({
 
     currentInterval: { start: moment('12/02/2016') },
 
-    comparisonLine: { value: 70, displayValue: '70', color: '#2CD02C' },
+    comparisonLine: { value: 50, displayValue: '50', color: '#2CD02C' },
 
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
-    series: [{ title: 'Offered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Skilled Answered Calls', hatch: false }],
+    series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }, { title: 'pos alert hatch', hatch: 'pos', alert: true, replaceIndex: 0 }, { title: 'neg alert hatch', hatch: 'neg', alert: true, replaceIndex: 1 }],
 
     // format object tells the groups function how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the grouping function that the 'entity' property on the data objects should be used for the displayed title on each bubble
@@ -189,6 +189,8 @@ export default Ember.Controller.extend({
         const dimensions = this.get('dimensions');
         const groupNames = ['calls', 'chats', 'emails'];
         this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
+        // below is for viewing a GROUPED chart with only one metric; also, remove the 'series' param from application.hbs
+        // this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
     },
 
     init() {

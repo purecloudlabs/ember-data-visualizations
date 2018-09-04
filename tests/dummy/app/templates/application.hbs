@@ -20,6 +20,7 @@
 <button{{action "increaseData"}}>Increase</button>
 <button{{action "decreaseData"}}>Decrease</button><br/>
 {{input type='checkbox' checked=showColumnLegend}}Show Legend<br/>
+{{input type='checkbox' checked=colorBelowComparisonLine}}Color rectangles below comparison line<br/>
 {{column-chart
     dimension=dimensions
     group=groups
@@ -35,6 +36,7 @@
     comparisonLine=comparisonLine
     currentInterval=currentInterval
     showCurrentIndicator=true
+    colorBelowComparisonLine=colorBelowComparisonLine
     showLegend=showColumnLegend
     legendWidth=250
 }}

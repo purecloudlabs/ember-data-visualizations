@@ -100,9 +100,15 @@ export default BaseChartComponent.extend({
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors(this.get('colors')[index])
+                    .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
                     .renderTitle(false)
-                    .elasticY(true);
+                    .elasticY(true)
+                    .colorAccessor(d => {
+                        return this.get('colorBelowComparisonLine')
+                        && this.get('comparisonLine.value') > d.value
+                            ? this.get('colors').length - 1
+                            : index;
+                    });
 
                 columnCharts.push(columnChart);
             });
@@ -137,10 +143,12 @@ export default BaseChartComponent.extend({
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
-                    titles.forEach((title, i) => {
-                        const datum = formatter(this.get('data')[d.data.key][i]);
-                        const secondaryClass = d.y === datum ? 'primary-stat' : '';
-                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                    this.get('series').forEach((series, i) => {
+                        if (!series.alert) {
+                            const datum = formatter(this.get('data')[d.data.key][i]);
+                            const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                            str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${series.title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                        }
                     });
                     return str;
                 }
@@ -158,6 +166,7 @@ export default BaseChartComponent.extend({
         this.get('series').forEach((series, index) => {
             if (series.hatch) {
                 let rotateAngle = series.hatch === 'pos' ? 45 : -45;
+                let comparisonValue = this.get('comparisonLine.value');
 
                 svg.append('pattern')
                     .attr('id', `diagonalHatch${index}`)
@@ -168,11 +177,19 @@ export default BaseChartComponent.extend({
                     .append('rect')
                     .attr('width', 2)
                     .attr('height', 4)
-                    .attr('fill', this.get('colors')[index]);
-
-                chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
-                    .attr('fill', `url(#diagonalHatch${index})`)
-                    .attr('opacity', '.7');
+                    .attr('fill', index < this.get('colors').length ? this.get('colors')[index] : this.get('colors')[this.get('colors').length - 1]);
+                if (!series.alert || !this.get('colorBelowComparisonLine')) {
+                    chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
+                        .attr('fill', `url(#diagonalHatch${index})`)
+                        .attr('opacity', '.7');
+                } else {
+                    chart.selectAll('rect.bar').filter(function (d) {
+                        return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
+                        && d.data.value < comparisonValue;
+                    })
+                        .attr('fill', `url(#diagonalHatch${index})`)
+                        .attr('opacity', '.7');
+                }
             }
         });
 
@@ -224,8 +241,7 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('type') === 'STACKED') {
-            const colors = this.get('colors');
-            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => this.get('colors')[d.layer]);
         }
 
         this.doHatching(chart);
@@ -265,22 +281,29 @@ export default BaseChartComponent.extend({
         let legendables = [];
         const formatter = this.get('xAxis.formatter') || (value => value);
         const data = this.get('data');
-        const titles = this.get('series').map(entry => entry.title);
 
-        for (let i = 0; i < titles.length; i++) {
-            let legendable = {};
-            const rectangles = chart.selectAll('rect.bar')
-                .filter(function (d) {
-                    let fill = d3.select(this).attr('fill');
-                    if (d.y === formatter(data[d.data.key][i]) && d3.select(this).classed(titles[i])) {
-                        legendable.title = titles[i];
-                        legendable.color = fill;
-                        return true;
-                    }
-                });
-            legendable.elements = rectangles;
-            legendables.push(legendable);
-        }
+        this.get('series').forEach((series, i) => {
+            if (!series.alert) {
+                let legendable = {};
+                let colors = this.get('colors');
+                const rectangles = chart.selectAll('rect.bar')
+                    .filter(function (d) {
+                        let fill;
+                        if (d3.select(this).attr('fill').indexOf('url(#diagonalHatch') !== -1) {
+                            fill = `url(#diagonalHatch${i})`;
+                        } else {
+                            fill = colors[i];
+                        }
+                        if (d.y === formatter(data[d.data.key][i]) && d3.select(this).classed(series.title)) {
+                            legendable.title = series.title;
+                            legendable.color = fill;
+                            return true;
+                        }
+                    });
+                legendable.elements = rectangles;
+                legendables.push(legendable);
+            }
+        });
         return legendables;
     },
 
