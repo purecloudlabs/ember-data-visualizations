@@ -140,3 +140,11 @@ test('it renders a legend with the correct number of boxes', function (assert) {
     later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 3)), 1000);
     return wait();
 });
+
+test('it renders a legend even when there are no groups', function (assert) {
+    this.set('groups', []);
+    this.render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
+    // delayed to let all dc rendering processes finish
+    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 3)), 1000);
+    return wait();
+});
