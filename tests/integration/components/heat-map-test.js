@@ -65,29 +65,29 @@ moduleForComponent('heat-map', 'Integration | Component | heat map', {
 
 test('it renders', function (assert) {
     this.render(hbs`{{heat-map}}`);
-    assert.equal(this.$('.chart.heat-map').length, 1);
+    assert.dom('.chart.heat-map').exists();
 });
 
 test('it renders a rectangle for each data point', function (assert) {
     this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    assert.equal(this.$('rect.heat-box').length, 9);
+    assert.dom('rect.heat-box').exists({ count: 9 });
 });
 
 test('it renders correct number of x axis ticks', function (assert) {
     this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('.cols text.tickLabel:not(.hidden)').length, 2)), 1000);
+    later(this, () => assert.dom('.cols text.tickLabel:not(.hidden)').exists({ count: 2 }), 1000);
     return wait();
 });
 
 test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 5)), 1000);
+    later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 5 }), 1000);
     return wait();
 });
 
 test('it shows chart not available', function (assert) {
     this.render(hbs`{{heat-map isChartAvailable=false xAxis=params.xAxis keyFormat=params.keyFormat instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('.chart-not-available').length, 1)), 1000);
+    later(this, () => assert.dom('.chart-not-available').exists(), 1000);
     return wait();
 });

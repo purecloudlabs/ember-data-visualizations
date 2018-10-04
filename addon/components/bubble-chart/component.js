@@ -3,6 +3,7 @@ import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import moment from 'moment';
+
 /**
    @public
    @module bubble-chart

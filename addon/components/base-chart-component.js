@@ -10,12 +10,6 @@ export default Component.extend({
 
     classNames: ['chart'],
 
-    colors: [
-        '#1f77b4', '#ff7f0e', '#2ca02c',
-        '#9467bd', '#8c564b', '#e377c2',
-        '#7f7f7f', '#bcbd22', '#17becf'
-    ],
-
     instantRun: false,
     resizeTimer: null,
     onResizeDebounced: null,
@@ -27,10 +21,15 @@ export default Component.extend({
     group: null,
     dimension: null,
     data: null,
-    series: [],
     height: 200,
     xAxis: {},
     yAxis: {},
+    series: [],
+    colors: [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#9467bd', '#8c564b', '#e377c2',
+        '#7f7f7f', '#bcbd22', '#17becf'
+    ],
 
     setupResize() {
         this.set('onResizeDebounced', () => {
@@ -63,8 +62,12 @@ export default Component.extend({
         });
 
         this.get('chart').selectAll(elementToApplyTip)
-            .on('mouseover.tip', tip.show)
-            .on('mouseout.tip', tip.hide);
+            .on('mouseover.tip', function (d) {
+                tip.show(d, this);
+            })
+            .on('mouseout.tip', function (d) {
+                tip.hide(d, this);
+            });
     },
 
     addLegend(chart, legendables, legendG, legendDimension) {

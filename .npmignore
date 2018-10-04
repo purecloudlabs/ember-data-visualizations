@@ -1,4 +1,3 @@
-/config/ember-try.js
 /dist
 /tests
 /tmp
@@ -9,5 +8,6 @@
 .eslintrc.js
 .watchmanconfig
 .travis.yml
+.template-lintrc.js
 ember-cli-build.js
 testem.js

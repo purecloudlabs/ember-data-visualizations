@@ -2,7 +2,7 @@ import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
-import $ from 'jquery';
+
 /**
    @public
    @module row-chart
@@ -83,7 +83,8 @@ export default BaseChartComponent.extend({
 
     onRenderlet(chart, tip) {
 
-        $(`#${this.get('elementId')} #inline-labels`).remove();
+        this.$('.inline-labels').remove();
+
         if (this.get('showMaxMin')) {
             this.addMaxMinLabels(chart.selectAll('g.row > rect')._groups[0]);
         }
@@ -223,7 +224,7 @@ export default BaseChartComponent.extend({
         minValue = Math.min(...nonZeroValues);
         minIdx = values.indexOf(minValue);
         minValue = formatter(minValue);
-        let gLabels = this.get('chart').select('svg > g').append('g').attr('id', 'inline-labels');
+        let gLabels = this.get('chart').select('svg > g').append('g').attr('class', 'inline-labels');
         let b = bars[maxIdx];
 
         // Choose the longest bar in the stack (largest width value) and place the max/min labels to the right of that.

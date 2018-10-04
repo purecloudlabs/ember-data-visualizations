@@ -50,29 +50,29 @@ moduleForComponent('row-chart', 'Integration | Component | row chart', {
 
 test('it renders', function (assert) {
     this.render(hbs`{{row-chart}}`);
-    assert.equal(this.$('.chart.row-chart').length, 1);
+    assert.dom('.chart.row-chart').exists();
 });
 
 test('it renders correct number of x axis ticks', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
-    assert.equal(this.$('g.axis.x g.tick').length, 3);
+    assert.dom('g.axis.x g.tick').exists({ count: 3 });
 });
 
 test('it renders a bar for each data point', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
-    assert.equal(this.$('g.row rect').length, 4);
+    assert.dom('g.row rect').exists({ count: 4 });
 });
 
 test('it renders a label for each data point', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('g.axis.y g.tick text').length, 4)), 1000);
+    later(this, () => assert.dom('g.axis.y g.tick text').exists({ count: 4 }), 1000);
     return wait();
 });
 
 test('it shows chart not available', function (assert) {
     this.render(hbs`{{row-chart isChartAvailable=false chartNotAvailableBars=4 xAxis=params.xAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('.chart-not-available').length, 1)), 1000);
+    later(this, () => assert.dom('.chart-not-available').exists(), 1000);
     return wait();
 });
 
@@ -80,10 +80,10 @@ test('it renders minimum and maximum value indicators', function (assert) {
     this.render(hbs`{{row-chart showMaxMin=true dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
 
     const runAssertions = () => {
-        assert.equal(this.$('.max-value-text').length, 1);
-        assert.equal(this.$('.max-value-indicator').length, 1);
-        assert.equal(this.$('.min-value-text').length, 1);
-        assert.equal(this.$('.min-value-indicator').length, 1);
+        assert.dom('.max-value-text').exists();
+        assert.dom('.max-value-indicator').exists();
+        assert.dom('.min-value-text').exists();
+        assert.dom('.min-value-indicator').exists();
     };
 
     // delayed to let all dc rendering processes finish
@@ -94,27 +94,27 @@ test('it renders minimum and maximum value indicators', function (assert) {
 test('it can hide x tick lines correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  hideXAxisLines=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('g.axis.x g.tick line.grid-line').length, 1)), 1000);
+    later(this, () => assert.dom('g.axis.x g.tick line.grid-line').exists(), 1000);
     return wait();
 });
 test('it can render y ticks correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYTicks=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('line.yTick').length, 4)), 1000);
+    later(this, () => assert.dom('line.yTick').exists({ count: 4 }), 1000);
     return wait();
 });
 test('it can render y grid lines correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYGridLines=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('line.y.grid-line').length, 4)), 1000);
+    later(this, () => assert.dom('line.y.grid-line').exists({ count: 4 }), 1000);
     return wait();
 });
 test('it can render both y ticks and y grid lines correctly', function (assert) {
     this.render(hbs`{{row-chart dimension=params.dimensions group=params.groups xAxis=params.xAxis  showYGridLines=true showYTicks=true instantRun=true}}`);
 
     const runAssertions = () => {
-        assert.equal(this.$('line.y.grid-line').length, 4);
-        assert.equal(this.$('line.yTick').length, 4);
+        assert.dom('line.y.grid-line').exists({ count: 4 });
+        assert.dom('line.yTick').exists({ count: 4 });
     };
 
     // delayed to let all dc rendering processes finish
@@ -125,13 +125,13 @@ test('it can render both y ticks and y grid lines correctly', function (assert) 
 test('it shows a comparison line', function (assert) {
     this.render(hbs`{{row-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('.comparison-line').length, 3)), 1000);
+    later(this, () => assert.dom('.comparison-line').exists({ count: 3 }), 1000);
     return wait();
 });
 
 test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{row-chart showLegend=true dimension=params.dimensions group=params.groups xAxis=params.xAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 4)), 1000);
+    later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 4 }), 1000);
     return wait();
 });

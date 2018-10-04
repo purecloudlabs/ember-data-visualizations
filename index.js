@@ -6,10 +6,12 @@ const Funnel = require('broccoli-funnel');
 const LessCompiler = require('broccoli-less-single');
 
 module.exports = {
-    name: 'ember-data-visualizations',
+    name: require('./package').name,
+
     isDevelopingAddon() {
         return Boolean(process.env.DATA_VIS_DEV_MODE);
     },
+
     treeForAddon(tree) {
         const defaultTree = this._super.treeForAddon.call(this, tree);
 

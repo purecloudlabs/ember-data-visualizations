@@ -51,7 +51,7 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 * `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties: 
+* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties:
     * `value` (value on y axis on which to show line)
     * `displayValue` (text that will appear to the left of the line on the y axis)
     * `color` (Hex string)
@@ -73,7 +73,7 @@ The line chart uses an *array* of crossfilter groups to display different types 
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
 * `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties: 
+* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties:
     * `value` (value on y axis on which to show line)
     * `displayValue` (text that will appear to the left of the line on the y axis)
     * `color` (Hex string)
@@ -98,7 +98,7 @@ The row chart uses an *array* of crossfilter groups to display different types o
 * `showYTicks` (boolean): whether to show tick marks for each bar on the y axis
 * `showMaxMin`: whether to show max/min indicators for the maximum and minimum values of the row chart
 * `showComparisonLine` (boolean): whether to show a comparison line
-* `comparisonLine` (Object): a vertical line to mark a target, average, or any kind of comparison value. Properties: 
+* `comparisonLine` (Object): a vertical line to mark a target, average, or any kind of comparison value. Properties:
     * `value` (value on y axis on which to show line)
     * `displayValue` (text that will appear to the left of the line on the y axis)
     * `color` (Hex string)
@@ -132,16 +132,16 @@ The bubble chart is a dc-addons `bubbleCloud`, which is not as robustly supporte
     * The `value` of each fact is an object with the following properties:
         * `tooltip` (String): tooltips display the `key` property with a subtitle of whatever is contained in this property. Optional.
         * `colorValue` (number): index of the `colors` array that this bubble is colored. e.g. if the `colors` array is `['#8b0000', '#ffff00', '#6495ed']`, a `banana` object might have a `colorValue` of `1`. See the dummy app for an example of color mapping. Optional.
-        * `radius` (String): Not necessarily a number value. This is the string value that will be transformed into a number based on `radiusFormat`. 
+        * `radius` (String): Not necessarily a number value. This is the string value that will be transformed into a number based on `radiusFormat`.
             * e.g. if `radiusFormat = 'timestamp'`, `radius` should be a timestamp like `'2018-06-26T16:55:25-04:00'`. Required.
         * `subtitle` (String): Actual subtitle of bubble. Optional.
 
 
 #### Optional parameters
 * Formats/formatters (if not specified, the labels on the bubbles will assume the `key` and `value.subtitle` property verbatim, and `radiusFormat` will assume `'count'`):
-    * `radiusFormat` (string): specifies how to interpret the `value.radius` string to get an actual radius number. Options: `timestamp`, `milliseconds`, `count`. 
-        * The `timestamp` option calculates the duration between `value.radius` and now. 
-        * The `milliseconds` option assumes that `value.radius` is a duration in milliseconds. 
+    * `radiusFormat` (string): specifies how to interpret the `value.radius` string to get an actual radius number. Options: `timestamp`, `milliseconds`, `count`.
+        * The `timestamp` option calculates the duration between `value.radius` and now.
+        * The `milliseconds` option assumes that `value.radius` is a duration in milliseconds.
         * The `count` option assumes that whatever is currently in `value.radius` is the actual physical radius desired.
     * `titleFormatter` (function): Takes an input of the fact's `key` property and outputs the formatted string for the bubble label.
         * e.g. if the `key` is `'First Last'` and the label on the bubble should be the initials, `titleFormatter` takes an input of `First Last` and returns `FL`.
@@ -158,7 +158,7 @@ The heatmap does *not* use an array of crossfilter groups. It uses a singular gr
     * The `key` of each fact is an array that tells the heatmap the position of the fact on the chart. `key[0]` will tell the chart the y position, and `key[1]` the x position.
     * The `value` property of each fact will be used to determine the color of the fact. All possible `value` properties should be included in the `colorMap` array (see below). This can be a string, number, whatever, as long as it is included in the `colorMap` object.
 * `colorMap` (Array): order in which to show the colors of the properties. Each element in the array is a string which matches one of the `value` types in the group. For example, if the color value on your heatmap represents intensity from 1 to 10, your `colorMap` might be `[1,2,3,4,5,6,7,8,9,10]` (or the numbers in any order). The heatmap will use the index of this array to determine the index of the `colors` property with which to use each number.
-* `xAxis` (Object) describes the x axis. Properties: 
+* `xAxis` (Object) describes the x axis. Properties:
     * `domain` (Array): describes the domain of the x axis. This property is REQUIRED.
     * `ticks` (number): number of tick LABELS to show on the x axis. This property is optional, and if left out, the chart will automatically show as many labels as will comfortably fit based on the chart's width.
     * `tickMarks` (number): number of ticks to show on the x axis. This property is optional, and if left out, the chart will show a tick for each data point.

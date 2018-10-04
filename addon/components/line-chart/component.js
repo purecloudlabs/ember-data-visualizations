@@ -2,7 +2,6 @@ import moment from 'moment';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
-import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
 
@@ -125,7 +124,7 @@ export default BaseChartComponent.extend({
 
         let dots = chart.selectAll('.sub._0 circle.dot')._groups[0];
 
-        $(`#${this.get('elementId')} #inline-labels`).remove();
+        this.$('.inline-labels').remove();
 
         // Show min and max values over lines
         if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && dots.length > 0) {
@@ -252,7 +251,7 @@ export default BaseChartComponent.extend({
                 minValue = formatter(minValue);
             }
         });
-        let gLabels = d3.select(dots[0].parentNode).append('g').attr('id', 'inline-labels');
+        let gLabels = d3.select(dots[0].parentNode).append('g').attr('class', 'inline-labels');
         let d = dots[maxIdx];
 
         // Choose the tallest circle in the stack (lowest y value) and place the max/min labels above that.

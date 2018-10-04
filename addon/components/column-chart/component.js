@@ -2,7 +2,6 @@ import moment from 'moment';
 import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
-import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
 
@@ -252,7 +251,7 @@ export default BaseChartComponent.extend({
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
-        $(`#${this.get('elementId')} #inline-labels`).remove();
+        this.$('.inline-labels').remove();
 
         if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addMaxMinLabels(bars);
@@ -409,7 +408,7 @@ export default BaseChartComponent.extend({
                 minValue = formatter(minValue);
             }
         });
-        let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
+        let gLabels = d3.select(bars[0].parentNode).append('g').attr('class', 'inline-labels');
         let b = bars[maxIdx];
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.

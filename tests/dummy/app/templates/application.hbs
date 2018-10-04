@@ -1,7 +1,7 @@
-{{domainString}}<br/>
+{{domainString}} <br>
 
-<div style="width: 50%">
-{{heat-map
+<div class="dummy-chart-container">
+  {{heat-map
     dimension=heatDimension
     group=heatGroup
     height=400
@@ -14,81 +14,82 @@
     minBoxWidth=minBoxWidth
     currentInterval=currentInterval
     showCurrentIndicator=true
-}}
+  }}
 </div>
 
-<button{{action "increaseData"}}>Increase</button>
-<button{{action "decreaseData"}}>Decrease</button><br/>
-{{input type='checkbox' checked=showColumnLegend}}Show Legend<br/>
-{{input type='checkbox' checked=colorBelowComparisonLine}}Color rectangles below comparison line<br/>
+<button {{action "increaseData"}}>Increase</button>
+<button {{action "decreaseData"}}>Decrease</button> <br>
+
+{{input type="checkbox" checked=showColumnLegend}}Show Legend <br>
+{{input type="checkbox" checked=colorBelowComparisonLine}}Color rectangles below comparison line <br>
 {{column-chart
-    dimension=dimensions
-    group=groups
-    type='LAYERED'
-    seriesMaxMin=2
-    showMaxMin=true
-    series=series
-    colors=colors
-    height=200
-    xAxis=xAxis
-    yAxis=yAxis
-    showComparisonLine=true
-    comparisonLine=comparisonLine
-    currentInterval=currentInterval
-    showCurrentIndicator=true
-    colorBelowComparisonLine=colorBelowComparisonLine
-    showLegend=showColumnLegend
-    legendWidth=250
+  dimension=dimensions
+  group=groups
+  type="LAYERED"
+  seriesMaxMin=2
+  showMaxMin=true
+  series=series
+  colors=colors
+  height=200
+  xAxis=xAxis
+  yAxis=yAxis
+  showComparisonLine=true
+  comparisonLine=comparisonLine
+  currentInterval=currentInterval
+  showCurrentIndicator=true
+  colorBelowComparisonLine=colorBelowComparisonLine
+  showLegend=showColumnLegend
+  legendWidth=250
 }}
 
-{{input type='checkbox' checked=showLineLegend}}Show Legend<br/>
+{{input type="checkbox" checked=showLineLegend}}Show Legend <br>
 {{line-chart
-    dimension=dimensions
-    group=groups
-    seriesMaxMin=2
-    showMaxMin=true
-    series=series
-    colors=colors
-    height=200
-    xAxis=xAxis
-    yAxis=yAxis
-    showComparisonLine=true
-    comparisonLine=comparisonLine
-    currentInterval=currentInterval
-    showCurrentIndicator=false
-    showLegend=showLineLegend
-    legendWidth=250
+  dimension=dimensions
+  group=groups
+  seriesMaxMin=2
+  showMaxMin=true
+  series=series
+  colors=colors
+  height=200
+  xAxis=xAxis
+  yAxis=yAxis
+  showComparisonLine=true
+  comparisonLine=comparisonLine
+  currentInterval=currentInterval
+  showCurrentIndicator=false
+  showLegend=showLineLegend
+  legendWidth=250
 }}
 
 
-{{input type='checkbox' checked=donutChart}}Donut<br/>
-{{input type='checkbox' checked=showTotal}}Total<br/>
-{{input type='checkbox' checked=labels}}Labels<br/>
-{{input type='checkbox' checked=externalLabels}}External labels<br/>
-{{input type='checkbox' checked=showPieLegend}}Show Legend<br/>
+{{input type="checkbox" checked=donutChart}}Donut <br>
+{{input type="checkbox" checked=showTotal}}Total <br>
+{{input type="checkbox" checked=labels}}Labels <br>
+{{input type="checkbox" checked=externalLabels}}External labels <br>
+{{input type="checkbox" checked=showPieLegend}}Show Legend <br>
 {{pie-chart
-    dimension=agentDimensions
-    group=agentGroups
-    colors=statusColors
-    colorMap=colorMap
-    height=400
-    width=800
-    showTotal=showTotal
-    donutChart=donutChart
-    externalLabels=externalLabels
-    labels=labels
-    showLegend=showPieLegend
-    legendWidth=200
+  dimension=agentDimensions
+  group=agentGroups
+  colors=statusColors
+  colorMap=colorMap
+  height=400
+  width=800
+  showTotal=showTotal
+  donutChart=donutChart
+  externalLabels=externalLabels
+  labels=labels
+  showLegend=showPieLegend
+  legendWidth=200
 }}
 
-{{input type='checkbox' checked=hideXAxisLines}}Hide x tick lines<br/>
-{{input type='checkbox' checked=showYTicks}}Show y ticks<br/>
-{{input type='checkbox' checked=showYGridLines}}Show y tick lines<br/>
-{{input type='checkbox' checked=showRowLegend}}Show Legend<br/>
-<button{{action "increaseQueue"}}>Increase</button>
-<button{{action "decreaseQueue"}}>Decrease</button>
-<div style='width: 40%'>
-{{row-chart
+{{input type="checkbox" checked=hideXAxisLines}}Hide x tick lines <br>
+{{input type="checkbox" checked=showYTicks}}Show y ticks <br>
+{{input type="checkbox" checked=showYGridLines}}Show y tick lines <br>
+{{input type="checkbox" checked=showRowLegend}}Show Legend <br>
+<button {{action "increaseQueue"}}>Increase</button>
+<button {{action "decreaseQueue"}}>Decrease</button>
+<div class="dummy-chart-container">
+  {{row-chart
     dimension=queueDimensions
     group=queueGroups
     colors=colors
@@ -103,12 +104,12 @@
     chartNotAvailableBars=6
     showLegend=showRowLegend
     legendWidth=300
-}}
+  }}
 </div>
 
-{{input type='checkbox' checked=showBubbleLegend}}Show Legend<br/>
-<div style='width: 40%'>
-{{bubble-chart
+{{input type="checkbox" checked=showBubbleLegend}}Show Legend <br>
+<div class="dummy-chart-container">
+  {{bubble-chart
     dimension=statusDimension
     group=statusGroup
     radiusFormat=radiusFormat
@@ -118,7 +119,7 @@
     colors=statusColors
     showLegend=showBubbleLegend
     legendWidth=200
-}}
+  }}
 </div>
 
 {{outlet}}
