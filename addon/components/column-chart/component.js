@@ -278,13 +278,16 @@ export default BaseChartComponent.extend({
 
     getLegendables(chart) {
         let legendables = [];
-        const formatter = this.get('xAxis.formatter') || (value => value);
         const data = this.get('data');
 
         this.get('series').forEach((series, i) => {
             if (!series.alert) {
-                let legendable = {};
+                let legendable = {
+                    title: series.title
+                };
+
                 let colors = this.get('colors');
+
                 const rectangles = chart.selectAll('rect.bar')
                     .filter(function (d) {
                         let fill;
@@ -293,8 +296,7 @@ export default BaseChartComponent.extend({
                         } else {
                             fill = colors[i];
                         }
-                        if (d.y === formatter(data[d.data.key][i]) && d3.select(this).classed(series.title)) {
-                            legendable.title = series.title;
+                        if (d.y === data[d.data.key][i] && d3.select(this).classed(series.title)) {
                             legendable.color = fill;
                             return true;
                         }
