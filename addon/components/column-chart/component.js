@@ -177,7 +177,7 @@ export default BaseChartComponent.extend({
                     .append('rect')
                     .attr('width', 2)
                     .attr('height', 4)
-                    .attr('fill', index < this.get('colors').length ? this.get('colors')[index] : this.get('colors')[this.get('colors').length - 1]);
+                    .attr('fill', this.getColorAtIndex(index));
                 if (!series.alert || !this.get('colorBelowComparisonLine')) {
                     chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
                         .attr('fill', `url(#diagonalHatch${index})`)
@@ -278,35 +278,19 @@ export default BaseChartComponent.extend({
     },
 
     getLegendables(chart) {
-        let legendables = [];
         const data = this.get('data');
+        const colors = this.get('colors');
 
-        this.get('series').forEach((series, i) => {
-            if (!series.alert) {
-                let legendable = {
-                    title: series.title
-                };
+        return this.getWithDefault('series', []).filter(s => !s.alert).map((s, i) => ({
+            title: s.title,
 
-                let colors = this.get('colors');
+            elements: chart.selectAll('rect.bar').filter(function (d) {
+                const keyData = data && d.data && data[d.data.key];
+                return keyData && d.y === keyData[i] && d3.select(this).classed(s.title);
+            }),
 
-                const rectangles = chart.selectAll('rect.bar')
-                    .filter(function (d) {
-                        let fill;
-                        if (d3.select(this).attr('fill').indexOf('url(#diagonalHatch') !== -1) {
-                            fill = `url(#diagonalHatch${i})`;
-                        } else {
-                            fill = colors[i];
-                        }
-                        if (d.y === data[d.data.key][i] && d3.select(this).classed(series.title)) {
-                            legendable.color = fill;
-                            return true;
-                        }
-                    });
-                legendable.elements = rectangles;
-                legendables.push(legendable);
-            }
-        });
-        return legendables;
+            color: s.hatch ? `url(#diagonalHatch${i})` : this.getColorAtIndex(i)
+        }));
     },
 
     getIndexForHatch(idx) {

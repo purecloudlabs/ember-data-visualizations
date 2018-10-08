@@ -32,6 +32,16 @@ export default Component.extend({
     xAxis: {},
     yAxis: {},
 
+    /**
+       @desc Retrieves the color at the given index. Just returns the last available color if index is out of bounds of the array.
+       @param {number} index
+       @returns {string} Hex color string
+    */
+    getColorAtIndex(index) {
+        const colors = this.get('colors');
+        return colors[index] || colors[colors.length - 1];
+    },
+
     setupResize() {
         this.set('onResizeDebounced', () => {
             // This is outside the Ember run loop so check if component is destroyed

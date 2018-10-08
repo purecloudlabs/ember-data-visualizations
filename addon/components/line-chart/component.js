@@ -150,16 +150,14 @@ export default BaseChartComponent.extend({
     },
 
     getLegendables(chart) {
-        let legendables = [];
-        const titles = this.get('series').map(entry => entry.title);
-        chart.selectAll('path.line').filter(function (d, i) {
-            let legendable = {};
-            legendable.title = titles[i];
-            legendable.color = d3.select(this).attr('stroke');
-            legendable.elements = d3.select(this);
-            legendables.push(legendable);
-        });
-        return legendables;
+        const elements = chart.selectAll('path.line');
+        const colors = this.get('colors');
+
+        return this.getWithDefault('series', []).map((s, i) => ({
+            title: s.title,
+            color: this.getColorAtIndex(i),
+            elements: elements.filter((d, elementIndex) => elementIndex === i)
+        }));
     },
 
     isIntervalIncluded(ticks, interval) {
