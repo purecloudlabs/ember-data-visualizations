@@ -82,8 +82,10 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(chart, tip) {
-
-        this.$('.inline-labels').remove();
+        let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
+        if (labels) {
+            labels.remove();
+        }
 
         if (this.get('showMaxMin')) {
             this.addMaxMinLabels(chart.selectAll('g.row > rect')._groups[0]);

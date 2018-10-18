@@ -128,8 +128,9 @@ export default BaseChartComponent.extend({
                 const centroidX = xbar * Math.cos(startAngle) - ybar * Math.sin(startAngle);
 
                 // coordinates of the center point of the chart
-                const centerOfChartY = _this.$()[0].offsetTop + (_this.get('chart').height() / 2);
-                const centerOfChartX = _this.$()[0].offsetLeft + (_this.get('chart').width() / 2);
+                const currentElement = document.querySelector(`#${_this.get('elementId')}`);
+                const centerOfChartY = currentElement.offsetTop + (_this.get('chart').height() / 2);
+                const centerOfChartX = currentElement.offsetLeft + (_this.get('chart').width() / 2);
 
                 // account for size of tooltip
                 const offsetX = ((d.data.key.length + 1) * -4);

@@ -179,8 +179,9 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
-            this.$().parents().find(`.d3-tip#${this.get('elementId')}`).remove();
+        let tooltips = document.querySelector(`.d3-tip#${this.get('elementId')}`);
+        if (tooltips) {
+            tooltips.remove();
         }
     },
 

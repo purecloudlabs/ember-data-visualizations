@@ -124,7 +124,10 @@ export default BaseChartComponent.extend({
 
         let dots = chart.selectAll('.sub._0 circle.dot')._groups[0];
 
-        this.$('.inline-labels').remove();
+        let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
+        if (labels) {
+            labels.remove();
+        }
 
         // Show min and max values over lines
         if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && dots.length > 0) {

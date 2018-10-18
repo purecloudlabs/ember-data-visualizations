@@ -251,7 +251,10 @@ export default BaseChartComponent.extend({
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
-        this.$('.inline-labels').remove();
+        let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
+        if (labels) {
+            labels.remove();
+        }
 
         if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addMaxMinLabels(bars);
