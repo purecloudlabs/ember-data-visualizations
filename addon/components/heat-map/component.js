@@ -3,6 +3,7 @@ import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import d3Tip from 'd3-tip';
 
 /**
    @public
@@ -89,7 +90,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip().attr('class', 'd3-tip')
+        return d3Tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .style('text-align', 'center')
             .html(d => `<span class='row-tip-key'>${d.key[0]}, ${this.get('keyFormat')(d.key[1])}</span><br/><span class='row-tip-value'>${d.value}</span>`);

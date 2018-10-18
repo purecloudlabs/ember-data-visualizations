@@ -4,6 +4,7 @@ import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
+import d3Tip from 'd3-tip';
 
 /**
    @public
@@ -137,7 +138,7 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3.tip().attr('class', 'd3-tip')
+        let tip = d3Tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
                 if (!isEmpty(titles)) {

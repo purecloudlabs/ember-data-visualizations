@@ -2,6 +2,7 @@ import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import d3Tip from 'd3-tip';
 
 /**
    @public
@@ -74,7 +75,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip().attr('class', 'd3-tip')
+        return d3Tip().attr('class', 'd3-tip')
             .style('text-align', 'center')
             .attr('id', this.get('elementId'))
             .html(d => `<span class="row-tip-key">${d.key}</span><br/><span class="row-tip-value">${d.value}</span>`)

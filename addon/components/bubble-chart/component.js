@@ -1,8 +1,9 @@
 import d3 from 'd3';
-import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import moment from 'moment';
+import d3Tip from 'd3-tip';
+import bubbleCloud from 'dc-addons-bubble-chart';
 
 /**
    @public
@@ -14,7 +15,7 @@ export default BaseChartComponent.extend({
     classNames: ['bubble-chart'],
 
     buildChart() {
-        let bubbleChart = dc.bubbleCloud(`#${this.get('elementId')}`);
+        let bubbleChart = bubbleCloud(`#${this.get('elementId')}`);
 
         let radii = [];
         this.get('group').all().forEach(d => radii.push(this.getRadiusValue(d)));
@@ -100,7 +101,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip().attr('class', 'd3-tip')
+        return d3Tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .style('text-align', 'center')
             .html(d => `<span class="tooltip-value">${d.key}</span><br/><span class="tooltip-label">${d.value.tooltip}</span>`);
@@ -111,7 +112,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let bubbleChart = dc.bubbleCloud(`#${this.get('elementId')}`);
+        let bubbleChart = bubbleCloud(`#${this.get('elementId')}`);
         this.set('chart', bubbleChart);
 
         let data = [];
