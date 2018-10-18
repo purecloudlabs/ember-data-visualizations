@@ -1,7 +1,8 @@
+/* global d3 */
+
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
-import d3 from 'd3';
 import { A } from '@ember/array';
 import { isEmpty } from '@ember/utils';
 

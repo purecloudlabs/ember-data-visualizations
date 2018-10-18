@@ -1,4 +1,5 @@
-import d3 from 'd3';
+/* global d3 */
+
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';

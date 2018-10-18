@@ -1,5 +1,6 @@
+/* global d3 */
+
 import moment from 'moment';
-import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import $ from 'jquery';
