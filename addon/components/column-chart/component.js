@@ -105,10 +105,11 @@ export default BaseChartComponent.extend({
                     .renderTitle(false)
                     .elasticY(true)
                     .colorAccessor(d => {
-                        return this.get('colorBelowComparisonLine')
-                        && this.get('comparisonLine.value') > d.value
-                            ? this.get('colors').length - 1
-                            : index;
+                        if ((this.get('alert') === 'above' && this.get('comparisonLine.value') < d.value)
+                                || (this.get('alert') === 'below' && this.get('comparisonLine.value') > d.value)) {
+                            return this.get('colors').length - 1;
+                        }
+                        return index;
                     });
 
                 columnCharts.push(columnChart);
@@ -179,14 +180,21 @@ export default BaseChartComponent.extend({
                     .attr('width', 2)
                     .attr('height', 4)
                     .attr('fill', this.getColorAtIndex(index));
-                if (!series.alert || !this.get('colorBelowComparisonLine')) {
+                if (!series.alert || !this.get('alert')) {
                     chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
                 } else {
+                    let alert = this.get('alert');
                     chart.selectAll('rect.bar').filter(function (d) {
-                        return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                        && d.data.value < comparisonValue;
+                        if (alert === 'below') {
+                            return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
+                            && d.data.value < comparisonValue;
+                        }
+                        if (alert === 'above') {
+                            return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
+                            && d.data.value > comparisonValue;
+                        }
                     })
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
