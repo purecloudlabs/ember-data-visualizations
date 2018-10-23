@@ -187,14 +187,9 @@ export default BaseChartComponent.extend({
                 } else {
                     let alert = this.get('alert');
                     chart.selectAll('rect.bar').filter(function (d) {
-                        if (alert === 'below') {
-                            return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                            && d.data.value < comparisonValue;
-                        }
-                        if (alert === 'above') {
-                            return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                            && d.data.value > comparisonValue;
-                        }
+                        return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
+                            && ((alert === 'below' && d.data.value < comparisonValue)
+                            || (alert === 'above' && d.data.value > comparisonValue));
                     })
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
@@ -288,7 +283,6 @@ export default BaseChartComponent.extend({
 
     getLegendables(chart) {
         const data = this.get('data');
-        const colors = this.get('colors');
 
         return this.getWithDefault('series', []).filter(s => !s.alert).map((s, i) => ({
             title: s.title,
