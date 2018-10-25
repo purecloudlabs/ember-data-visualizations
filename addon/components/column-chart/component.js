@@ -209,7 +209,7 @@ export default BaseChartComponent.extend({
         let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
         const seriesCount = this.get('group.length');
 
-        if (bars[0]) {
+        if (bars[0] && seriesCount) {
             let barWidth = (parseInt(d3.select(bars[0]).attr('width'), 10)) || 1;
 
             // if composed, double barWidth
@@ -219,7 +219,7 @@ export default BaseChartComponent.extend({
                 chart.selectAll('rect.bar')._groups[0].forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
-                    barD3.attr('x', x - barWidth * (this.get('group.length') - 1) / 2 + 1);
+                    barD3.attr('x', x - barWidth * (seriesCount - 1) / 2 + 1);
                 });
 
                 barWidth *= this.get('group.length'); // number of series
