@@ -1,7 +1,10 @@
+/* global d3 */
+
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
-import _ from 'lodash/lodash';
+import { A } from '@ember/array';
+import { isEmpty } from '@ember/utils';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -24,12 +27,21 @@ export default Component.extend({
     tooltipDateFormat: 'll LT',
     group: null,
     dimension: null,
-    seriesData: null,
     data: null,
     series: [],
     height: 200,
     xAxis: {},
     yAxis: {},
+
+    /**
+       @desc Retrieves the color at the given index. Just returns the last available color if index is out of bounds of the array.
+       @param {number} index
+       @returns {string} Hex color string
+    */
+    getColorAtIndex(index) {
+        const colors = this.get('colors');
+        return colors[index] || colors[colors.length - 1];
+    },
 
     setupResize() {
         this.set('onResizeDebounced', () => {
@@ -66,6 +78,82 @@ export default Component.extend({
             .on('mouseout.tip', tip.hide);
     },
 
+    addLegend(chart, legendables, legendG, legendDimension) {
+        legendG.attr('class', 'legend');
+        let legendGs = legendG.selectAll('g')
+            .data(legendables)
+            .enter().append('g')
+            .attr('class', 'legendItem');
+        legendGs.append('rect')
+            .attr('class', 'legendRect')
+            .attr('y', (d, i) => (i + 1) * 22)
+            .attr('height', legendDimension)
+            .attr('width', legendDimension)
+            .attr('fill', d => d.color)
+            .on('click', legendClickHandler);
+        legendGs.append('text')
+            .attr('unselectable', 'on')
+            .attr('x', legendDimension + 6)
+            .attr('y', (d, i) => (i + 1) * 22 + (legendDimension * 0.75))
+            .text(d => d.title);
+
+        function legendClickHandler(d) {
+            const clicked = d3.select(this);
+            const clickedElements = d.elements;
+            const allOthers = chart.selectAll('rect.legendRect').filter(legendD => legendD.color !== d.color);
+            let allOtherElements = [];
+            for (let i = 0; i < legendables.length; i++) {
+                if (legendables[i].color !== d.color) {
+                    allOtherElements.push(legendables[i].elements);
+                }
+            }
+
+            // determine if any other groups are selected
+            let isAnyLegendRectSelected = false;
+            allOthers.each(function () {
+                if (d3.select(this).classed('selected')) {
+                    isAnyLegendRectSelected = true;
+                }
+            });
+
+            // helper functions
+            function toggleSelection(element) {
+                element.classed('selected', !element.classed('selected'));
+                element.classed('deselected', !element.classed('deselected'));
+            }
+
+            function returnToNeutral(element) {
+                element.classed('selected', false);
+                element.classed('deselected', false);
+            }
+
+            // class the groups based on what is currently selected and what was clicked
+            if (clicked.classed('selected')) {
+                if (isAnyLegendRectSelected) {
+                    toggleSelection(clicked);
+                    toggleSelection(clickedElements);
+                } else {
+                    returnToNeutral(clicked);
+                    returnToNeutral(clickedElements);
+                    returnToNeutral(allOthers);
+                    for (let i = 0; i < allOtherElements.length; i++) {
+                        returnToNeutral(allOtherElements[i]);
+                    }
+                }
+            } else if (clicked.classed('deselected')) {
+                toggleSelection(clicked);
+                toggleSelection(clickedElements);
+            } else {
+                clicked.classed('selected', true);
+                clickedElements.classed('selected', true);
+                allOthers.classed('deselected', true);
+                for (let i = 0; i < allOtherElements.length; i++) {
+                    allOtherElements[i].classed('deselected', true);
+                }
+            }
+        }
+    },
+
     onClick() {},
 
     buildChart() { },
@@ -99,7 +187,7 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !_.isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
+        if (this.$() && this.$().parents() && !isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
             this.$().parents().find(`.d3-tip#${this.get('elementId')}`).remove();
         }
     },
@@ -114,8 +202,8 @@ export default Component.extend({
         this._super(...arguments);
         let data = {};
         if (Array.isArray(this.get('group'))) {
-            _.forEach(this.get('group'), g => {
-                _.forEach(g.all(), datum => {
+            A(this.get('group')).forEach(g => {
+                A(g.all()).forEach(datum => {
                     if (data[datum.key]) {
                         data[datum.key].push(datum.value);
                     } else {
@@ -125,7 +213,7 @@ export default Component.extend({
             });
         } else if (this.get('group')) {
             data.total = 0;
-            _.forEach(this.get('group').all(), datum => {
+            A(this.get('group').all()).forEach(datum => {
                 if (data[datum.key]) {
                     data[datum.key].push(datum.value);
                     data.total += datum.value;

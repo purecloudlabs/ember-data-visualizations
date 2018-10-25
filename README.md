@@ -18,6 +18,18 @@ Usage
 All charts must have a group and a dimension. All charts use `d3-tip` (an npm package which can be found [here](https://github.com/Caged/d3-tip)) to create and style tooltips. 
 See the dummy app for an example of each type of chart. The code for the dummy can be found in `tests/dummy`. In particular, `tests/dummy/controllers/application.js` and `tests/dummy/templates/application.hbs` will be useful in understanding the use of this addon.
 
+##### Optional parameters
+* `height` (number): height in pixels of the chart
+* `colors` (Array): Hex strings to color the chart
+* `showLegend` (boolean): Whether or not to show an interactive legend. Heatmaps do not have this option, however, as a heatmap doesn't make sense without a legend.
+* `legendWidth` (number): width in pixels of the legend. Not applicable if `showLegend` is `false`. If not specified, defaults to 250.
+* `isChartAvailable` (boolean, defaults to `true`): if `true`, shows normal view. If `false`, shows chart-not-available view.
+* `chartNotAvailableMessage` (String): message to display on top of chart if `isChartAvailable` is false
+* `chartNotAvailableTextColor` (String): Hexadecimal color value to color the text of `chartNotAvailableMessage`
+* `chartNotAvailableColor`: (String): Hexadecimal color value to color the chart if `isChartAvailable` is false
+
+All optional boolean parameters except `isChartAvailable` default to `false`.
+
 ### Column chart
 The column chart uses an *array* of crossfilter groups to display different types of column charts (vertical bar charts). If there is only one group, *you must still pass an array of 1 group to the column chart*. This is true for many of the charts in this addon.
 
@@ -28,16 +40,23 @@ The column chart uses an *array* of crossfilter groups to display different type
 
 ##### Optional parameters
 * `yAxis` (Object): `domain` (Array, probably of numbers) (optional) and `ticks` (number of ticks to show)
-* `type` (String) (defaults to `GROUPED`): `GROUPED`, `LAYERED`, `STACKED`. `GROUPED` is for "ordinary" data and is most likely what should be used if there is only one crossfilter group. `LAYERED` is for "overlapping data;" i.e. there are 10 fruits, 6 of which are citrus, 3 of which are oranges. If this chart is `LAYERED`, the `series` option tells the chart how to format the bars (hatching). `STACKED` creates a stacked bar chart; i.e. there are 10 fruits, 20 vegetables, and 15 meats and we want to display them on top of each other.
-* `series` (Array):  Each object in the array should have a `title` property and a `hatch` property. `title` should be the name of `this.get('group')` at the same index (used in tooltip creation). `hatch` should be either `pos` (for a hatch from bottom left to top right), `neg` (for a hatch from top left to bottom right), or `false` (for no hatch).
+* `type` (String) (defaults to `GROUPED`):
+    * `GROUPED` is for "ordinary" data and is most likely what should be used if there is only one crossfilter group.
+    * `LAYERED` is for "overlapping data: e.g. there are 10 fruits, 6 of which are citrus, 3 of which are oranges. If this chart is `LAYERED`, the `series` option tells the chart how to format the bars (hatching).
+    * `STACKED` creates a stacked bar chart: e.g. there are 10 fruits, 20 vegetables, and 15 meats and we want to display them on top of each other.
+* `series` (Array):  Each object in the array has properties:
+    * `title`: the name of `this.get('group')` at the same index (used in tooltip creation)
+    * `hatch`: `pos` (for a hatch from bottom left to top right), `neg` (for a hatch from top left to bottom right), or `false` (for no hatch)
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the column chart
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
-* `colors` (Array): Hex strings to color the chart
-* `height` (number): height in pixels of chart
+* `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear to the left of the line on the y axis), `color` (Hex string)
+* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties: 
+    * `value` (value on y axis on which to show line)
+    * `displayValue` (text that will appear to the left of the line on the y axis)
+    * `color` (Hex string)
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
-* `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator
+* `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
 
 ### Line chart
 The line chart uses an *array* of crossfilter groups to display different types of line charts. If there is only one group, *you must still pass an array of 1 group to the line chart*. This is true for many of the charts in this addon.
@@ -49,13 +68,15 @@ The line chart uses an *array* of crossfilter groups to display different types 
 
 ##### Optional parameters
 * `yAxis` (Object): `domain` (Array, probably of numbers) (optional) and `ticks` (number of ticks to show)
-* `series` (Array):  Each object in the array should have a `title` property. `title` should be the name of `this.get('group')` at the same index (used in tooltip creation).
-* `colors` (Array): Hex strings to color the chart
-* `height` (number): height in pixels of chart
+* `series` (Array):  Each object in the array has a `title` property. `title` is the name of `this.get('group')` at the same index (used in tooltip creation).
+* `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
-* `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator
+* `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
 * `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear to the left of the line on the y axis), `color` (color of line, hex string), `textColor` (color of text, hex string)
+* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties: 
+    * `value` (value on y axis on which to show line)
+    * `displayValue` (text that will appear to the left of the line on the y axis)
+    * `color` (Hex string)
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the line chart
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 
@@ -65,36 +86,93 @@ The row chart uses an *array* of crossfilter groups to display different types o
 ##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
 * `group`: *array* of crossfilter groups to use for chart
+    * Currently, the row chart only supports using one group, so the `group` parameter will be an array of length 1. However, it is kept as an array for potential future use on stacked, grouped, or layered charts.
 
 ##### Optional parameters
-* `colors` (Array): Hex strings to color the chart (colors[2] is currently the color that the bars appear as)
-* `labelWidth` (number): width in pixels of the labels div. Defaults to 150
-* `xAxis` (Object): `ticks` property tells the chart how many ticks to display on the x axis
-* `height` (number): height of pixels of chart
+* `colors` note: colors[2] is currently the color that the bars appear as
+* `labelWidth` (number): width in pixels of the labels div; defaults to 150
+* `xAxis` (Object): `ticks` property tells the chart how many ticks to display on the x axis.
+* `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `hideXAxisLines` (boolean): whether to hide the x-axis grid lines that show by default on the chart
 * `showYGridLines` (boolean): whether to show y-axis grid lines on the chart
 * `showYTicks` (boolean): whether to show tick marks for each bar on the y axis
-* `showMaxMin`: whether or not to show max/min indicators for the maximum and minimum values of the row chart
-* `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): Properties: `value` (value on y axis on which to show line), `displayValue` (text that will appear on the bottom of the line on the x axis), `color` (color of line, hex string), `textColor` (color of text, hex string)
+* `showMaxMin`: whether to show max/min indicators for the maximum and minimum values of the row chart
+* `showComparisonLine` (boolean): whether to show a comparison line
+* `comparisonLine` (Object): a vertical line to mark a target, average, or any kind of comparison value. Properties: 
+    * `value` (value on y axis on which to show line)
+    * `displayValue` (text that will appear to the left of the line on the y axis)
+    * `color` (Hex string)
 * `chartNotAvailableBars` (number): number of bars to show on the chart not available view
 
 ### Pie chart
-The pie chart does *not* use an array of crossfilter groups. 
+The pie chart does *not* use an array of crossfilter groups. It uses a singular group.
 
 ##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
-* `group`: crossfilter group to use for chart (NOT AN ARRAY)
+* `group`: crossfilter group to use for chart (not an array)
 
 ##### Optional parameters
-* `colors` (Array): Hex strings to color the chart
-* `colorMap` (Object): parameter/key pairs by which to color chart. e.g. if key values of the data are `'apples, bananas, blueberries'`, colorMap might be `{'apples': '#8b0000', 'bananas': '#ffff00', 'blueberries': '#6495ed'}`, where those colors exist in the `colors` array
-* `height` (number): height in pixels of the chart (radius of the chart is height / 2)
+* `colorMap` (Object): parameter/key pairs by which to color chart
+    * e.g. if key values of the data are `'apples, bananas, blueberries'`, colorMap might be `{'apples': '#8b0000', 'bananas': '#ffff00', 'blueberries': '#6495ed'}`, where those colors exist in the `colors` array.
+* `height` note: radius of the chart is height / 2
 * `donutChart` (boolean): whether or not this pie chart is a donut chart (has an inner radius)
 * `showTotal` (boolean): whether or not to show the total number in the center of the chart. Not recommended unless `donutChart` is `true`
 * `labels` (boolean): whether or not to show labels on the pie slices with the key value of the slice
-* `externalLabels` (boolean): whether or not the labels should be on the outside of the chart. Only if `labels` is `true`
+* `externalLabels` (boolean): whether or not the labels appear on the outside of the chart. Only if `labels` is `true`
 * `legend` (boolean): whether or not to show a legend for the pie chart
+
+### Bubble chart
+The bubble chart does *not* use an array of crossfilter groups. It uses a singluar group.
+The bubble chart is a dc-addons `bubbleCloud`, which is not as robustly supported as the rest of our chart types. Therefore, crossfiltering on this chart will likely **not be possible** until the source is updated. See [this issue](https://github.com/Intellipharm/dc-addons/issues/29).
+
+#### Required parameters
+* `dimension`: crossfilter dimension to use for chart
+* `group`: crossfilter group to use for chart (not an array)
+    * The `key` of each fact is a string that identifies the fact. It is also used as the title of the bubble, subject to the `titleFormatter` function (see optional parameters)
+    * The `value` of each fact is an object with the following properties:
+        * `tooltip` (String): tooltips display the `key` property with a subtitle of whatever is contained in this property. Optional.
+        * `colorValue` (number): index of the `colors` array that this bubble is colored. e.g. if the `colors` array is `['#8b0000', '#ffff00', '#6495ed']`, a `banana` object might have a `colorValue` of `1`. See the dummy app for an example of color mapping. Optional.
+        * `radius` (String): Not necessarily a number value. This is the string value that will be transformed into a number based on `radiusFormat`. 
+            * e.g. if `radiusFormat = 'timestamp'`, `radius` should be a timestamp like `'2018-06-26T16:55:25-04:00'`. Required.
+        * `subtitle` (String): Actual subtitle of bubble. Optional.
+
+
+#### Optional parameters
+* Formats/formatters (if not specified, the labels on the bubbles will assume the `key` and `value.subtitle` property verbatim, and `radiusFormat` will assume `'count'`):
+    * `radiusFormat` (string): specifies how to interpret the `value.radius` string to get an actual radius number. Options: `timestamp`, `milliseconds`, `count`. 
+        * The `timestamp` option calculates the duration between `value.radius` and now. 
+        * The `milliseconds` option assumes that `value.radius` is a duration in milliseconds. 
+        * The `count` option assumes that whatever is currently in `value.radius` is the actual physical radius desired.
+    * `titleFormatter` (function): Takes an input of the fact's `key` property and outputs the formatted string for the bubble label.
+        * e.g. if the `key` is `'First Last'` and the label on the bubble should be the initials, `titleFormatter` takes an input of `First Last` and returns `FL`.
+    * `subtitleFormatter` (function): Takes an input of the fact's `value.subtitle` property and outputs the formatted string for the bubble subtitle.
+        * e.g. if the `subtitle` is a timestamp, `subtitleFormatter` takes an input of a timestamp and returns a formatted duration.
+* `width` (number): width in pixels of the chart. It is recommended that the chart be roughly square for best display of the bubbles. If not specified, the chart will fill to the width of its container.
+
+### Heat map
+The heatmap does *not* use an array of crossfilter groups. It uses a singular group.
+
+##### Required parameters
+* `dimension`: crossfilter dimension to use for chart
+* `group`: crossfilter group to use for chart (not an array)
+    * The `key` of each fact is an array that tells the heatmap the position of the fact on the chart. `key[0]` will tell the chart the y position, and `key[1]` the x position.
+    * The `value` property of each fact will be used to determine the color of the fact. All possible `value` properties should be included in the `colorMap` array (see below). This can be a string, number, whatever, as long as it is included in the `colorMap` object.
+* `colorMap` (Array): order in which to show the colors of the properties. Each element in the array is a string which matches one of the `value` types in the group. For example, if the color value on your heatmap represents intensity from 1 to 10, your `colorMap` might be `[1,2,3,4,5,6,7,8,9,10]` (or the numbers in any order). The heatmap will use the index of this array to determine the index of the `colors` property with which to use each number.
+* `xAxis` (Object) describes the x axis. Properties: 
+    * `domain` (Array): describes the domain of the x axis. This property is REQUIRED.
+    * `ticks` (number): number of tick LABELS to show on the x axis. This property is optional, and if left out, the chart will automatically show as many labels as will comfortably fit based on the chart's width.
+    * `tickMarks` (number): number of ticks to show on the x axis. This property is optional, and if left out, the chart will show a tick for each data point.
+    * `label` (String): a label for the x axis. This property is optional.
+* `keyFormat` (function): function to apply to `key[1]` in order to attain the desired format on the screen. For example, if `key[1]` of each fact on your `group` is a date formatted like `20161109`, `keyFormat` might be `key => moment(key.toString()).format('MMM DD')`.
+
+##### Optional parameters
+* `yAxis` (Object): `label` property shows a label on the y axis (optional).
+* `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
+* `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
+* `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
+* `legend` (boolean): whether or not to show an interactive legend to the right of the heatmap. If `true`, `legendWidth` must also be specified for the legend to appear.
+* `legendWidth` (number): width in pixels that legend should take up on the right side of the chart. This width is subtracted from the chart's overall width when drawing the chart, so it cannot be larger than the `width` parameter.
+* `minBoxWidth` (number): minimum width in pixels for each box in the heatmap. If not specified, defaults to 4.
 
 Contributing
 ------------------------------------------------------------------------------

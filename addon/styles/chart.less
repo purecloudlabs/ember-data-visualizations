@@ -20,6 +20,7 @@
         overflow: visible;
         text {
             fill: @silver-chalice;
+            font-size: 16px;
         }
     }
 
@@ -42,5 +43,22 @@
         font-family: FontAwesome;
         font-size: 12px;
         fill: #000;
+    }
+
+    .deselected {
+        opacity: .5;
+    }
+    .selected {
+        opacity: 1;
+    }
+    .deselected:not(.line) {
+        stroke-width: 0px;
+    }
+    .selected:not(.line) {
+        stroke-width: 1.5px;
+        stroke: black;
+    }
+    .selected.line {
+        stroke-width: 2px;
     }
 }

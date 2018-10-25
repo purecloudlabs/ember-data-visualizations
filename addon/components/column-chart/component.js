@@ -1,10 +1,11 @@
+/* global d3 */
+
 import moment from 'moment';
-import _ from 'lodash/lodash';
-import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
+import { isEmpty } from '@ember/utils';
 
 /**
    @public
@@ -30,6 +31,9 @@ export default BaseChartComponent.extend({
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
+        const legendWidth = this.get('legendWidth') || 250;
+        const rightMargin = this.get('showLegend') ? legendWidth : 100;
+
         compositeChart
             .transitionDuration(0)
             .renderTitle(false)
@@ -37,11 +41,11 @@ export default BaseChartComponent.extend({
             .height(this.get('height'))
             .margins({
                 top: 10,
-                right: 100,
+                right: rightMargin,
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(this.get('xAxis').domain))
+            .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => {
                 if (this.get('group.length')) {
                     return this.get('group')[0].size() * (this.get('group.length') + 1);
@@ -57,19 +61,19 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
-            compositeChart.y(d3.scale.linear().domain(this.get('yAxis').domain));
+            compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
         }
 
         if (this.get('currentInterval') && this.get('showCurrentIndicator') && this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks).tickValues(this.addTickForCurrentInterval());
         }
 
-        compositeChart.xAxis().outerTickSize(0);
+        compositeChart.xAxis().tickSizeOuter(0);
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks);
         }
 
-        compositeChart.yAxis().outerTickSize(0);
+        compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
         }
@@ -82,7 +86,7 @@ export default BaseChartComponent.extend({
         if (this.get('type') !== 'STACKED') {
             groups.forEach((g, index) => {
                 // If we are hatching, we need to display a white bar behind the hatched bar
-                if (!_.isEmpty(this.get('series')) && !_.isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
+                if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
                     columnChart = dc.barChart(compositeChart);
 
                     columnChart
@@ -102,9 +106,15 @@ export default BaseChartComponent.extend({
                     .centerBar(true)
                     .barPadding(0.00)
                     .group(g)
-                    .colors(this.get('colors')[index])
+                    .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
                     .renderTitle(false)
-                    .elasticY(true);
+                    .elasticY(true)
+                    .colorAccessor(d => {
+                        return this.get('colorBelowComparisonLine')
+                        && this.get('comparisonLine.value') > d.value
+                            ? this.get('colors').length - 1
+                            : index;
+                    });
 
                 columnCharts.push(columnChart);
             });
@@ -137,12 +147,14 @@ export default BaseChartComponent.extend({
         let tip = d3.tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
-                if (!_.isEmpty(titles)) {
+                if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
-                    titles.forEach((title, i) => {
-                        const datum = formatter(this.get('data')[d.data.key][i]);
-                        const secondaryClass = d.y === datum ? 'primary-stat' : '';
-                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                    this.get('series').forEach((series, i) => {
+                        if (!series.alert) {
+                            const datum = formatter(this.get('data')[d.data.key][i]);
+                            const secondaryClass = d.y === datum ? 'primary-stat' : '';
+                            str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${series.title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                        }
                     });
                     return str;
                 }
@@ -160,6 +172,7 @@ export default BaseChartComponent.extend({
         this.getWithDefault('series', []).forEach((series, index) => {
             if (series.hatch) {
                 let rotateAngle = series.hatch === 'pos' ? 45 : -45;
+                let comparisonValue = this.get('comparisonLine.value');
 
                 svg.append('pattern')
                     .attr('id', `diagonalHatch${index}`)
@@ -170,11 +183,19 @@ export default BaseChartComponent.extend({
                     .append('rect')
                     .attr('width', 2)
                     .attr('height', 4)
-                    .attr('fill', this.get('colors')[index]);
-
-                chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
-                    .attr('fill', `url(#diagonalHatch${index})`)
-                    .attr('opacity', '.7');
+                    .attr('fill', this.getColorAtIndex(index));
+                if (!series.alert || !this.get('colorBelowComparisonLine')) {
+                    chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
+                        .attr('fill', `url(#diagonalHatch${index})`)
+                        .attr('opacity', '.7');
+                } else {
+                    chart.selectAll('rect.bar').filter(function (d) {
+                        return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
+                        && d.data.value < comparisonValue;
+                    })
+                        .attr('fill', `url(#diagonalHatch${index})`)
+                        .attr('opacity', '.7');
+                }
             }
         });
 
@@ -185,7 +206,7 @@ export default BaseChartComponent.extend({
 
     handleBarWidth(chart) {
         const gap = 2;
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
         const seriesCount = this.get('group.length');
 
         if (bars[0]) {
@@ -195,7 +216,7 @@ export default BaseChartComponent.extend({
             if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
-                chart.selectAll('rect.bar')[0].forEach(bar => {
+                chart.selectAll('rect.bar')._groups[0].forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
                     barD3.attr('x', x - barWidth * (this.get('group.length') - 1) / 2 + 1);
@@ -226,31 +247,55 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('type') === 'STACKED') {
-            const colors = this.get('colors');
-            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => colors[d.layer]);
+            chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => this.get('colors')[d.layer]);
         }
 
         this.doHatching(chart);
         this.handleBarWidth(chart);
 
         let svg = chart.select('svg > defs');
-        let bars = chart.selectAll('.sub._0 rect.bar')[0];
+        let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
         $(`#${this.get('elementId')} #inline-labels`).remove();
 
-        if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin')) && bars.length > 0) {
+        if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addMaxMinLabels(bars);
         }
 
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !_.isEmpty(this.get('data'))) {
-            this.addComparisonLine();
+        if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
+            this.addComparisonLine(chart);
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
+
+        if (this.get('showLegend')) {
+            this.get('series').forEach((series, index) => chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`).classed(series.title, true));
+            chart.select('g.legend').remove();
+            const legendDimension = 18;
+            let legendG = chart.select('g')
+                .append('g')
+                .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+        }
+    },
+
+    getLegendables(chart) {
+        const data = this.get('data');
+
+        return this.getWithDefault('series', []).filter(s => !s.alert).map((s, i) => ({
+            title: s.title,
+
+            elements: chart.selectAll('rect.bar').filter(function (d) {
+                const keyData = data && d.data && data[d.data.key];
+                return keyData && d.y === keyData[i] && d3.select(this).classed(s.title);
+            }),
+
+            color: s.hatch ? `url(#diagonalHatch${i})` : this.getColorAtIndex(i)
+        }));
     },
 
     getIndexForHatch(idx) {
@@ -273,10 +318,10 @@ export default BaseChartComponent.extend({
 
     addTickForCurrentInterval() {
         // if indicatorDate is in range but not already in the scale, add it.
-        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
+        let xscaleTime = d3.scaleTime().domain(this.get('xAxis').domain);
         let indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
-        let ticks = xTimeScale.ticks(this.get('xAxis').ticks);
-        if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xTimeScale, indicatorDate)) {
+        let ticks = xscaleTime.ticks(this.get('xAxis').ticks);
+        if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xscaleTime, indicatorDate)) {
             ticks.push(indicatorDate);
         }
         return ticks;
@@ -285,57 +330,57 @@ export default BaseChartComponent.extend({
     changeTickForCurrentInterval() {
         // this method should be called on renderlet
         let indicatorDate = this.get('currentInterval.start._d');
-        let xTimeScale = d3.time.scale().domain(this.get('xAxis').domain);
-        if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
+        let xscaleTime = d3.scaleTime().domain(this.get('xAxis').domain);
+        if (this.isIntervalInRange(xscaleTime, indicatorDate)) {
             let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
             if (!currentTick.empty()) {
                 if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                    let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                    let tickHtml = this.isIntervalIncluded(xscaleTime.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
                     currentTick.select('text').html(tickHtml);
                 }
             }
         }
     },
 
-    addComparisonLine() {
-        const chartBody = d3.select('.column-chart > svg > g');
+    addComparisonLine(chart) {
+        const chartBody = chart.select('svg > g');
         const line = this.get('comparisonLine');
 
-        this.get('chart').selectAll('.comparison-line').remove();
-        this.get('chart').selectAll('#comparison-text').remove();
+        chart.selectAll('.comparison-line').remove();
+        chart.selectAll('.comparison-text').remove();
 
         chartBody.append('svg:line')
-            .attr('x1', 100)
-            .attr('x2', this.get('chart').width() - 95)
-            .attr('y1', 10 + this.get('chart').y()(line.value))
-            .attr('y2', 10 + this.get('chart').y()(line.value))
+            .attr('x1', chart.margins().left)
+            .attr('x2', chart.width() - chart.margins().right)
+            .attr('y1', chart.margins().top + chart.y()(line.value))
+            .attr('y2', chart.margins().top + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
-            .attr('x1', 100)
-            .attr('x2', 100)
-            .attr('y1', 15 + this.get('chart').y()(line.value))
-            .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('x1', chart.margins().left)
+            .attr('x2', chart.margins().left)
+            .attr('y1', 15 + chart.y()(line.value))
+            .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('svg:line')
-            .attr('x1', this.get('chart').width() - 95)
-            .attr('x2', this.get('chart').width() - 95)
-            .attr('y1', 15 + this.get('chart').y()(line.value))
-            .attr('y2', 5 + this.get('chart').y()(line.value))
+            .attr('x1', chart.width() - chart.margins().right)
+            .attr('x2', chart.width() - chart.margins().right)
+            .attr('y1', 15 + chart.y()(line.value))
+            .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line')
             .style('stroke', line.color || '#2CD02C');
 
         chartBody.append('text')
             .text(line.displayValue)
             .attr('x', 80)
-            .attr('y', 14 + this.get('chart').y()(line.value))
+            .attr('y', 14 + chart.y()(line.value))
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
-            .attr('id', 'comparison-text')
+            .attr('class', 'comparison-text')
             .attr('fill', line.textColor || '#000000');
     },
 
@@ -344,17 +389,15 @@ export default BaseChartComponent.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
         groups.forEach((g, index) => {
-            if (this.get('showMaxMin') && _.isNumber(this.get('seriesMaxMin'))) {
-                if (index === this.get('seriesMaxMin')) {
-                    values = g.all().map(gElem => gElem.value);
-                    nonZeroValues = values.filter(v => v > 0);
-                    maxValue = _.max(nonZeroValues);
-                    maxIdx = values.indexOf(maxValue);
-                    maxValue = formatter(maxValue);
-                    minValue = _.min(nonZeroValues);
-                    minIdx = values.indexOf(minValue);
-                    minValue = formatter(minValue);
-                }
+            if (index === this.get('seriesMaxMin')) {
+                values = g.all().map(gElem => gElem.value);
+                nonZeroValues = values.filter(v => v > 0);
+                maxValue = Math.max(...nonZeroValues);
+                maxIdx = values.indexOf(maxValue);
+                maxValue = formatter(maxValue);
+                minValue = Math.min(...nonZeroValues);
+                minIdx = values.indexOf(minValue);
+                minValue = formatter(minValue);
             }
         });
         let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
@@ -362,7 +405,11 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        const maxLabelY = Math.min(...this.get('chart').selectAll('.sub rect.bar')[0].map(rect => parseInt(rect.getAttribute('y'), 10)));
+        let yValues = [];
+        this.get('chart').selectAll('.sub rect.bar').each(function () {
+            yValues.push(parseInt(d3.select(this).attr('y')));
+        });
+        const maxLabelY = Math.min(...yValues);
 
         if (b) {
             gLabels.append('text')
@@ -426,7 +473,7 @@ export default BaseChartComponent.extend({
             ticks = 24;
         }
 
-        const data = d3.time.scale().domain(xAxis.domain).ticks(ticks);
+        const data = d3.scaleTime().domain(xAxis.domain).ticks(ticks);
         const filter = crossfilter(data);
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
@@ -444,15 +491,15 @@ export default BaseChartComponent.extend({
                 bottom: 50,
                 left: 100
             })
-            .x(d3.time.scale().domain(xAxis.domain))
+            .x(d3.scaleTime().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
-            .y(d3.scale.linear().domain([0, 1]))
+            .y(d3.scaleLinear().domain([0, 1]))
             .group(group)
             .dimension(dimension)
             .transitionDuration(0);
 
         if (this.get('width')) {
-            this.get('chart').width(this.get('width'));
+            this.get('chart').effectiveWidth(this.get('width'));
         }
 
         columnChart.on('pretransition', chart => {
