@@ -42,7 +42,12 @@ export default BaseChartComponent.extend({
                 left: 100
             })
             .x(d3.time.scale().domain(this.get('xAxis').domain))
-            .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
+            .xUnits(() => {
+                if (this.get('group.length')) {
+                    return this.get('group')[0].size() * (this.get('group.length') + 1);
+                }
+                return 0;
+            })
             .dimension(this.get('dimension'))
             .elasticY(true)
             .yAxisPadding('40%');
@@ -128,7 +133,7 @@ export default BaseChartComponent.extend({
 
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
-        const titles = this.get('series').map(entry => entry.title);
+        const titles = this.getWithDefault('series', []).map(entry => entry.title);
         let tip = d3.tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
@@ -152,7 +157,7 @@ export default BaseChartComponent.extend({
         // Set up any necessary hatching patterns
         let svg = chart.select('svg > defs');
 
-        this.get('series').forEach((series, index) => {
+        this.getWithDefault('series', []).forEach((series, index) => {
             if (series.hatch) {
                 let rotateAngle = series.hatch === 'pos' ? 45 : -45;
 
@@ -181,7 +186,7 @@ export default BaseChartComponent.extend({
     handleBarWidth(chart) {
         const gap = 2;
         let bars = chart.selectAll('.sub._0 rect.bar')[0];
-        const seriesCount = this.get('group').length;
+        const seriesCount = this.get('group.length');
 
         if (bars[0]) {
             let barWidth = (parseInt(d3.select(bars[0]).attr('width'), 10)) || 1;
@@ -193,10 +198,10 @@ export default BaseChartComponent.extend({
                 chart.selectAll('rect.bar')[0].forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
-                    barD3.attr('x', x - barWidth * (this.get('group').length - 1) / 2 + 1);
+                    barD3.attr('x', x - barWidth * (this.get('group.length') - 1) / 2 + 1);
                 });
 
-                barWidth *= this.get('group').length; // number of series
+                barWidth *= this.get('group.length'); // number of series
             }
 
             let position = -1 * (barWidth + gap);
