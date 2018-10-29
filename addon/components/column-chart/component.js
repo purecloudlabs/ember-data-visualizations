@@ -105,8 +105,8 @@ export default BaseChartComponent.extend({
                     .renderTitle(false)
                     .elasticY(true)
                     .colorAccessor(d => {
-                        if ((this.get('alert') === 'above' && this.get('comparisonLine.value') < d.value)
-                                || (this.get('alert') === 'below' && this.get('comparisonLine.value') > d.value)) {
+                        if ((this.get('alert') === this.get('AlertType').ABOVE && this.get('comparisonLine.value') < d.value)
+                                || (this.get('alert') === this.get('AlertType').BELOW && this.get('comparisonLine.value') > d.value)) {
                             return this.get('colors').length - 1;
                         }
                         return index;
@@ -186,10 +186,11 @@ export default BaseChartComponent.extend({
                         .attr('opacity', '.7');
                 } else {
                     let alert = this.get('alert');
+                    let AlertType = this.get('AlertType');
                     chart.selectAll('rect.bar').filter(function (d) {
                         return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                            && ((alert === 'below' && d.data.value < comparisonValue)
-                            || (alert === 'above' && d.data.value > comparisonValue));
+                            && ((alert === AlertType.BELOW && d.data.value < comparisonValue)
+                            || (alert === AlertType.ABOVE && d.data.value > comparisonValue));
                     })
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
