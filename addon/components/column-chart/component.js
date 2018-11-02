@@ -216,7 +216,7 @@ export default BaseChartComponent.extend({
             if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
-                chart.selectAll('rect.bar')._groups[0].forEach(bar => {
+                Array.prototype.slice.call(chart.selectAll('rect.bar')._groups[0]).forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
                     barD3.attr('x', x - barWidth * (seriesCount - 1) / 2 + 1);
