@@ -32,6 +32,10 @@ export default Component.extend({
     height: 200,
     xAxis: {},
     yAxis: {},
+    AlertType: {
+        ABOVE: 'above',
+        BELOW: 'below'
+    },
 
     /**
        @desc Retrieves the color at the given index. Just returns the last available color if index is out of bounds of the array.

@@ -152,7 +152,6 @@ export default BaseChartComponent.extend({
 
     getLegendables(chart) {
         const elements = chart.selectAll('path.line');
-        const colors = this.get('colors');
 
         return this.getWithDefault('series', []).map((s, i) => ({
             title: s.title,
