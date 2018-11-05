@@ -20,7 +20,6 @@
 <button{{action "increaseData"}}>Increase</button>
 <button{{action "decreaseData"}}>Decrease</button><br/>
 {{input type='checkbox' checked=showColumnLegend}}Show Legend<br/>
-{{input type="text" value=alert}}Alert ('above' or 'below')<br/>
 
 {{column-chart
     dimension=dimensions
@@ -33,11 +32,10 @@
     height=200
     xAxis=xAxis
     yAxis=yAxis
-    showComparisonLine=true
-    comparisonLine=comparisonLine
+    showComparisonLines=true
+    comparisonLines=comparisonLines
     currentInterval=currentInterval
     showCurrentIndicator=true
-    alert=alert
     showLegend=showColumnLegend
     legendWidth=250
 }}

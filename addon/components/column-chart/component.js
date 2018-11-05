@@ -17,7 +17,7 @@ export default BaseChartComponent.extend({
     classNames: ['column-chart'],
 
     showMaxMin: false,
-    showComparisonLine: false,
+    showComparisonLines: false,
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
@@ -110,11 +110,8 @@ export default BaseChartComponent.extend({
                     .renderTitle(false)
                     .elasticY(true)
                     .colorAccessor(d => {
-                        if ((this.get('alert') === this.get('AlertType').ABOVE && this.get('comparisonLine.value') < d.value)
-                                || (this.get('alert') === this.get('AlertType').BELOW && this.get('comparisonLine.value') > d.value)) {
-                            return this.get('colors').length - 1;
-                        }
-                        return index;
+                        const activeAlert = this.determineActiveAlertLine(d.value);
+                        return activeAlert ? activeAlert.alertColorIndex : index;
                     });
 
                 columnCharts.push(columnChart);
@@ -166,15 +163,43 @@ export default BaseChartComponent.extend({
         return tip;
     },
 
+    determineActiveAlertLine(value) {
+        // Find the first applicable warning
+        // Start with the lowest "below" warning to highest
+        // Then look at highest "above" warning to lowest
+        if (this.get('comparisonLines')) {
+            const applicableBelowAlert = this.get('comparisonLines')
+                .filter(w => w.alert === this.get('AlertType').BELOW && value < w.value)
+                .sort((a, b) => a.value - b.value)[0];
+
+            if (applicableBelowAlert) {
+                return applicableBelowAlert;
+            }
+
+            const applicableAboveAlert = this.get('comparisonLines')
+                .filter(w => w.alert === this.get('AlertType').ABOVE && value > w.value)
+                .sort((a, b) => b.value - a.value)[0];
+
+            if (applicableAboveAlert) {
+                return applicableAboveAlert;
+            }
+        }
+        return null;
+    },
+
     doHatching(chart) {
         // Set up any necessary hatching patterns
         let svg = chart.select('svg > defs');
+        let series = this.getWithDefault('series', []);
 
-        this.getWithDefault('series', []).forEach((series, index) => {
+        this.getWithDefault('comparisonLines', []).forEach((line, index) => {
+            series.push({ title: `pos alert hatch${index}`, hatch: 'pos', alert: true, replaceIndex: 0, activeAlertLine: line });
+            series.push({ title: `neg alert hatch${index}`, hatch: 'neg', alert: true, replaceIndex: 1, activeAlertLine: line });
+        });
+        series.forEach((series, index) => {
             if (series.hatch) {
                 let rotateAngle = series.hatch === 'pos' ? 45 : -45;
-                let comparisonValue = this.get('comparisonLine.value');
-
+                // create hatch patterns
                 svg.append('pattern')
                     .attr('id', `diagonalHatch${index}`)
                     .attr('patternUnits', 'userSpaceOnUse')
@@ -184,18 +209,18 @@ export default BaseChartComponent.extend({
                     .append('rect')
                     .attr('width', 2)
                     .attr('height', 4)
-                    .attr('fill', this.getColorAtIndex(index));
-                if (!series.alert || !this.get('alert')) {
+                    .attr('fill', series.alert ? this.getColorAtIndex(series.activeAlertLine.alertColorIndex) : this.getColorAtIndex(index));
+
+                // apply hatch patterns
+                if (!series.alert) {
                     chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
                 } else {
-                    let alert = this.get('alert');
-                    let AlertType = this.get('AlertType');
+                    let _this = this;
                     chart.selectAll('rect.bar').filter(function (d) {
                         return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                            && ((alert === AlertType.BELOW && d.data.value < comparisonValue)
-                            || (alert === AlertType.ABOVE && d.data.value > comparisonValue));
+                            && _this.determineActiveAlertLine(d.data.value) === series.activeAlertLine;
                     })
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
@@ -271,8 +296,8 @@ export default BaseChartComponent.extend({
             this.addMaxMinLabels(bars);
         }
 
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
-            this.addComparisonLine(chart);
+        if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
+            this.addComparisonLines(chart);
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
@@ -350,45 +375,51 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addComparisonLine(chart) {
+    addComparisonLines(chart) {
         const chartBody = chart.select('svg > g');
-        const line = this.get('comparisonLine');
+        const lines = this.get('comparisonLines');
 
         chart.selectAll('.comparison-line').remove();
         chart.selectAll('.comparison-text').remove();
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.margins().left)
-            .attr('x2', chart.width() - chart.margins().right)
-            .attr('y1', chart.margins().top + chart.y()(line.value))
-            .attr('y2', chart.margins().top + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+        lines.forEach((line, i) => {
+            chartBody.append('svg:line')
+                .attr('x1', chart.margins().left)
+                .attr('x2', chart.width() - chart.margins().right)
+                .attr('y1', chart.margins().top + chart.y()(line.value))
+                .attr('y2', chart.margins().top + chart.y()(line.value))
+                .attr('class', 'comparison-line')
+                .attr('id', `comparison-line-main${i}`)
+                .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.margins().left)
-            .attr('x2', chart.margins().left)
-            .attr('y1', 15 + chart.y()(line.value))
-            .attr('y2', 5 + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+            chartBody.append('svg:line')
+                .attr('x1', chart.margins().left)
+                .attr('x2', chart.margins().left)
+                .attr('y1', 15 + chart.y()(line.value))
+                .attr('y2', 5 + chart.y()(line.value))
+                .attr('class', 'comparison-line')
+                .attr('id', `comparison-line-left${i}`)
+                .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.width() - chart.margins().right)
-            .attr('x2', chart.width() - chart.margins().right)
-            .attr('y1', 15 + chart.y()(line.value))
-            .attr('y2', 5 + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+            chartBody.append('svg:line')
+                .attr('x1', chart.width() - chart.margins().right)
+                .attr('x2', chart.width() - chart.margins().right)
+                .attr('y1', 15 + chart.y()(line.value))
+                .attr('y2', 5 + chart.y()(line.value))
+                .attr('class', 'comparison-line')
+                .attr('id', `comparison-line-right${i}`)
+                .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('text')
-            .text(line.displayValue)
-            .attr('x', 80)
-            .attr('y', 14 + chart.y()(line.value))
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('class', 'comparison-text')
-            .attr('fill', line.textColor || '#000000');
+            chartBody.append('text')
+                .text(line.displayValue)
+                .attr('x', 80)
+                .attr('y', 14 + chart.y()(line.value))
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('class', 'comparison-text')
+                .attr('id', `comparison-text${i}`)
+                .attr('fill', line.textColor || '#000000');
+        });
     },
 
     addMaxMinLabels(bars) {
