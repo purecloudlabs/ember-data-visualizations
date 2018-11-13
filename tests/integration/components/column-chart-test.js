@@ -64,11 +64,11 @@ const getTestParameters = function () {
             ticks: 3
         },
 
-        comparisonLine: {
+        comparisonLines: [{
             value: 15,
             displayValue: '15',
             color: '#2CD02C'
-        }
+        }]
     };
 };
 
@@ -112,8 +112,8 @@ test('it shows chart not available', function (assert) {
     return wait();
 });
 
-test('it shows a comparison line', function (assert) {
-    this.render(hbs`{{column-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+test('it shows comparison lines', function (assert) {
+    this.render(hbs`{{column-chart showComparisonLines=true comparisonLines=params.comparisonLines dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
     later(this, (() => assert.equal(this.$('.comparison-line').length, 3)), 1000);
     return wait();
