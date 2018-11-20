@@ -91,6 +91,8 @@ export default Ember.Controller.extend({
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
     series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+    oneSeries: [{ title: 'Offered Calls', hatch: false }],
+    noGroup: [],
 
     // format object tells the groups function how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the grouping function that the 'entity' property on the data objects should be used for the displayed title on each bubble
