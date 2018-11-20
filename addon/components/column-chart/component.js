@@ -313,6 +313,19 @@ export default BaseChartComponent.extend({
                 .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
+
+        // account for negative y values
+        let negs = false;
+        this.get('group')[0].all().forEach(d => {
+            if (d.value < 0) {
+                negs = true;
+            }
+        });
+        if (negs && this.get('type') === 'GROUPED') {
+            const y0 = chart.selectAll('rect.bar').filter(d => d.y < 0).attr('y');
+            chart.select('.axis.x path.domain')
+                .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+        }
     },
 
     getLegendables(chart) {
@@ -429,7 +442,7 @@ export default BaseChartComponent.extend({
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
-                nonZeroValues = values.filter(v => v > 0);
+                nonZeroValues = values.filter(v => v !== 0);
                 maxValue = Math.max(...nonZeroValues);
                 maxIdx = values.indexOf(maxValue);
                 maxValue = formatter(maxValue);
