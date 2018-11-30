@@ -194,9 +194,13 @@ export default Ember.Controller.extend({
      */
     _createGroups() {
         const dimensions = this.get('dimensions');
+        // These two blocks of code are a convenient way to switch between proper data for GROUPED vs LAYERED/STACKED type in column chart.
+        // For GROUPED, uncomment the bottom line and comment out the top block;
+        // for LAYERED or STACKED, uncomment the top block and comment out the bottom line
+
         // const groupNames = ['calls', 'chats', 'emails'];
         // this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
-        // below is for viewing a GROUPED chart with only one metric; also, remove the 'series' param from application.hbs
+
         this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
     },
 
