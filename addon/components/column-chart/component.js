@@ -313,6 +313,21 @@ export default BaseChartComponent.extend({
                 .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
+
+        // account for negative y values
+        let negs = false;
+        if (this.get('group') && this.get('group')[0]) {
+            this.get('group')[0].all().forEach(d => {
+                if (d.value < 0) {
+                    negs = true;
+                }
+            });
+        }
+        if (negs && this.get('type') === 'GROUPED') {
+            const y0 = chart.selectAll('rect.bar').filter(d => d.y < 0).attr('y');
+            chart.select('.axis.x path.domain')
+                .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+        }
     },
 
     getLegendables(chart) {
@@ -381,45 +396,46 @@ export default BaseChartComponent.extend({
 
         chart.selectAll('.comparison-line').remove();
         chart.selectAll('.comparison-text').remove();
+        if (chartBody && chart && chart.y()) {
+            lines.forEach((line, i) => {
+                chartBody.append('svg:line')
+                    .attr('x1', chart.margins().left)
+                    .attr('x2', chart.width() - chart.margins().right)
+                    .attr('y1', chart.margins().top + chart.y()(line.value))
+                    .attr('y2', chart.margins().top + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .attr('id', `comparison-line-main${i}`)
+                    .style('stroke', line.color || '#2CD02C');
 
-        lines.forEach((line, i) => {
-            chartBody.append('svg:line')
-                .attr('x1', chart.margins().left)
-                .attr('x2', chart.width() - chart.margins().right)
-                .attr('y1', chart.margins().top + chart.y()(line.value))
-                .attr('y2', chart.margins().top + chart.y()(line.value))
-                .attr('class', 'comparison-line')
-                .attr('id', `comparison-line-main${i}`)
-                .style('stroke', line.color || '#2CD02C');
+                chartBody.append('svg:line')
+                    .attr('x1', chart.margins().left)
+                    .attr('x2', chart.margins().left)
+                    .attr('y1', 15 + chart.y()(line.value))
+                    .attr('y2', 5 + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .attr('id', `comparison-line-left${i}`)
+                    .style('stroke', line.color || '#2CD02C');
 
-            chartBody.append('svg:line')
-                .attr('x1', chart.margins().left)
-                .attr('x2', chart.margins().left)
-                .attr('y1', 15 + chart.y()(line.value))
-                .attr('y2', 5 + chart.y()(line.value))
-                .attr('class', 'comparison-line')
-                .attr('id', `comparison-line-left${i}`)
-                .style('stroke', line.color || '#2CD02C');
+                chartBody.append('svg:line')
+                    .attr('x1', chart.width() - chart.margins().right)
+                    .attr('x2', chart.width() - chart.margins().right)
+                    .attr('y1', 15 + chart.y()(line.value))
+                    .attr('y2', 5 + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .attr('id', `comparison-line-right${i}`)
+                    .style('stroke', line.color || '#2CD02C');
 
-            chartBody.append('svg:line')
-                .attr('x1', chart.width() - chart.margins().right)
-                .attr('x2', chart.width() - chart.margins().right)
-                .attr('y1', 15 + chart.y()(line.value))
-                .attr('y2', 5 + chart.y()(line.value))
-                .attr('class', 'comparison-line')
-                .attr('id', `comparison-line-right${i}`)
-                .style('stroke', line.color || '#2CD02C');
-
-            chartBody.append('text')
-                .text(line.displayValue)
-                .attr('x', 80)
-                .attr('y', 14 + chart.y()(line.value))
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('class', 'comparison-text')
-                .attr('id', `comparison-text${i}`)
-                .attr('fill', line.textColor || '#000000');
-        });
+                chartBody.append('text')
+                    .text(line.displayValue)
+                    .attr('x', 80)
+                    .attr('y', 14 + chart.y()(line.value))
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('class', 'comparison-text')
+                    .attr('id', `comparison-text${i}`)
+                    .attr('fill', line.textColor || '#000000');
+            });
+        }
     },
 
     addMaxMinLabels(bars) {
@@ -429,7 +445,7 @@ export default BaseChartComponent.extend({
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
-                nonZeroValues = values.filter(v => v > 0);
+                nonZeroValues = values.filter(v => v !== 0);
                 maxValue = Math.max(...nonZeroValues);
                 maxIdx = values.indexOf(maxValue);
                 maxValue = formatter(maxValue);

@@ -91,6 +91,8 @@ export default Ember.Controller.extend({
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
     series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+    oneSeries: [{ title: 'Offered Calls', hatch: false }],
+    noGroup: [],
 
     // format object tells the groups function how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the grouping function that the 'entity' property on the data objects should be used for the displayed title on each bubble
@@ -192,10 +194,14 @@ export default Ember.Controller.extend({
      */
     _createGroups() {
         const dimensions = this.get('dimensions');
-        const groupNames = ['calls', 'chats', 'emails'];
-        this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
-        // below is for viewing a GROUPED chart with only one metric; also, remove the 'series' param from application.hbs
-        // this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
+        // These two blocks of code are a convenient way to switch between proper data for GROUPED vs LAYERED/STACKED type in column chart.
+        // For GROUPED, uncomment the bottom line and comment out the top block;
+        // for LAYERED or STACKED, uncomment the top block and comment out the bottom line
+
+        // const groupNames = ['calls', 'chats', 'emails'];
+        // this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
+
+        this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
     },
 
     init() {
