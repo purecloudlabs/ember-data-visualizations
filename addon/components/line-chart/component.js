@@ -352,8 +352,8 @@ export default BaseChartComponent.extend({
             groups[i] = dimension.group().reduce(function () {
                 return i / 5;
             },
-                function () { },
-                function () { });
+            function () { },
+            function () { });
         }
 
         // create subcharts
