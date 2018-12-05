@@ -379,7 +379,7 @@ export default BaseChartComponent.extend({
         let indicatorDate = this.get('currentInterval.start._d');
         let xscaleTime = d3.scaleTime().domain(this.get('xAxis').domain);
         if (this.isIntervalInRange(xscaleTime, indicatorDate)) {
-            let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
+            let currentTick = this.get('chart').select('svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
             if (!currentTick.empty()) {
                 if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
