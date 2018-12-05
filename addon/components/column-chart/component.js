@@ -445,7 +445,7 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addDataValues(bars) {
+    addDataValues(bars = []) {
         let formatter = this.get('xAxis.formatter') || (value => value);
         let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'data-labels');
 
@@ -457,8 +457,8 @@ export default BaseChartComponent.extend({
         });
         const maxLabelY = Math.min(...yValues);
 
-        let values;
-        let groups = this.get('group');
+        let values = [];
+        let groups = this.getWithDefault('group', []);
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
@@ -472,7 +472,7 @@ export default BaseChartComponent.extend({
                 .attr('y', Math.max(12, maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
-                .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
+                .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
                 .attr('class', 'data-text');
         }
     },
