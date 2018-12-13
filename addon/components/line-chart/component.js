@@ -187,7 +187,7 @@ export default BaseChartComponent.extend({
         let indicatorDate = this.get('currentInterval.start._d');
         let xTimeScale = d3.scaleTime().domain(this.get('xAxis').domain);
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
-            let currentTick = d3.select('.line-chart > svg > g > g.axis').selectAll('g.tick')
+            let currentTick = this.get('chart').select('svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
             if (currentTick && !currentTick.empty() && currentTick.select('text').text().indexOf('\u25C6') === -1) {
                 let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
