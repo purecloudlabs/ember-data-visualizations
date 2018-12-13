@@ -76,6 +76,9 @@ export default BaseChartComponent.extend({
         compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
+            if (this.get('yAxis.formatter')) {
+                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
+            }
         }
 
         let tip = this.createTooltip();
@@ -296,6 +299,10 @@ export default BaseChartComponent.extend({
             this.addMaxMinLabels(bars);
         }
 
+        if (this.get('showDataValues') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+            this.addDataValues(bars);
+        }
+
         if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
             this.addComparisonLines(chart);
         }
@@ -433,6 +440,38 @@ export default BaseChartComponent.extend({
                     .attr('id', `comparison-text${i}`)
                     .attr('fill', line.textColor || '#000000');
             });
+        }
+    },
+
+    addDataValues(bars = []) {
+        let formatter = this.get('xAxis.formatter') || (value => value);
+        let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'data-labels');
+
+        // Choose the tallest bar in the stack (lowest y value) and place the data labels above that.
+        // Avoids label falling under any bar in the stack.
+        let yValues = [];
+        this.get('chart').selectAll('.sub rect.bar').each(function () {
+            yValues.push(parseInt(d3.select(this).attr('y')));
+        });
+        const maxLabelY = Math.min(...yValues);
+
+        let values = [];
+        let groups = this.getWithDefault('group', []);
+        groups.forEach((g, index) => {
+            if (index === this.get('seriesMaxMin')) {
+                values = g.all().map(gElem => gElem.value);
+            }
+        });
+
+        for (let i = 0; i < bars.length; i++) {
+            gLabels.append('text')
+                .text(() => formatter(values[i]))
+                .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
+                .attr('y', Math.max(12, maxLabelY - 2))
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
+                .attr('class', 'data-text');
         }
     },
 

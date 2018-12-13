@@ -68,6 +68,9 @@ export default BaseChartComponent.extend({
         compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
+            if (this.get('yAxis.formatter')) {
+                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
+            }
         }
 
         let lineCharts = [];
