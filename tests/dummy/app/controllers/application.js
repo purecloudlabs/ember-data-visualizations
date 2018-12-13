@@ -76,7 +76,8 @@ export default Ember.Controller.extend({
     },
     yAxis: {
         ticks: 3,
-        label: 'Queues'
+        label: 'Queues',
+        formatter: value => value * 10
     },
 
     currentInterval: { start: moment('12/02/2016') },
