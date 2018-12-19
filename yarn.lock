@@ -2623,7 +2623,7 @@ d3-zoom@1:
     d3-selection "1"
     d3-transition "1"
 
-d3@^5.4.0, d3@^5.5.0:
+d3@^5.4.0, d3@^5.5.0, d3@^5.7.0:
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/d3/-/d3-5.7.0.tgz#f189d338bdde62acf02f308918e0ec34dd7568f9"
   integrity sha512-8KEIfx+dFm8PlbJN9PI0suazrZ41QcaAufsKE9PRcqYPWLngHIyWJZX96n6IQKePGgeSu0l7rtlueSSNq8Zc3g==
@@ -2677,10 +2677,13 @@ date-now@^0.1.4:
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
   integrity sha1-6vQ5/U1ISK105cx9vvIAZyueNFs=
 
-dc-addons-bubble-chart@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/dc-addons-bubble-chart/-/dc-addons-bubble-chart-1.0.1.tgz#8c99003d08cda212cf73c1b25e30251b8a33803f"
-  integrity sha512-VxqL5AzhbW+oMNKFzLBS6lH0oKkFcop1w8WIzSVocRSHBduImZVtgGt/NVFVBdhAUeJ9lkqQTalf6fRyUdNklA==
+dc-addons-bubble-chart@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/dc-addons-bubble-chart/-/dc-addons-bubble-chart-3.0.0.tgz#1e85edf358bc9ae3267a43427abd1a8313dc59d3"
+  integrity sha512-fim+rOPh0eHFBp4h7WRqZAYf3PdBLjSW/Pdac5iP3AWjXb017wJbwVBzpBq4mHCO1tM77/4wWYNzQIxHgauZRw==
+  dependencies:
+    d3 "^5.7.0"
+    dc "^3.0.8"
 
 dc@^3.0.5:
   version "3.0.6"
@@ -2689,6 +2692,14 @@ dc@^3.0.5:
   dependencies:
     crossfilter2 "^1.4.5"
     d3 "^5.4.0"
+
+dc@^3.0.8:
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/dc/-/dc-3.0.9.tgz#9e9dfd3e2edde77f5a10110d03aebee11b85db87"
+  integrity sha512-bAupWEtqRYazUl6eigL9BvRsITx52GK1bCkV2SotowI1uoQ7hq9dk8EHOGzSsa3G8oRAhy4L3yCA3OC+lijPjw==
+  dependencies:
+    crossfilter2 "^1.4.5"
+    d3 "^5.7.0"
 
 debug@2.6.9, debug@^2.1.0, debug@^2.1.1, debug@^2.1.2, debug@^2.1.3, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
@@ -3324,10 +3335,10 @@ ember-router-generator@^1.2.3:
   dependencies:
     recast "^0.11.3"
 
-ember-source@~3.4.0:
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/ember-source/-/ember-source-3.4.4.tgz#b94800f8f0c1cc9baefc27b4fdcd8c65979a9bad"
-  integrity sha512-nT6BWL8XHP1+Toi2Wtpb7xvzkvvgBFBWotIt40e+P+piXM02QMfGySwO8vK7PR0mO0QkrSNxN8oGDjt0D4agYQ==
+ember-source@~3.4.7:
+  version "3.4.7"
+  resolved "https://registry.yarnpkg.com/ember-source/-/ember-source-3.4.7.tgz#c819337c62fcc6a10ca8aee28abc703c15a57d9e"
+  integrity sha512-+4yhFZHsjSucSd0bJGErJUly0kdkutMR06AWHLR0b0VRcdYUCbMcFlEvfc2g2B5YR0GY4enSy4gt7PZgYQOrQw==
   dependencies:
     broccoli-funnel "^2.0.1"
     broccoli-merge-trees "^2.0.0"
