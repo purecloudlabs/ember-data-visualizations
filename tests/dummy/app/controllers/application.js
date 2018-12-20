@@ -1,16 +1,17 @@
-import Ember from 'ember';
+import { get } from '@ember/object';
+import Controller from '@ember/controller';
 import moment from 'moment';
 import d3 from 'd3';
 import crossfilter from 'crossfilter';
 
-export default Ember.Controller.extend({
+export default Controller.extend({
     metrics: [
         { value: 'sighting', label: 'Sightings' }
     ],
 
     actions: {
         increaseData() {
-            let content = Ember.get(this, 'content');
+            let content = get(this, 'content');
             content[5].calls += 15;
             content[5].chats += 15;
             content[5].emails += 15;
@@ -19,7 +20,7 @@ export default Ember.Controller.extend({
             this._createGroups();
         },
         decreaseData() {
-            let content = Ember.get(this, 'content');
+            let content = get(this, 'content');
             content[5].calls -= 15;
             content[5].chats -= 15;
             content[5].emails -= 15;
@@ -28,7 +29,7 @@ export default Ember.Controller.extend({
             this._createGroups();
         },
         increaseQueue() {
-            let content = Ember.get(this, 'queueContent');
+            let content = get(this, 'queueContent');
 
             content.push({ 'queue': 'IT' });
             content.push({ 'queue': 'Manufacturing' });
@@ -40,7 +41,7 @@ export default Ember.Controller.extend({
             this._createQueueGroups();
         },
         decreaseQueue() {
-            let content = Ember.get(this, 'queueContent');
+            let content = get(this, 'queueContent');
             content.pop();
             content.pop();
             content.pop();
@@ -171,7 +172,7 @@ export default Ember.Controller.extend({
      * @private
      */
     _createDimensions() {
-        let content = Ember.get(this, 'content');
+        let content = get(this, 'content');
 
         content.forEach(function (d) {
             d.date = moment(d.date, 'YYYYMMDD').toDate();
@@ -206,6 +207,8 @@ export default Ember.Controller.extend({
     },
 
     init() {
+        this._super(...arguments);
+
         let self = this;
         d3.json('data.json').then(function (json) {
             self.set('content', json);
@@ -240,7 +243,7 @@ export default Ember.Controller.extend({
     },
 
     _createAgentDimensions() {
-        let content = Ember.get(this, 'agentContent');
+        let content = get(this, 'agentContent');
         let cf = crossfilter(content);
         this.set('agentDimensions', cf.dimension(d => d.status));
     },
@@ -250,7 +253,7 @@ export default Ember.Controller.extend({
         this.set('agentGroups', dimensions.group().reduceCount(d => d.status));
     },
     _createQueueDimensions() {
-        let content = Ember.get(this, 'queueContent');
+        let content = get(this, 'queueContent');
 
         if (this._QueueCrossfilter) {
             this._QueueCrossfilter.remove();
@@ -269,7 +272,7 @@ export default Ember.Controller.extend({
     },
 
     _createHeatDimensions() {
-        let content = Ember.get(this, 'heatContent');
+        let content = get(this, 'heatContent');
 
         if (this._heatCrossfilter) {
             this._heatCrossfilter.remove();
@@ -303,7 +306,7 @@ export default Ember.Controller.extend({
         ));
     },
     _createStatusDimension() {
-        let content = Ember.get(this, 'statusContent');
+        let content = get(this, 'statusContent');
 
         if (this._StatusCrossfilter) {
             this._StatusCrossfilter.remove();

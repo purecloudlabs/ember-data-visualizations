@@ -1,10 +1,8 @@
-/* global d3 */
-
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import { A } from '@ember/array';
-import { isEmpty } from '@ember/utils';
+import d3 from 'd3';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -28,7 +26,6 @@ export default Component.extend({
     group: null,
     dimension: null,
     data: null,
-    series: [],
     height: 200,
     xAxis: {},
     yAxis: {},
@@ -78,8 +75,12 @@ export default Component.extend({
         });
 
         this.get('chart').selectAll(elementToApplyTip)
-            .on('mouseover.tip', tip.show)
-            .on('mouseout.tip', tip.hide);
+            .on('mouseover.tip', function (d) {
+                tip.show(d, this);
+            })
+            .on('mouseout.tip', function (d) {
+                tip.hide(d, this);
+            });
     },
 
     addLegend(chart, legendables, legendG, legendDimension) {
@@ -191,8 +192,9 @@ export default Component.extend({
                 .on('postRender', null);
         }
 
-        if (this.$() && this.$().parents() && !isEmpty(this.$().parents().find(`.d3-tip#${this.get('elementId')}`))) {
-            this.$().parents().find(`.d3-tip#${this.get('elementId')}`).remove();
+        let tooltips = document.querySelector(`.d3-tip#${this.get('elementId')}`);
+        if (tooltips) {
+            tooltips.remove();
         }
     },
 

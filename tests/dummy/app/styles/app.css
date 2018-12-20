@@ -5,3 +5,7 @@ body {
 body > .ember-view {
     height: 50%;
 }
+
+.dummy-chart-container {
+    width: 50%;
+}

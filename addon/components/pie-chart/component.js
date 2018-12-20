@@ -1,9 +1,8 @@
-/* global d3 */
-
 import dc from 'dc';
 import crossfilter from 'crossfilter';
-import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
+import d3Tip from 'd3-tip';
+import d3 from 'd3';
 
 /**
    @public
@@ -92,7 +91,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip()
+        return d3Tip()
             .attr('class', 'd3-tip pie-chart')
             .attr('id', this.get('elementId'))
             .style('text-align', 'center')
@@ -112,14 +111,14 @@ export default BaseChartComponent.extend({
         });
 
         // tooltip positioning
+        let _this = this;
         this.get('chart').selectAll('.pie-slice')
-            .on('mouseover.tip', d => {
-                tip
-                    .show(d);
+            .on('mouseover.tip', function (d) {
+                tip.show(d, this);
 
                 const endAngle = d.endAngle - (Math.PI / 2), startAngle = d.startAngle - (Math.PI / 2);
                 const alpha = endAngle - startAngle;
-                const radius = this.get('chart').radius();
+                const radius = _this.get('chart').radius();
 
                 // coordinates of centroid if startAngle = 0
                 const xbar = (2 / 3) * (radius / alpha) * Math.sin(alpha);
@@ -130,8 +129,9 @@ export default BaseChartComponent.extend({
                 const centroidX = xbar * Math.cos(startAngle) - ybar * Math.sin(startAngle);
 
                 // coordinates of the center point of the chart
-                const centerOfChartY = $(`#${this.get('elementId')}`)[0].offsetTop + (this.get('chart').height() / 2);
-                const centerOfChartX = $(`#${this.get('elementId')}`)[0].offsetLeft + (this.get('chart').width() / 2);
+                const currentElement = document.querySelector(`#${_this.get('elementId')}`);
+                const centerOfChartY = currentElement.offsetTop + (_this.get('chart').height() / 2);
+                const centerOfChartX = currentElement.offsetLeft + (_this.get('chart').width() / 2);
 
                 // account for size of tooltip
                 const offsetX = ((d.data.key.length + 1) * -4);
@@ -140,7 +140,9 @@ export default BaseChartComponent.extend({
                 tip.style('top', (`${centerOfChartY + centroidY + offsetY}px`));
                 tip.style('left', (`${centerOfChartX + centroidX + offsetX}px`));
             })
-            .on('mouseout.tip', tip.hide);
+            .on('mouseout.tip', function (d) {
+                tip.hide(d, this);
+            });
     },
 
     showChartNotAvailable() {

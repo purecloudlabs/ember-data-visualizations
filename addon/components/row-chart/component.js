@@ -1,9 +1,9 @@
-/* global d3 */
-
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
-import $ from 'jquery';
+import d3Tip from 'd3-tip';
+import d3 from 'd3';
+
 /**
    @public
    @module row-chart
@@ -75,7 +75,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3.tip().attr('class', 'd3-tip')
+        return d3Tip().attr('class', 'd3-tip')
             .style('text-align', 'center')
             .attr('id', this.get('elementId'))
             .html(d => `<span class="row-tip-key">${d.key}</span><br/><span class="row-tip-value">${d.value}</span>`)
@@ -83,8 +83,11 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(chart, tip) {
+        let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
+        if (labels) {
+            labels.remove();
+        }
 
-        $(`#${this.get('elementId')} #inline-labels`).remove();
         if (this.get('showMaxMin')) {
             this.addMaxMinLabels(chart.selectAll('g.row > rect')._groups[0]);
         }
@@ -224,7 +227,7 @@ export default BaseChartComponent.extend({
         minValue = Math.min(...nonZeroValues);
         minIdx = values.indexOf(minValue);
         minValue = formatter(minValue);
-        let gLabels = this.get('chart').select('svg > g').append('g').attr('id', 'inline-labels');
+        let gLabels = this.get('chart').select('svg > g').append('g').attr('class', 'inline-labels');
         let b = bars[maxIdx];
 
         // Choose the longest bar in the stack (largest width value) and place the max/min labels to the right of that.

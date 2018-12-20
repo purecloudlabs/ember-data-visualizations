@@ -48,35 +48,35 @@ moduleForComponent('bubble-chart', 'Integration | Component | bubble chart', {
 
 test('it renders', function (assert) {
     this.render(hbs`{{bubble-chart}}`);
-    assert.equal(this.$('.chart.bubble-chart').length, 1);
+    assert.dom('.chart.bubble-chart').exists();
 });
 
 test('it renders a bubble for each data point', function (assert) {
     this.render(hbs`{{bubble-chart dimension=params.dimension group=params.group instantRun=true}}`);
-    assert.equal(this.$('circle.bubble').length, 4);
+    assert.dom('circle.bubble').exists({ count: 4 });
 });
 
 test('it renders a title for each data point', function (assert) {
     this.render(hbs`{{bubble-chart dimension=params.dimension group=params.group instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('text.title').length, 4)), 1000);
+    later(this, () => assert.dom('text.title').exists({ count: 4 }), 1000);
     return wait();
 });
 
 test('it renders a subtitle for each data point', function (assert) {
     this.render(hbs`{{bubble-chart dimension=params.dimension group=params.group instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('text.subtitle').length, 4)), 1000);
+    later(this, () => assert.dom('text.subtitle').exists({ count: 4 }), 1000);
     return wait();
 });
 
 test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{bubble-chart showLegend=true dimension=params.dimension group=params.group instantRun=true}}`);
-    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 4)), 1000);
+    later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 4 }), 1000);
     return wait();
 });
 
 test('it shows chart not available', function (assert) {
     this.render(hbs`{{bubble-chart isChartAvailable=false instantRun=true}}`);
     // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('.chart-not-available').length, 1)), 1000);
+    later(this, () => assert.dom('.chart-not-available').exists(), 1000);
     return wait();
 });

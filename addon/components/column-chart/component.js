@@ -1,11 +1,10 @@
-/* global d3 */
-
 import moment from 'moment';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
-import $ from 'jquery';
 import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
+import d3Tip from 'd3-tip';
+import d3 from 'd3';
 
 /**
    @public
@@ -145,7 +144,7 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.getWithDefault('series', []).map(entry => entry.title);
-        let tip = d3.tip().attr('class', 'd3-tip')
+        let tip = d3Tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
                 if (!isEmpty(titles)) {
@@ -293,7 +292,10 @@ export default BaseChartComponent.extend({
 
         this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
 
-        $(`#${this.get('elementId')} #inline-labels`).remove();
+        let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
+        if (labels) {
+            labels.remove();
+        }
 
         if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addMaxMinLabels(bars);
@@ -491,7 +493,7 @@ export default BaseChartComponent.extend({
                 minValue = formatter(minValue);
             }
         });
-        let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'inline-labels');
+        let gLabels = d3.select(bars[0].parentNode).append('g').attr('class', 'inline-labels');
         let b = bars[maxIdx];
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
