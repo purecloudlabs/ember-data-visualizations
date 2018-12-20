@@ -1,6 +1,6 @@
 {
   "name": "ember-data-visualizations",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "Ember addon to support visualizations with dc.js (d3 & crossfilter).",
   "keywords": [
     "ember-addon"
@@ -22,7 +22,7 @@
     "ember-auto-import": "^1.2.13",
     "ember-cli-babel": "^6.16.0",
     "ember-element-resize-detector": "^0.4.0",
-    "moment": "^2.22.2"
+    "moment-timezone": "^0.5.23"
   },
   "devDependencies": {
     "@ember/optional-features": "^0.6.3",
