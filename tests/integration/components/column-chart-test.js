@@ -64,11 +64,11 @@ const getTestParameters = function () {
             ticks: 3
         },
 
-        comparisonLine: {
+        comparisonLines: [{
             value: 15,
             displayValue: '15',
             color: '#2CD02C'
-        }
+        }]
     };
 };
 
@@ -112,8 +112,8 @@ test('it shows chart not available', function (assert) {
     return wait();
 });
 
-test('it shows a comparison line', function (assert) {
-    this.render(hbs`{{column-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+test('it shows comparison lines', function (assert) {
+    this.render(hbs`{{column-chart showComparisonLines=true comparisonLines=params.comparisonLines dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
     later(this, () => assert.dom('.comparison-line').exists({ count: 3 }), 1000);
     return wait();
@@ -138,5 +138,13 @@ test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
     // delayed to let all dc rendering processes finish
     later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 3 }), 1000);
+    return wait();
+});
+
+test('it renders a legend even when there are no groups', function (assert) {
+    this.set('groups', []);
+    this.render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
+    // delayed to let all dc rendering processes finish
+    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 3)), 1000);
     return wait();
 });

@@ -39,7 +39,7 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `xAxis` (Object): `domain` (Array, probably of `moment` objects) and `ticks` (number of ticks to show)
 
 ##### Optional parameters
-* `yAxis` (Object): `domain` (Array, probably of numbers) (optional) and `ticks` (number of ticks to show)
+* `yAxis` (Object): `domain` (Array, probably of numbers) (optional), `ticks` (number of ticks to show), and `formatter` (function to apply to every y-axis value for tick display)
 * `type` (String) (defaults to `GROUPED`):
     * `GROUPED` is for "ordinary" data and is most likely what should be used if there is only one crossfilter group.
     * `LAYERED` is for "overlapping data: e.g. there are 10 fruits, 6 of which are citrus, 3 of which are oranges. If this chart is `LAYERED`, the `series` option tells the chart how to format the bars (hatching).
@@ -50,13 +50,16 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the column chart
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 * `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
-* `showComparisonLine` (boolean): whether or not to show a comparison line
-* `comparisonLine` (Object): a horizontal line to mark a target, average, or any kind of comparison value. Properties:
-    * `value` (value on y axis on which to show line)
-    * `displayValue` (text that will appear to the left of the line on the y axis)
-    * `color` (Hex string)
+* `showComparisonLines` (boolean): whether or not to show the comparison lines
+* `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties: 
+    * `value` (number): value on y axis on which to show line
+    * `displayValue` (String): text that will appear to the left of the line on the y axis
+    * `color` (Hex string): color of the comparison line
+    * `alert` (String; acceptable values: `above`, `below`, `''`): whether to change the color of rectangles above or below this line. Use an empty string for no color changing.
+    * `alertColorIndex` (number): index of the `colors` array to use for color changes for this line.
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
+* `showDataValues` (boolean): whether or not to display the y-value of each point above each bar.
 
 ### Line chart
 The line chart uses an *array* of crossfilter groups to display different types of line charts. If there is only one group, *you must still pass an array of 1 group to the line chart*. This is true for many of the charts in this addon.

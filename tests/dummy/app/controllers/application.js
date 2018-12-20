@@ -60,7 +60,7 @@ export default Controller.extend({
 
     // color stuff
     heatColors: ['#203B73', '#75A8FF', '#8452CF', '#1DA8B3', '#B5B5EB', '#CC3EBE', '#5E5782', '#FF8FDD', '#868C1E', '#DDD933'],
-    colors: ['#B9B9B9', '#A0C0CF', '#105470', '#FF0000'],
+    colors: ['#B9B9B9', '#A0C0CF', '#105470', '#FF0000', '#0f9b22'],
     statusColors: [
         '#7ADB37', // available
         '#FC0D1C', // busy
@@ -77,16 +77,24 @@ export default Controller.extend({
     },
     yAxis: {
         ticks: 3,
-        label: 'Queues'
+        label: 'Queues',
+        formatter: value => value * 10
     },
 
     currentInterval: { start: moment('12/02/2016') },
 
     comparisonLine: { value: 50, displayValue: '50', color: '#2CD02C' },
 
+    comparisonLines:
+        [{ value: 75, displayValue: '75', color: '#FF0000', alert: 'above', alertColorIndex: 3 },
+            { value: 25, displayValue: '25', color: '#0f9b22', alert: 'below', alertColorIndex: 4 }
+        ],
+
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
 
-    series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }, { title: 'pos alert hatch', hatch: 'pos', alert: true, replaceIndex: 0 }, { title: 'neg alert hatch', hatch: 'neg', alert: true, replaceIndex: 1 }],
+    series: [{ title: 'Skilled Answered Calls', hatch: 'pos' }, { title: 'Answered Calls', hatch: 'neg' }, { title: 'Offered Calls', hatch: false }],
+    oneSeries: [{ title: 'Offered Calls', hatch: false }],
+    noGroup: [],
 
     // format object tells the groups function how to interpret the data. Give the name of the property you want to use to assign a value to each bubble
     // e.g. the 'title' property is 'entity' here, which tells the grouping function that the 'entity' property on the data objects should be used for the displayed title on each bubble
@@ -188,10 +196,14 @@ export default Controller.extend({
      */
     _createGroups() {
         const dimensions = this.get('dimensions');
-        const groupNames = ['calls', 'chats', 'emails'];
-        this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
-        // below is for viewing a GROUPED chart with only one metric; also, remove the 'series' param from application.hbs
-        // this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
+        // These two blocks of code are a convenient way to switch between proper data for GROUPED vs LAYERED/STACKED type in column chart.
+        // For GROUPED, uncomment the bottom line and comment out the top block;
+        // for LAYERED or STACKED, uncomment the top block and comment out the bottom line
+
+        // const groupNames = ['calls', 'chats', 'emails'];
+        // this.set('groups', groupNames.map(name => dimensions.group().reduceSum(item => item[name])));
+
+        this.set('groups', [dimensions.group().reduceSum(item => item.calls)]);
     },
 
     init() {

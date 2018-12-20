@@ -2,6 +2,7 @@
 /* eslint camelcase: ["error", {properties: "never"}] */
 
 module.exports = {
+    reporter: 'dot',
     test_page: 'tests/index.html?hidepassed',
     disable_watching: true,
     launch_in_ci: [

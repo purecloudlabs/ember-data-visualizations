@@ -33,7 +33,7 @@ export default BaseChartComponent.extend({
             .r(d3.scaleLinear().domain([0, maxRadius * this.get('group').size() / 3]))
             .radiusValueAccessor(d => this.getRadiusValue(d))
             .label(d => titleFormatter(d.key))
-            .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
+            .colors(d3.scaleQuantize().domain([0, this.get('colors.length') - 1]).range(this.get('colors')))
             .colorAccessor(d => d.value.colorValue)
             .renderTitle(false)
             .margins({

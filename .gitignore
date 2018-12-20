@@ -12,7 +12,8 @@
 /connect.lock
 /coverage/
 /libpeerconnection.log
-/npm-debug.log*
-/yarn-error.log
-/testem.log
+npm-debug.log*
+yarn-error.log
+testem.log
+package-lock.json
 .npmrc

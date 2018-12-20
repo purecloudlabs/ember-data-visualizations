@@ -18,28 +18,27 @@
 </div>
 
 <button {{action "increaseData"}}>Increase</button>
-<button {{action "decreaseData"}}>Decrease</button> <br>
+<button {{action "decreaseData"}}>Decrease</button><br>
+{{input type="checkbox" checked=showColumnLegend}}Show Legend<br>
 
-{{input type="checkbox" checked=showColumnLegend}}Show Legend <br>
-{{input type="checkbox" checked=colorBelowComparisonLine}}Color rectangles below comparison line <br>
 {{column-chart
   dimension=dimensions
   group=groups
-  type="LAYERED"
-  seriesMaxMin=2
+  type="GROUPED"
+  seriesMaxMin=0
   showMaxMin=true
-  series=series
+  series=oneSeries
   colors=colors
   height=200
   xAxis=xAxis
   yAxis=yAxis
-  showComparisonLine=true
-  comparisonLine=comparisonLine
+  showComparisonLines=true
+  comparisonLines=comparisonLines
   currentInterval=currentInterval
   showCurrentIndicator=true
-  colorBelowComparisonLine=colorBelowComparisonLine
   showLegend=showColumnLegend
   legendWidth=250
+  showDataValues=true
 }}
 
 {{input type="checkbox" checked=showLineLegend}}Show Legend <br>

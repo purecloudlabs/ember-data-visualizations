@@ -1,10 +1,10 @@
 import moment from 'moment';
-import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
+import d3 from 'd3';
 
 /**
    @public
@@ -67,6 +67,9 @@ export default BaseChartComponent.extend({
         compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
+            if (this.get('yAxis.formatter')) {
+                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
+            }
         }
 
         let lineCharts = [];
@@ -153,16 +156,13 @@ export default BaseChartComponent.extend({
     },
 
     getLegendables(chart) {
-        let legendables = [];
-        const titles = this.get('series').map(entry => entry.title);
-        chart.selectAll('path.line').filter(function (d, i) {
-            let legendable = {};
-            legendable.title = titles[i];
-            legendable.color = d3.select(this).attr('stroke');
-            legendable.elements = d3.select(this);
-            legendables.push(legendable);
-        });
-        return legendables;
+        const elements = chart.selectAll('path.line');
+
+        return this.getWithDefault('series', []).map((s, i) => ({
+            title: s.title,
+            color: this.getColorAtIndex(i),
+            elements: elements.filter((d, elementIndex) => elementIndex === i)
+        }));
     },
 
     isIntervalIncluded(ticks, interval) {
@@ -189,9 +189,9 @@ export default BaseChartComponent.extend({
         let indicatorDate = this.get('currentInterval.start._d');
         let xTimeScale = d3.scaleTime().domain(this.get('xAxis').domain);
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
-            let currentTick = d3.select('.line-chart > svg > g > g.axis').selectAll('g.tick')
+            let currentTick = this.get('chart').select('svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
-            if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
+            if (currentTick && !currentTick.empty() && currentTick.select('text').text().indexOf('\u25C6') === -1) {
                 let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
                 currentTick.select('text').html(tickHtml);
             }

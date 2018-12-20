@@ -1,8 +1,8 @@
-import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import d3Tip from 'd3-tip';
+import d3 from 'd3';
 
 /**
    @public

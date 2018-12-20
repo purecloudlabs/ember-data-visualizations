@@ -1,14 +1,19 @@
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
-import d3 from 'd3';
 import { A } from '@ember/array';
-import { isEmpty } from '@ember/utils';
+import d3 from 'd3';
 
 export default Component.extend({
     resizeDetector: service(),
 
     classNames: ['chart'],
+
+    colors: [
+        '#1f77b4', '#ff7f0e', '#2ca02c',
+        '#9467bd', '#8c564b', '#e377c2',
+        '#7f7f7f', '#bcbd22', '#17becf'
+    ],
 
     instantRun: false,
     resizeTimer: null,
@@ -24,12 +29,20 @@ export default Component.extend({
     height: 200,
     xAxis: {},
     yAxis: {},
-    series: [],
-    colors: [
-        '#1f77b4', '#ff7f0e', '#2ca02c',
-        '#9467bd', '#8c564b', '#e377c2',
-        '#7f7f7f', '#bcbd22', '#17becf'
-    ],
+    AlertType: {
+        ABOVE: 'above',
+        BELOW: 'below'
+    },
+
+    /**
+       @desc Retrieves the color at the given index. Just returns the last available color if index is out of bounds of the array.
+       @param {number} index
+       @returns {string} Hex color string
+    */
+    getColorAtIndex(index) {
+        const colors = this.get('colors');
+        return colors[index] || colors[colors.length - 1];
+    },
 
     setupResize() {
         this.set('onResizeDebounced', () => {

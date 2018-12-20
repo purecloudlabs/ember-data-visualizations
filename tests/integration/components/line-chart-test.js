@@ -119,6 +119,14 @@ test('it renders a legend with the correct number of boxes', function (assert) {
     return wait();
 });
 
+test('it renders a legend even when there are no groups', function (assert) {
+    this.set('groups', []);
+    this.render(hbs`{{line-chart showLegend=true dimension=params.dimensions group=groups seriesData=params.seriesData series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    // delayed to let all dc rendering processes finish
+    later(this, (() => assert.equal(this.$('g.legend > g.legendItem').length, 3)), 1000);
+    return wait();
+});
+
 test('it renders minimum and maximum value indicators', function (assert) {
     this.render(hbs`{{line-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
 

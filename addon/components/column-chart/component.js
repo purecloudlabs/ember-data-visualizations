@@ -1,10 +1,10 @@
 import moment from 'moment';
-import d3 from 'd3';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
+import d3 from 'd3';
 
 /**
    @public
@@ -16,7 +16,7 @@ export default BaseChartComponent.extend({
     classNames: ['column-chart'],
 
     showMaxMin: false,
-    showComparisonLine: false,
+    showComparisonLines: false,
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
@@ -45,7 +45,12 @@ export default BaseChartComponent.extend({
                 left: 100
             })
             .x(d3.scaleTime().domain(this.get('xAxis').domain))
-            .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
+            .xUnits(() => {
+                if (this.get('group.length')) {
+                    return this.get('group')[0].size() * (this.get('group.length') + 1);
+                }
+                return 0;
+            })
             .dimension(this.get('dimension'))
             .elasticY(true)
             .yAxisPadding('40%');
@@ -70,6 +75,9 @@ export default BaseChartComponent.extend({
         compositeChart.yAxis().tickSizeOuter(0);
         if (this.get('yAxis') && this.get('yAxis').ticks) {
             compositeChart.yAxis().ticks(this.get('yAxis').ticks);
+            if (this.get('yAxis.formatter')) {
+                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
+            }
         }
 
         let tip = this.createTooltip();
@@ -104,10 +112,8 @@ export default BaseChartComponent.extend({
                     .renderTitle(false)
                     .elasticY(true)
                     .colorAccessor(d => {
-                        return this.get('colorBelowComparisonLine')
-                        && this.get('comparisonLine.value') > d.value
-                            ? this.get('colors').length - 1
-                            : index;
+                        const activeAlert = this.determineActiveAlertLine(d.value);
+                        return activeAlert ? activeAlert.alertColorIndex : index;
                     });
 
                 columnCharts.push(columnChart);
@@ -137,7 +143,7 @@ export default BaseChartComponent.extend({
 
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
-        const titles = this.get('series').map(entry => entry.title);
+        const titles = this.getWithDefault('series', []).map(entry => entry.title);
         let tip = d3Tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .html(d => {
@@ -159,15 +165,43 @@ export default BaseChartComponent.extend({
         return tip;
     },
 
+    determineActiveAlertLine(value) {
+        // Find the first applicable warning
+        // Start with the lowest "below" warning to highest
+        // Then look at highest "above" warning to lowest
+        if (this.get('comparisonLines')) {
+            const applicableBelowAlert = this.get('comparisonLines')
+                .filter(w => w.alert === this.get('AlertType').BELOW && value < w.value)
+                .sort((a, b) => a.value - b.value)[0];
+
+            if (applicableBelowAlert) {
+                return applicableBelowAlert;
+            }
+
+            const applicableAboveAlert = this.get('comparisonLines')
+                .filter(w => w.alert === this.get('AlertType').ABOVE && value > w.value)
+                .sort((a, b) => b.value - a.value)[0];
+
+            if (applicableAboveAlert) {
+                return applicableAboveAlert;
+            }
+        }
+        return null;
+    },
+
     doHatching(chart) {
         // Set up any necessary hatching patterns
         let svg = chart.select('svg > defs');
+        let series = this.getWithDefault('series', []);
 
-        this.get('series').forEach((series, index) => {
+        this.getWithDefault('comparisonLines', []).forEach((line, index) => {
+            series.push({ title: `pos alert hatch${index}`, hatch: 'pos', alert: true, replaceIndex: 0, activeAlertLine: line });
+            series.push({ title: `neg alert hatch${index}`, hatch: 'neg', alert: true, replaceIndex: 1, activeAlertLine: line });
+        });
+        series.forEach((series, index) => {
             if (series.hatch) {
                 let rotateAngle = series.hatch === 'pos' ? 45 : -45;
-                let comparisonValue = this.get('comparisonLine.value');
-
+                // create hatch patterns
                 svg.append('pattern')
                     .attr('id', `diagonalHatch${index}`)
                     .attr('patternUnits', 'userSpaceOnUse')
@@ -177,15 +211,18 @@ export default BaseChartComponent.extend({
                     .append('rect')
                     .attr('width', 2)
                     .attr('height', 4)
-                    .attr('fill', index < this.get('colors').length ? this.get('colors')[index] : this.get('colors')[this.get('colors').length - 1]);
-                if (!series.alert || !this.get('colorBelowComparisonLine')) {
+                    .attr('fill', series.alert ? this.getColorAtIndex(series.activeAlertLine.alertColorIndex) : this.getColorAtIndex(index));
+
+                // apply hatch patterns
+                if (!series.alert) {
                     chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`)
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
                 } else {
+                    let _this = this;
                     chart.selectAll('rect.bar').filter(function (d) {
                         return d3.select(this).attr('fill') === `url(#diagonalHatch${series.replaceIndex})`
-                        && d.data.value < comparisonValue;
+                            && _this.determineActiveAlertLine(d.data.value) === series.activeAlertLine;
                     })
                         .attr('fill', `url(#diagonalHatch${index})`)
                         .attr('opacity', '.7');
@@ -201,22 +238,25 @@ export default BaseChartComponent.extend({
     handleBarWidth(chart) {
         const gap = 2;
         let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
-        const seriesCount = this.get('group').length;
+        const seriesCount = this.get('group.length');
 
-        if (bars[0]) {
+        if (bars[0] && seriesCount) {
             let barWidth = (parseInt(d3.select(bars[0]).attr('width'), 10)) || 1;
 
             // if composed, double barWidth
             if (this.get('type') === 'LAYERED' || this.get('type') === 'STACKED') {
                 let x;
                 let barD3;
-                chart.selectAll('rect.bar')._groups[0].forEach(bar => {
+                // convert NodeList to Array for IE 11 compatability
+                let barList = Array.prototype.slice.call(chart.selectAll('rect.bar')._groups[0]);
+
+                barList.forEach(bar => {
                     barD3 = d3.select(bar);
                     x = parseInt(barD3.attr('x'), 10);
-                    barD3.attr('x', x - barWidth * (this.get('group').length - 1) / 2 + 1);
+                    barD3.attr('x', x - barWidth * (seriesCount - 1) / 2 + 1);
                 });
 
-                barWidth *= this.get('group').length; // number of series
+                barWidth *= this.get('group.length'); // number of series
             }
 
             let position = -1 * (barWidth + gap);
@@ -261,8 +301,12 @@ export default BaseChartComponent.extend({
             this.addMaxMinLabels(bars);
         }
 
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
-            this.addComparisonLine(chart);
+        if (this.get('showDataValues') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+            this.addDataValues(bars);
+        }
+
+        if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
+            this.addComparisonLines(chart);
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
@@ -278,38 +322,36 @@ export default BaseChartComponent.extend({
                 .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
+
+        // account for negative y values
+        let negs = false;
+        if (this.get('group') && this.get('group')[0]) {
+            this.get('group')[0].all().forEach(d => {
+                if (d.value < 0) {
+                    negs = true;
+                }
+            });
+        }
+        if (negs && this.get('type') === 'GROUPED') {
+            const y0 = chart.selectAll('rect.bar').filter(d => d.y < 0).attr('y');
+            chart.select('.axis.x path.domain')
+                .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+        }
     },
 
     getLegendables(chart) {
-        let legendables = [];
         const data = this.get('data');
 
-        this.get('series').forEach((series, i) => {
-            if (!series.alert) {
-                let legendable = {
-                    title: series.title
-                };
+        return this.getWithDefault('series', []).filter(s => !s.alert).map((s, i) => ({
+            title: s.title,
 
-                let colors = this.get('colors');
+            elements: chart.selectAll('rect.bar').filter(function (d) {
+                const keyData = data && d.data && data[d.data.key];
+                return keyData && d.y === keyData[i] && d3.select(this).classed(s.title);
+            }),
 
-                const rectangles = chart.selectAll('rect.bar')
-                    .filter(function (d) {
-                        let fill;
-                        if (d3.select(this).attr('fill').indexOf('url(#diagonalHatch') !== -1) {
-                            fill = `url(#diagonalHatch${i})`;
-                        } else {
-                            fill = colors[i];
-                        }
-                        if (d.y === data[d.data.key][i] && d3.select(this).classed(series.title)) {
-                            legendable.color = fill;
-                            return true;
-                        }
-                    });
-                legendable.elements = rectangles;
-                legendables.push(legendable);
-            }
-        });
-        return legendables;
+            color: s.hatch ? `url(#diagonalHatch${i})` : this.getColorAtIndex(i)
+        }));
     },
 
     getIndexForHatch(idx) {
@@ -346,56 +388,93 @@ export default BaseChartComponent.extend({
         let indicatorDate = this.get('currentInterval.start._d');
         let xscaleTime = d3.scaleTime().domain(this.get('xAxis').domain);
         if (this.isIntervalInRange(xscaleTime, indicatorDate)) {
-            let currentTick = d3.select('.column-chart > svg > g > g.axis').selectAll('g.tick')
+            let currentTick = this.get('chart').select('svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
-            if (!currentTick.empty()) {
-                if (currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                    let tickHtml = this.isIntervalIncluded(xscaleTime.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-                    currentTick.select('text').html(tickHtml);
-                }
+            if (currentTick && !currentTick.empty() && currentTick.select('text').text().indexOf('\u25C6') === -1) {
+                let tickHtml = this.isIntervalIncluded(xscaleTime.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                currentTick.select('text').html(tickHtml);
             }
         }
     },
 
-    addComparisonLine(chart) {
+    addComparisonLines(chart) {
         const chartBody = chart.select('svg > g');
-        const line = this.get('comparisonLine');
+        const lines = this.get('comparisonLines');
 
         chart.selectAll('.comparison-line').remove();
         chart.selectAll('.comparison-text').remove();
+        if (chartBody && chart && chart.y()) {
+            lines.forEach((line, i) => {
+                chartBody.append('svg:line')
+                    .attr('x1', chart.margins().left)
+                    .attr('x2', chart.width() - chart.margins().right)
+                    .attr('y1', chart.margins().top + chart.y()(line.value))
+                    .attr('y2', chart.margins().top + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .attr('id', `comparison-line-main${i}`)
+                    .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.margins().left)
-            .attr('x2', chart.width() - chart.margins().right)
-            .attr('y1', chart.margins().top + chart.y()(line.value))
-            .attr('y2', chart.margins().top + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+                chartBody.append('svg:line')
+                    .attr('x1', chart.margins().left)
+                    .attr('x2', chart.margins().left)
+                    .attr('y1', 15 + chart.y()(line.value))
+                    .attr('y2', 5 + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .attr('id', `comparison-line-left${i}`)
+                    .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.margins().left)
-            .attr('x2', chart.margins().left)
-            .attr('y1', 15 + chart.y()(line.value))
-            .attr('y2', 5 + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+                chartBody.append('svg:line')
+                    .attr('x1', chart.width() - chart.margins().right)
+                    .attr('x2', chart.width() - chart.margins().right)
+                    .attr('y1', 15 + chart.y()(line.value))
+                    .attr('y2', 5 + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .attr('id', `comparison-line-right${i}`)
+                    .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.width() - chart.margins().right)
-            .attr('x2', chart.width() - chart.margins().right)
-            .attr('y1', 15 + chart.y()(line.value))
-            .attr('y2', 5 + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+                chartBody.append('text')
+                    .text(line.displayValue)
+                    .attr('x', 80)
+                    .attr('y', 14 + chart.y()(line.value))
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('class', 'comparison-text')
+                    .attr('id', `comparison-text${i}`)
+                    .attr('fill', line.textColor || '#000000');
+            });
+        }
+    },
 
-        chartBody.append('text')
-            .text(line.displayValue)
-            .attr('x', 80)
-            .attr('y', 14 + chart.y()(line.value))
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('class', 'comparison-text')
-            .attr('fill', line.textColor || '#000000');
+    addDataValues(bars = []) {
+        let formatter = this.get('xAxis.formatter') || (value => value);
+        let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'data-labels');
+
+        // Choose the tallest bar in the stack (lowest y value) and place the data labels above that.
+        // Avoids label falling under any bar in the stack.
+        let yValues = [];
+        this.get('chart').selectAll('.sub rect.bar').each(function () {
+            yValues.push(parseInt(d3.select(this).attr('y')));
+        });
+        const maxLabelY = Math.min(...yValues);
+
+        let values = [];
+        let groups = this.getWithDefault('group', []);
+        groups.forEach((g, index) => {
+            if (index === this.get('seriesMaxMin')) {
+                values = g.all().map(gElem => gElem.value);
+            }
+        });
+
+        for (let i = 0; i < bars.length; i++) {
+            gLabels.append('text')
+                .text(() => formatter(values[i]))
+                .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
+                .attr('y', Math.max(12, maxLabelY - 2))
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
+                .attr('class', 'data-text');
+        }
     },
 
     addMaxMinLabels(bars) {
@@ -405,7 +484,7 @@ export default BaseChartComponent.extend({
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
-                nonZeroValues = values.filter(v => v > 0);
+                nonZeroValues = values.filter(v => v !== 0);
                 maxValue = Math.max(...nonZeroValues);
                 maxIdx = values.indexOf(maxValue);
                 maxValue = formatter(maxValue);
