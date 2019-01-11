@@ -8,6 +8,16 @@ const LessCompiler = require('broccoli-less-single');
 module.exports = {
     name: require('./package').name,
 
+    options: {
+        autoImport: {
+            exclude: ['moment']
+        }
+    },
+
+    included() {
+        this._super.included.apply(this, arguments);
+    },
+
     isDevelopingAddon() {
         return Boolean(process.env.DATA_VIS_DEV_MODE);
     },
