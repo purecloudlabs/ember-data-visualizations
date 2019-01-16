@@ -30,6 +30,7 @@ export default BaseChartComponent.extend({
 
         const legendWidth = this.get('legendWidth') || 250;
         const rightMargin = this.get('showLegend') ? legendWidth : 100;
+        const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
             .renderTitle(false)
@@ -43,7 +44,7 @@ export default BaseChartComponent.extend({
             })
             .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => this.get('group')[0].size() * (this.get('group').length + 1))
-            .elasticY(true)
+            .elasticY(useElasticY)
             .yAxisPadding('20%')
             .transitionDuration(0);
 
