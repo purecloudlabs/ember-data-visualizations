@@ -5,6 +5,7 @@ import BaseChartComponent from '../base-chart-component';
 import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
+import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 
 /**
    @public
@@ -30,8 +31,8 @@ export default BaseChartComponent.extend({
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
-        const legendWidth = this.get('legendWidth') || 250;
-        const rightMargin = this.get('showLegend') ? legendWidth : 100;
+        const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
+        const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_RIGHT_MARGIN : ChartSizes.RIGHT_MARGIN;
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
@@ -320,7 +321,7 @@ export default BaseChartComponent.extend({
             const legendDimension = 18;
             let legendG = chart.select('g')
                 .append('g')
-                .attr('transform', `translate(${chart.width() - chart.margins().right + 10},${chart.effectiveHeight() / 4})`);
+                .attr('transform', `translate(${chart.width() - chart.margins().right + ChartSizes.LEGEND_OFFSET},${chart.effectiveHeight() / 4})`);
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
 
