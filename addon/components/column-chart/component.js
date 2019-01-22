@@ -21,11 +21,6 @@ export default BaseChartComponent.extend({
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
-
-    // Horizontal line to mark a target, average, or any kind of comparison value
-    // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
-    comparisonLine: null,
-
     type: 'GROUPED', // GROUPED, LAYERED, STACKED
 
     buildChart() {
@@ -405,15 +400,15 @@ export default BaseChartComponent.extend({
 
         chart.selectAll('.comparison-line').remove();
         chart.selectAll('.comparison-text').remove();
+
         if (chartBody && chart && chart.y()) {
-            lines.forEach((line, i) => {
+            lines.forEach(line => {
                 chartBody.append('svg:line')
                     .attr('x1', chart.margins().left)
                     .attr('x2', chart.width() - chart.margins().right)
                     .attr('y1', chart.margins().top + chart.y()(line.value))
                     .attr('y2', chart.margins().top + chart.y()(line.value))
                     .attr('class', 'comparison-line')
-                    .attr('id', `comparison-line-main${i}`)
                     .style('stroke', line.color || '#2CD02C');
 
                 chartBody.append('svg:line')
@@ -422,7 +417,6 @@ export default BaseChartComponent.extend({
                     .attr('y1', 15 + chart.y()(line.value))
                     .attr('y2', 5 + chart.y()(line.value))
                     .attr('class', 'comparison-line')
-                    .attr('id', `comparison-line-left${i}`)
                     .style('stroke', line.color || '#2CD02C');
 
                 chartBody.append('svg:line')
@@ -431,7 +425,6 @@ export default BaseChartComponent.extend({
                     .attr('y1', 15 + chart.y()(line.value))
                     .attr('y2', 5 + chart.y()(line.value))
                     .attr('class', 'comparison-line')
-                    .attr('id', `comparison-line-right${i}`)
                     .style('stroke', line.color || '#2CD02C');
 
                 chartBody.append('text')
@@ -441,7 +434,6 @@ export default BaseChartComponent.extend({
                     .attr('text-anchor', 'middle')
                     .attr('font-size', '12px')
                     .attr('class', 'comparison-text')
-                    .attr('id', `comparison-text${i}`)
                     .attr('fill', line.textColor || '#000000');
             });
         }
