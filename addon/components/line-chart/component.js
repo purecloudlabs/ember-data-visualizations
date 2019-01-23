@@ -17,14 +17,10 @@ export default BaseChartComponent.extend({
     classNames: ['line-chart'],
 
     showMaxMin: false,
-    showComparisonLine: false,
+    showComparisonLines: false,
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
-
-    // Horizontal line to mark a target, average, or any kind of comparison value
-    // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
-    comparisonLine: null,
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
@@ -139,8 +135,8 @@ export default BaseChartComponent.extend({
             this.addMaxMinLabels(dots);
         }
 
-        if (this.get('showComparisonLine') && this.get('comparisonLine') && !isEmpty(this.get('data'))) {
-            this.addComparisonLine(chart);
+        if (this.get('showComparisonLines') && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
+            this.addComparisonLines(chart);
         }
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
@@ -199,45 +195,49 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addComparisonLine(chart) {
+    addComparisonLines(chart) {
         const chartBody = chart.select('svg > g');
-        const line = this.get('comparisonLine');
+        const lines = this.get('comparisonLines');
 
         chart.selectAll('.comparison-line').remove();
         chart.selectAll('.comparison-text').remove();
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.margins().left)
-            .attr('x2', chart.width() - chart.margins().right)
-            .attr('y1', chart.margins().top + chart.y()(line.value))
-            .attr('y2', chart.margins().top + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+        if (chartBody && chart && chart.y()) {
+            lines.forEach(line => {
+                chartBody.append('svg:line')
+                    .attr('x1', chart.margins().left)
+                    .attr('x2', chart.width() - chart.margins().right)
+                    .attr('y1', chart.margins().top + chart.y()(line.value))
+                    .attr('y2', chart.margins().top + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.margins().left)
-            .attr('x2', chart.margins().left)
-            .attr('y1', 15 + chart.y()(line.value))
-            .attr('y2', 5 + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+                chartBody.append('svg:line')
+                    .attr('x1', chart.margins().left)
+                    .attr('x2', chart.margins().left)
+                    .attr('y1', 15 + chart.y()(line.value))
+                    .attr('y2', 5 + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('svg:line')
-            .attr('x1', chart.width() - chart.margins().right)
-            .attr('x2', chart.width() - chart.margins().right)
-            .attr('y1', 15 + chart.y()(line.value))
-            .attr('y2', 5 + chart.y()(line.value))
-            .attr('class', 'comparison-line')
-            .style('stroke', line.color || '#2CD02C');
+                chartBody.append('svg:line')
+                    .attr('x1', chart.width() - chart.margins().right)
+                    .attr('x2', chart.width() - chart.margins().right)
+                    .attr('y1', 15 + chart.y()(line.value))
+                    .attr('y2', 5 + chart.y()(line.value))
+                    .attr('class', 'comparison-line')
+                    .style('stroke', line.color || '#2CD02C');
 
-        chartBody.append('text')
-            .text(line.displayValue)
-            .attr('x', 80)
-            .attr('y', 14 + chart.y()(line.value))
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('class', 'comparison-text')
-            .attr('fill', line.textColor || '#000000');
+                chartBody.append('text')
+                    .text(line.displayValue)
+                    .attr('x', 80)
+                    .attr('y', 14 + chart.y()(line.value))
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('class', 'comparison-text')
+                    .attr('fill', line.textColor || '#000000');
+            });
+        }
     },
 
     addMaxMinLabels(dots) {
