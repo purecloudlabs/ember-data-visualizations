@@ -460,6 +460,10 @@ export default BaseChartComponent.extend({
         });
 
         for (let i = 0; i < bars.length; i++) {
+            if (!values[i]) {
+                continue;
+            }
+
             gLabels.append('text')
                 .text(() => formatter(values[i]))
                 .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
