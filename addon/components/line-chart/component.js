@@ -6,6 +6,7 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
+import { addComparisonLines } from 'ember-data-visualizations/utils/comparison-lines';
 
 /**
    @public
@@ -136,8 +137,9 @@ export default BaseChartComponent.extend({
         }
 
         if (this.get('showComparisonLines') && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
-            this.addComparisonLines(chart);
+            addComparisonLines(chart, this.get('comparisonLines'));
         }
+
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
             this.changeTickForCurrentInterval();
         }
@@ -192,51 +194,6 @@ export default BaseChartComponent.extend({
                 let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
                 currentTick.select('text').html(tickHtml);
             }
-        }
-    },
-
-    addComparisonLines(chart) {
-        const chartBody = chart.select('svg > g');
-        const lines = this.get('comparisonLines');
-
-        chart.selectAll('.comparison-line').remove();
-        chart.selectAll('.comparison-text').remove();
-
-        if (chartBody && chart && chart.y()) {
-            lines.forEach(line => {
-                chartBody.append('svg:line')
-                    .attr('x1', chart.margins().left)
-                    .attr('x2', chart.width() - chart.margins().right)
-                    .attr('y1', chart.margins().top + chart.y()(line.value))
-                    .attr('y2', chart.margins().top + chart.y()(line.value))
-                    .attr('class', 'comparison-line')
-                    .style('stroke', line.color || '#2CD02C');
-
-                chartBody.append('svg:line')
-                    .attr('x1', chart.margins().left)
-                    .attr('x2', chart.margins().left)
-                    .attr('y1', 15 + chart.y()(line.value))
-                    .attr('y2', 5 + chart.y()(line.value))
-                    .attr('class', 'comparison-line')
-                    .style('stroke', line.color || '#2CD02C');
-
-                chartBody.append('svg:line')
-                    .attr('x1', chart.width() - chart.margins().right)
-                    .attr('x2', chart.width() - chart.margins().right)
-                    .attr('y1', 15 + chart.y()(line.value))
-                    .attr('y2', 5 + chart.y()(line.value))
-                    .attr('class', 'comparison-line')
-                    .style('stroke', line.color || '#2CD02C');
-
-                chartBody.append('text')
-                    .text(line.displayValue)
-                    .attr('x', 80)
-                    .attr('y', 14 + chart.y()(line.value))
-                    .attr('text-anchor', 'middle')
-                    .attr('font-size', '12px')
-                    .attr('class', 'comparison-text')
-                    .attr('fill', line.textColor || '#000000');
-            });
         }
     },
 

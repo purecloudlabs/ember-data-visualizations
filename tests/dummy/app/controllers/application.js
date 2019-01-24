@@ -83,11 +83,9 @@ export default Controller.extend({
 
     currentInterval: { start: moment('12/02/2016') },
 
-    comparisonLine: { value: 50, displayValue: '50', color: '#2CD02C' },
-
     comparisonLines:
         [{ value: 75, displayValue: '75', color: '#FF0000', alert: 'above', alertColorIndex: 3 },
-            { value: 25, displayValue: '25', color: '#0f9b22', alert: 'below', alertColorIndex: 4 }
+            { value: 60, displayValue: '60', color: '#0f9b22', alert: 'below', alertColorIndex: 4 }
         ],
 
     queueComparisonLine: { value: 225, displayValue: '225', color: '#2CD02C' },
