@@ -53,9 +53,7 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `showComparisonLines` (boolean): whether or not to show the comparison lines
 * `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties: 
     * `value` (number): value on y axis on which to show line
-    * `displayValue` (String): text that will appear to the left of the line on the y axis
     * `color` (Hex string): color of the comparison line
-    * `textColor` (Hex string): color of the comparison line label
     * `alert` (String; acceptable values: `above`, `below`, `''`): whether to change the color of rectangles above or below this line. Use an empty string for no color changing.
     * `alertColorIndex` (number): index of the `colors` array to use for color changes for this line.
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
@@ -79,9 +77,7 @@ The line chart uses an *array* of crossfilter groups to display different types 
 * `showComparisonLines` (boolean): whether or not to show the comparison lines
 * `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties: 
     * `value` (number): value on y axis on which to show line
-    * `displayValue` (String): text that will appear to the left of the line on the y axis
     * `color` (Hex string): color of the comparison line
-    * `textColor` (Hex string): color of the comparison line label
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the line chart
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 
