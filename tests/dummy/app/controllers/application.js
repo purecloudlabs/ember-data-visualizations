@@ -77,8 +77,7 @@ export default Controller.extend({
     },
     yAxis: {
         ticks: 3,
-        label: 'Queues',
-        formatter: value => value * 10
+        label: 'Queues'
     },
 
     currentInterval: { start: moment('12/02/2016') },

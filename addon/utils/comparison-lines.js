@@ -21,7 +21,7 @@ export function addComparisonLines(chart, comparisonLines) {
 
     comparisonLines.forEach(line => {
         const lineColor = line.color || '#2CD02C';
-        const lineXStart = ChartSizes.COMPARISON_LABEL_WIDTH;
+        const lineXStart = chart.margins().left;
         const lineXEnd = chart.width() - chart.margins().right;
         const lineY = chart.margins().top + chart.y()(line.value);
 
@@ -48,14 +48,30 @@ export function addComparisonLines(chart, comparisonLines) {
             .attr('y2', 5 + chart.y()(line.value))
             .attr('class', 'comparison-line comparison-line-right')
             .style('stroke', lineColor);
-
-        chartBody.append('text')
-            .text(line.displayValue)
-            .attr('x', lineXStart - ChartSizes.COMPARISON_LABEL_PAD)
-            .attr('y', 14 + chart.y()(line.value))
-            .attr('text-anchor', 'end')
-            .attr('font-size', '12px')
-            .attr('class', 'comparison-text')
-            .attr('fill', line.textColor || '#000000');
     });
+}
+
+/**
+   @desc Adds y-axis ticks for comparison line values to a column or line chart. These will replace any existing y-axis ticks.
+   @param {object} chart - DC chart instance.
+   @param {array} comparisonLines - Array of comparison lines passed to the chart component.
+*/
+export function addComparisonLineTicks(chart, comparisonLines) {
+    if (!chart || !comparisonLines) {
+        return;
+    }
+
+    const yAxis = chart.yAxis && chart.yAxis();
+
+    if (!yAxis) {
+        return;
+    }
+
+    const yAxisTicks = yAxis.ticks && yAxis.ticks();
+
+    if (!yAxisTicks) {
+        return;
+    }
+
+    yAxisTicks.tickValues(comparisonLines.map(line => line.value));
 }

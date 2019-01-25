@@ -6,7 +6,11 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import { addComparisonLines } from 'ember-data-visualizations/utils/comparison-lines';
+
+import {
+    addComparisonLines,
+    addComparisonLineTicks
+} from 'ember-data-visualizations/utils/comparison-lines';
 
 /**
    @public
@@ -86,6 +90,8 @@ export default BaseChartComponent.extend({
 
             lineCharts.push(lineChart);
         });
+
+        addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
 
         compositeChart
             .on('renderlet', chart => this.onRenderlet(chart, tip))
