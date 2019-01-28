@@ -7,6 +7,11 @@ import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 
+import {
+    addComparisonLines,
+    addComparisonLineTicks
+} from 'ember-data-visualizations/utils/comparison-lines';
+
 /**
    @public
    @module column-chart
@@ -130,6 +135,8 @@ export default BaseChartComponent.extend({
             });
             columnCharts.push(columnChart);
         }
+
+        addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
 
         compositeChart
             .on('pretransition', chart => this.onPretransition(chart, tip))
@@ -303,7 +310,7 @@ export default BaseChartComponent.extend({
         }
 
         if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
-            this.addComparisonLines(chart);
+            addComparisonLines(chart, this.get('comparisonLines'));
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
@@ -394,51 +401,6 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addComparisonLines(chart) {
-        const chartBody = chart.select('svg > g');
-        const lines = this.get('comparisonLines');
-
-        chart.selectAll('.comparison-line').remove();
-        chart.selectAll('.comparison-text').remove();
-
-        if (chartBody && chart && chart.y()) {
-            lines.forEach(line => {
-                chartBody.append('svg:line')
-                    .attr('x1', chart.margins().left)
-                    .attr('x2', chart.width() - chart.margins().right)
-                    .attr('y1', chart.margins().top + chart.y()(line.value))
-                    .attr('y2', chart.margins().top + chart.y()(line.value))
-                    .attr('class', 'comparison-line')
-                    .style('stroke', line.color || '#2CD02C');
-
-                chartBody.append('svg:line')
-                    .attr('x1', chart.margins().left)
-                    .attr('x2', chart.margins().left)
-                    .attr('y1', 15 + chart.y()(line.value))
-                    .attr('y2', 5 + chart.y()(line.value))
-                    .attr('class', 'comparison-line')
-                    .style('stroke', line.color || '#2CD02C');
-
-                chartBody.append('svg:line')
-                    .attr('x1', chart.width() - chart.margins().right)
-                    .attr('x2', chart.width() - chart.margins().right)
-                    .attr('y1', 15 + chart.y()(line.value))
-                    .attr('y2', 5 + chart.y()(line.value))
-                    .attr('class', 'comparison-line')
-                    .style('stroke', line.color || '#2CD02C');
-
-                chartBody.append('text')
-                    .text(line.displayValue)
-                    .attr('x', 80)
-                    .attr('y', 14 + chart.y()(line.value))
-                    .attr('text-anchor', 'middle')
-                    .attr('font-size', '12px')
-                    .attr('class', 'comparison-text')
-                    .attr('fill', line.textColor || '#000000');
-            });
-        }
-    },
-
     addDataValues(bars = []) {
         let formatter = this.get('xAxis.formatter') || (value => value);
         let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'data-labels');
@@ -460,6 +422,10 @@ export default BaseChartComponent.extend({
         });
 
         for (let i = 0; i < bars.length; i++) {
+            if (!values[i]) {
+                continue;
+            }
+
             gLabels.append('text')
                 .text(() => formatter(values[i]))
                 .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))

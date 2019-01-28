@@ -64,11 +64,11 @@ const getTestParameters = function () {
             ticks: 3
         },
 
-        comparisonLine: {
+        comparisonLines: [{
             value: 15,
             displayValue: '15',
             color: '#2CD02C'
-        }
+        }]
     };
 };
 
@@ -106,7 +106,7 @@ test('it renders a point for each data point', function (assert) {
 });
 
 test('it shows a comparison line', function (assert) {
-    this.render(hbs`{{line-chart showComparisonLine=true comparisonLine=params.comparisonLine dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    this.render(hbs`{{line-chart showComparisonLines=true comparisonLines=params.comparisonLines dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
     // delayed to let all dc rendering processes finish
     later(this, () => assert.dom('.comparison-line').exists({ count: 3 }), 1000);
     return wait();
