@@ -32,7 +32,7 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
 
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
-        const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_RIGHT_MARGIN : ChartSizes.RIGHT_MARGIN;
+        const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
@@ -321,10 +321,10 @@ export default BaseChartComponent.extend({
             this.get('series').forEach((series, index) => chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`).classed(series.title, true));
             chart.select('g.legend').remove();
             const legendDimension = 18;
-            let legendG = chart.select('g')
+            const legendG = chart.select('g')
                 .append('g')
-                .attr('transform', `translate(${chart.width() - chart.margins().right + ChartSizes.LEGEND_OFFSET},${chart.effectiveHeight() / 4})`);
-            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
+                .attr('transform', `translate(${chart.width() - chart.margins().right + ChartSizes.LEGEND_OFFSET})`);
+            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension, this.get('legendWidth'));
         }
 
         // account for negative y values
