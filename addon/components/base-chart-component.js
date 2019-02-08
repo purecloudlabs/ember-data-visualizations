@@ -3,6 +3,7 @@ import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
 import { A } from '@ember/array';
 import d3 from 'd3';
+import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -83,29 +84,40 @@ export default Component.extend({
             });
     },
 
-    addLegend(chart, legendables, legendG, legendDimension) {
+    addLegend(chart, legendables, legendG, legendDimension, legendWidth) {
         legendG.attr('class', 'legend');
-        let legendGs = legendG.selectAll('g')
+
+        const legendContainer = legendG
+            .append('foreignObject')
+            .attr('class', 'legend-embed')
+            .attr('height', chart.height())
+            .attr('width', legendWidth || ChartSizes.LEGEND_WIDTH)
+            .append('xhtml:div')
+            .attr('class', 'legend-container')
+            .attr('xmlns', 'http://www.w3.org/1999/xhtml');
+
+        const legendItems = legendContainer
+            .selectAll('g')
             .data(legendables)
-            .enter().append('g')
-            .attr('class', 'legendItem');
-        legendGs.append('rect')
-            .attr('class', 'legendRect')
-            .attr('y', (d, i) => (i + 1) * 22)
-            .attr('height', legendDimension)
-            .attr('width', legendDimension)
-            .attr('fill', d => d.color)
+            .enter()
+            .append('div')
+            .attr('class', 'legend-item');
+
+        legendItems
+            .append('span')
+            .attr('class', 'legend-box')
+            .attr('style', d => `height: ${legendDimension}px; width: ${legendDimension}px; background-color: ${d.color}`)
             .on('click', legendClickHandler);
-        legendGs.append('text')
-            .attr('unselectable', 'on')
-            .attr('x', legendDimension + 6)
-            .attr('y', (d, i) => (i + 1) * 22 + (legendDimension * 0.75))
+
+        legendItems
+            .append('span')
+            .attr('class', 'legend-text')
             .text(d => d.title);
 
         function legendClickHandler(d) {
             const clicked = d3.select(this);
             const clickedElements = d.elements;
-            const allOthers = chart.selectAll('rect.legendRect').filter(legendD => legendD.color !== d.color);
+            const allOthers = chart.selectAll('span.legend-box').filter(legendD => legendD.color !== d.color);
             let allOtherElements = [];
             for (let i = 0; i < legendables.length; i++) {
                 if (legendables[i].color !== d.color) {

@@ -5,6 +5,5 @@ const legendOffset = 35;
 export default {
     RIGHT_MARGIN: 100,
     LEGEND_WIDTH: legendWidth,
-    LEGEND_OFFSET: legendOffset,
-    LEGEND_RIGHT_MARGIN: legendWidth + legendOffset
+    LEGEND_OFFSET: legendOffset
 };
