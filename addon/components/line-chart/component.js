@@ -109,9 +109,10 @@ export default BaseChartComponent.extend({
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
                     titles.forEach((title, i) => {
-                        const datum = formatter(this.get('data')[d.data.key][i]);
-                        const secondaryClass = d.y === datum ? 'primary-stat' : '';
-                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${datum}</span></span>`);
+                        const value = this.get('data')[d.data.key][i];
+                        const formattedValue = formatter(value);
+                        const secondaryClass = d.y === value ? 'primary-stat' : '';
+                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${formattedValue}</span></span>`);
                     });
                     return str;
                 }
