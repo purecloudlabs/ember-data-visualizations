@@ -6,6 +6,7 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
+import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 
 import {
     addComparisonLines,
@@ -26,6 +27,7 @@ export default BaseChartComponent.extend({
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
+    d3LocaleInfo: {},
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
@@ -63,6 +65,7 @@ export default BaseChartComponent.extend({
         }
 
         compositeChart.xAxis().tickSizeOuter(0);
+        compositeChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks);
         }
