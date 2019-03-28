@@ -1,7 +1,7 @@
 import moment from 'moment';
 import d3 from 'd3';
 
-export function getTickFormat({ periods = ['AM', 'PM'], dayFormat = '%a %d', weekFormat = '%d %b' }) {
+export function getTickFormat({ periods = ['AM', 'PM'], dayFormat = '%a %d', weekFormat = '%d %b', hourFormat = '%I %p' }) {
     let locale = d3.timeFormatLocale({
         dateTime: '',
         date: '',
@@ -13,7 +13,7 @@ export function getTickFormat({ periods = ['AM', 'PM'], dayFormat = '%a %d', wee
         shortMonths: moment.monthsShort()
     });
 
-    let formatHour = locale.format('%I %p'),
+    let formatHour = locale.format(hourFormat),
         formatDay = locale.format(dayFormat),
         formatWeek = locale.format(weekFormat),
         formatMonth = locale.format('%B'),
