@@ -68,7 +68,7 @@ test('it shows chart not available', function (assert) {
 
 test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{pie-chart dimension=params.dimensions group=params.groups showLegend=true instantRun=true}}`);
-    later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 4 }), 1000);
+    later(this, () => assert.dom('.legend-container > .legend-item').exists({ count: 4 }), 1000);
     return wait();
 });
 

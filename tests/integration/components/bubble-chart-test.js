@@ -70,7 +70,7 @@ test('it renders a subtitle for each data point', function (assert) {
 
 test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{bubble-chart showLegend=true dimension=params.dimension group=params.group instantRun=true}}`);
-    later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 4 }), 1000);
+    later(this, () => assert.dom('.legend-container > .legend-item').exists({ count: 4 }), 1000);
     return wait();
 });
 

@@ -81,7 +81,7 @@ test('it renders correct number of x axis ticks', function (assert) {
 
 test('it renders a legend with the correct number of boxes', function (assert) {
     this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    later(this, () => assert.dom('g.legend > g.legendItem').exists({ count: 5 }), 1000);
+    later(this, () => assert.dom('.legend-container > .legend-item').exists({ count: 5 }), 1000);
     return wait();
 });
 
