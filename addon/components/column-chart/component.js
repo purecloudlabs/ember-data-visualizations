@@ -27,7 +27,8 @@ export default BaseChartComponent.extend({
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
-    type: 'GROUPED', // GROUPED, LAYERED, STACKED
+    type: 'GROUPED', // GROUPED, LAYERED, STACKED,
+    d3LocaleInfo: {},
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
