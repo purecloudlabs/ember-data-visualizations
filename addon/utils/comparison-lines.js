@@ -1,5 +1,3 @@
-import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-
 /**
    @desc Adds comparison lines to a line or column chart.
    @param chart - DC chart instance.

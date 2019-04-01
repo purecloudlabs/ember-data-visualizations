@@ -19,7 +19,7 @@ module.exports = {
         'ember/avoid-leaking-state-in-ember-objects': 'off',
         'arrow-parens': 'off',
         'one-var': 'off',
-        'indent': ['error', 4],
+        'indent': ['error', 4, { 'SwitchCase': 1, 'flatTernaryExpressions': true }],
         'space-before-function-paren': ['error', {
             'anonymous': 'always',
             'named': 'never'
