@@ -239,7 +239,7 @@ export default BaseChartComponent.extend({
         });
 
         chart.selectAll('rect.bar')
-            .attr('rx', '2')
+            .attr('rx', '1')
             .attr('stroke', 'white');
     },
 
@@ -593,7 +593,7 @@ export default BaseChartComponent.extend({
             chart.selectAll('rect.bar')
                 .attr('fill', 'url(#chartNotAvailableHatch)')
                 .attr('opacity', '.7')
-                .attr('rx', '2')
+                .attr('rx', '1')
                 .attr('stroke', 'white');
         });
 

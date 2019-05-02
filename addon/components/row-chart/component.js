@@ -352,7 +352,7 @@ export default BaseChartComponent.extend({
             svg.select('g').selectAll('g.row > rect')
                 .attr('fill', 'url(#rowChartNotAvailableHatch)')
                 .attr('opacity', '.7')
-                .attr('rx', '2')
+                .attr('rx', '1')
                 .attr('stroke', 'white');
 
             // add chart not available text
