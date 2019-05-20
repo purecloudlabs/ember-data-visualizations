@@ -1,9 +1,9 @@
 import Service from '@ember/service';
-import { moduleForComponent, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
+import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import crossfilter from 'crossfilter';
-import wait from 'ember-test-helpers/wait';
-import { later } from '@ember/runloop';
 import moment from 'moment';
 
 const getTestParameters = function () {
@@ -50,44 +50,41 @@ const getTestParameters = function () {
     };
 };
 
-moduleForComponent('heat-map', 'Integration | Component | heat map', {
-    integration: true,
-    beforeEach() {
+module('Integration | Component | heat map', function (hooks) {
+    setupRenderingTest(hooks);
+
+    hooks.beforeEach(function () {
         this.set('params', getTestParameters());
-        this.register('service:resizeDetector', Service.extend({
+        this.owner.register('service:resizeDetector', Service.extend({
             setup(elementId, callback) {
                 callback();
             },
             teardown() { }
         }));
-    }
-});
+    });
 
-test('it renders', function (assert) {
-    this.render(hbs`{{heat-map}}`);
-    assert.dom('.chart.heat-map').exists();
-});
+    test('it renders', async function (assert) {
+        await render(hbs`{{heat-map}}`);
+        assert.dom('.chart.heat-map').exists();
+    });
 
-test('it renders a rectangle for each data point', function (assert) {
-    this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    assert.dom('rect.heat-box').exists({ count: 9 });
-});
+    test('it renders a rectangle for each data point', async function (assert) {
+        await render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
+        assert.dom('rect.heat-box').exists({ count: 9 });
+    });
 
-test('it renders correct number of x axis ticks', function (assert) {
-    this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    later(this, () => assert.dom('.cols text.tickLabel:not(.hidden)').exists({ count: 2 }), 1000);
-    return wait();
-});
+    test('it renders correct number of x axis ticks', async function (assert) {
+        await render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
+        assert.dom('.cols text.tickLabel:not(.hidden)').exists({ count: 2 });
+    });
 
-test('it renders a legend with the correct number of boxes', function (assert) {
-    this.render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-    later(this, () => assert.dom('.legend-container > .legend-item').exists({ count: 5 }), 1000);
-    return wait();
-});
+    test('it renders a legend with the correct number of boxes', async function (assert) {
+        await render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
+        assert.dom('.legend-container > .legend-item').exists({ count: 5 });
+    });
 
-test('it shows chart not available', function (assert) {
-    this.render(hbs`{{heat-map isChartAvailable=false xAxis=params.xAxis keyFormat=params.keyFormat instantRun=true}}`);
-    // delayed to let all dc rendering processes finish
-    later(this, () => assert.dom('.chart-not-available').exists(), 1000);
-    return wait();
+    test('it shows chart not available', async function (assert) {
+        await render(hbs`{{heat-map isChartAvailable=false xAxis=params.xAxis keyFormat=params.keyFormat instantRun=true}}`);
+        assert.dom('.chart-not-available').exists();
+    });
 });

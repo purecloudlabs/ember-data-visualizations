@@ -1,10 +1,10 @@
 import Service from '@ember/service';
-import { moduleForComponent, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
+import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import moment from 'moment';
 import crossfilter from 'crossfilter';
-import wait from 'ember-test-helpers/wait';
-import { later } from '@ember/runloop';
 
 const getTestParameters = function () {
     const groupNames = ['fruits', 'citrus', 'oranges'];
@@ -72,79 +72,66 @@ const getTestParameters = function () {
     };
 };
 
-moduleForComponent('column-chart', 'Integration | Component | column chart', {
-    integration: true,
-    beforeEach() {
+module('Integration | Component | column chart', function (hooks) {
+    setupRenderingTest(hooks);
+
+    hooks.beforeEach(function () {
         this.set('params', getTestParameters());
-        this.register('service:resizeDetector', Service.extend({
+        this.owner.register('service:resizeDetector', Service.extend({
             setup(elementId, callback) {
                 callback();
             },
             teardown() {}
         }));
-    }
-});
+    });
 
-test('it renders', function (assert) {
-    this.render(hbs`{{column-chart}}`);
-    assert.dom('.chart.column-chart').exists();
-});
+    test('it renders', async function (assert) {
+        await render(hbs`{{column-chart}}`);
+        assert.dom('.chart.column-chart').exists();
+    });
 
-test('it renders correct number of x axis ticks', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
-    assert.dom('g.x.axis g.tick').exists({ count: 5 });
-});
+    test('it renders correct number of x axis ticks', async function (assert) {
+        await render(hbs`{{column-chart dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+        assert.dom('g.x.axis g.tick').exists({ count: 5 });
+    });
 
-test('it renders correct number of y axis ticks', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
-    assert.dom('g.y.axis g.tick').exists({ count: 4 });
-});
+    test('it renders correct number of y axis ticks', async function (assert) {
+        await render(hbs`{{column-chart dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+        assert.dom('g.y.axis g.tick').exists({ count: 4 });
+    });
 
-test('it renders a bar for each data point', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
-    assert.dom('g.sub._0 .chart-body rect.bar').exists({ count: 3 });
-});
+    test('it renders a bar for each data point', async function (assert) {
+        await render(hbs`{{column-chart dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+        assert.dom('g.sub._0 .chart-body rect.bar').exists({ count: 3 });
+    });
 
-test('it shows chart not available', function (assert) {
-    this.render(hbs`{{column-chart isChartAvailable=false xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
-    // delayed to let all dc rendering processes finish
-    later(this, () => assert.dom('.chart-not-available').exists(), 1000);
-    return wait();
-});
+    test('it shows chart not available', async function (assert) {
+        await render(hbs`{{column-chart isChartAvailable=false xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+        assert.dom('.chart-not-available').exists();
+    });
 
-test('it shows comparison lines', function (assert) {
-    this.render(hbs`{{column-chart showComparisonLines=true comparisonLines=params.comparisonLines dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
-    // delayed to let all dc rendering processes finish
-    later(this, () => assert.dom('.comparison-line').exists({ count: 3 }), 1000);
-    return wait();
-});
+    test('it shows comparison lines', async function (assert) {
+        await render(hbs`{{column-chart showComparisonLines=true comparisonLines=params.comparisonLines dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+        assert.dom('.comparison-line').exists({ count: 3 });
+    });
 
-test('it renders minimum and maximum value indicators', function (assert) {
-    this.render(hbs`{{column-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+    test('it renders minimum and maximum value indicators', async function (assert) {
+        await render(hbs`{{column-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
 
-    const runAssertions = () => {
         assert.dom('.max-value-text').exists();
         assert.dom('.max-value-indicator').exists();
         assert.dom('.min-value-text').exists();
         assert.dom('.min-value-indicator').exists();
-    };
+    });
 
-    // delayed to let all dc rendering processes finish
-    later(this, runAssertions, 1000);
-    return wait();
-});
+    test('it renders a legend with the correct number of boxes', async function (assert) {
+        await render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
+        assert.dom('.legend-container > .legend-item').exists({ count: 3 });
+    });
 
-test('it renders a legend with the correct number of boxes', function (assert) {
-    this.render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
-    // delayed to let all dc rendering processes finish
-    later(this, () => assert.dom('.legend-container > .legend-item').exists({ count: 3 }), 1000);
-    return wait();
-});
-
-test('it renders a legend even when there are no groups', function (assert) {
-    this.set('groups', []);
-    this.render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
-    // delayed to let all dc rendering processes finish
-    later(this, (() => assert.equal(this.$('.legend-container > .legend-item').length, 3)), 1000);
-    return wait();
+    test('it renders a legend even when there are no groups', async function (assert) {
+        this.set('groups', []);
+        await render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
+        assert.dom('.legend-container > .legend-item').exists({ count: 3 });
+    });
 });
