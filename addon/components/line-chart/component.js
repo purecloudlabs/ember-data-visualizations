@@ -201,7 +201,7 @@ export default BaseChartComponent.extend({
             let currentTick = this.get('chart').select('svg > g > g.axis').selectAll('g.tick')
                 .filter(d => d.toString() === indicatorDate.toString());
             if (currentTick && !currentTick.empty() && currentTick.select('text').text().indexOf('\u25C6') === -1) {
-                let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
+                let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? '<span class="current-interval">`\u25C6 ${currentTick.text()}`</span>' : '<span class="current-interval">\u25C6</span>';
                 currentTick.select('text').html(tickHtml);
             }
         }
