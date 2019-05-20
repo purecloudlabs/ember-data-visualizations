@@ -202,7 +202,7 @@ export default BaseChartComponent.extend({
                 .filter(d => d.toString() === indicatorDate.toString());
             if (currentTick && !currentTick.empty() && currentTick.select('text').text().indexOf('\u25C6') === -1) {
                 let tickHtml = this.isIntervalIncluded(xTimeScale.ticks(this.get('xAxis').ticks), indicatorDate) ? `\u25C6 ${currentTick.text()}` : '\u25C6';
-                currentTick.select('text').classed('current-interval').html(tickHtml);
+                currentTick.select('text').classed('current-interval', true).html(tickHtml);
             }
         }
     },
