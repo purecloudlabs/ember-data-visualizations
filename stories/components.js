@@ -30,7 +30,7 @@ const initializeStories = () => {
                     colors,
                     height: 200,
                     xAxis: {
-                        domain: [moment('10/31/2016'), moment('12/03/2016')],
+                        domain: [moment('2016-10-31T00:00:00.000Z'), moment('2016-12-03T00:00:00.000Z')],
                         ticks: 3,
                         tickMarks: 3
                     },

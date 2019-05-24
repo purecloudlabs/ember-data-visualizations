@@ -12,8 +12,8 @@
     "build": "ember build",
     "start": "ember serve",
     "test": "ember test",
-    "build-storybook": "ember build && build-storybook -p 9001 -s dist",
-    "storybook": "ember serve & start-storybook -p 9001 -s dist"
+    "build-storybook": "ember build --environment=test && build-storybook -p 9001 -s dist",
+    "storybook": "ember serve --environment=test & start-storybook -p 9001 -s dist"
   },
   "dependencies": {
     "crossfilter": "^1.3.12",
