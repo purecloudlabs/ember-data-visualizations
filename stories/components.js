@@ -1,3 +1,4 @@
+/* eslint-env node */
 import hbs from 'htmlbars-inline-precompile';
 import { storiesOf } from '@storybook/ember';
 import moment from 'moment';
@@ -11,22 +12,22 @@ const initializeStories = () => {
             return {
                 template: hbs`
                 {{column-chart 
-                dimension=dimension
-                group=group
-                type=type
-                series=series
-                colors=colors
-                height=height
-                xAxis=xAxis
-                yAxis=yAxis
-                click=(action onClick)
+                    dimension=dimension
+                    group=group
+                    type=type
+                    series=series
+                    colors=colors
+                    height=height
+                    xAxis=xAxis
+                    yAxis=yAxis
+                    click=(action onClick)
                 }}`,
                 context: {
                     dimension: dimensions,
                     group: groups,
                     type: 'GROUPED',
                     series: [{ title: 'Offered Calls', hatch: false }],
-                    colors: colors,
+                    colors,
                     height: 200,
                     xAxis: {
                         domain: [moment('10/31/2016'), moment('12/03/2016')],
