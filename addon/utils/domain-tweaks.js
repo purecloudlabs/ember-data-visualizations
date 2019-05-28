@@ -1,4 +1,4 @@
-import { zip, union } from 'lodash';
+import { union } from 'lodash';
 
 /**
  * function to add custom ticks to the chart.
@@ -29,18 +29,9 @@ export function addDomainTicks(chart, domain, otherTicks = undefined) {
 /**
  * Adds extra padding to the domain to accomodate datavalues and min/max indicator on top of the bars/columns.
  * @param {*} domain is a alist : [upperbound, lowerbound]
- * @returns {*} an object {actualDomain: [lowerbound, upper], paddedDomain: [paddedlowerbound, paddedupperbound]}
+ * @returns {*} a list [paddedlowerbound, paddedupperbound] : moves upper bound up and lower bound down (leaves 0 as it is).
  */
 export function padDomain(domain) {
-    return zip(domain, ['lower', 'upper']).map(([d, indicator]) => {
-        const domainPadding = Math.abs(d) * .4;
-        /* if the value is an upper bound then -
-                if the value is negative then add negative padding.
-                else add positive padding
-            if the value is lower bound then -
-                if the value is negative then add a negative padding.
-                else dont add padding because then the bars/columns won't start from zero, they will start from paddded value (undesirable).
-        */
-        return indicator === 'upper' ? (d < 0 ? d - domainPadding : d + domainPadding) : (d < 0 ? d - domainPadding : d);
-    });
+    const paddingFactor = 0.4;
+    return domain.map(d => d !== 0 ? d * (1 + paddingFactor) : 0);
 }

@@ -65,7 +65,6 @@ export default BaseChartComponent.extend({
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
             compositeChart.y(d3.scaleLinear().domain(padDomain(this.get('yAxis').domain)));
-            // compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
         }
 
         if (this.get('currentInterval') && this.get('showCurrentIndicator') && this.get('xAxis') && this.get('xAxis').ticks) {
