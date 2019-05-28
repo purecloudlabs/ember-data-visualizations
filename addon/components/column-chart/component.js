@@ -63,7 +63,7 @@ export default BaseChartComponent.extend({
             compositeChart.width(this.get('width'));
         }
 
-        if (this.get('yAxis') && this.get('yAxis').domain) {
+        if (this.get('yAxis.domain')) {
             compositeChart.y(d3.scaleLinear().domain(padDomain(this.get('yAxis').domain)));
         }
 
