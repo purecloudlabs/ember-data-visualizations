@@ -24,6 +24,7 @@
     "ember-auto-import": "^1.2.13",
     "ember-cli-babel": "^6.16.0",
     "ember-element-resize-detector": "^0.4.0",
+    "lodash": "^3.10.1",
     "moment": "^2.23.0"
   },
   "devDependencies": {
