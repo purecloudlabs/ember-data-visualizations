@@ -1,4 +1,4 @@
-import { union } from 'lodash';
+import { A } from '@ember/array';
 
 /**
  * function to add custom ticks to the chart.
@@ -23,7 +23,7 @@ export function addDomainTicks(chart, domain, otherTicks = undefined) {
     }
 
     otherTicks = otherTicks || [];
-    yAxisTicks.tickValues(union(domain, otherTicks));
+    yAxisTicks.tickValues(A([...domain, ...otherTicks]).uniq());
 }
 
 /**
