@@ -420,7 +420,7 @@ export default BaseChartComponent.extend({
         const maxLabelY = Math.min(...yValues.y);
         const maxLabelYHeight = Math.max(...yValues.height);
         // to indicate if chart has all negative values, so that data labels could be rendered at negative side of x -axis.
-        const allNegativeValues = this.get('yAxis').allNegative;
+        const bottomLabelPosition = this.get('yAxis').bottomLabelPosition;
 
         let values = [];
         let groups = this.getWithDefault('group', []);
@@ -438,7 +438,7 @@ export default BaseChartComponent.extend({
             gLabels.append('text')
                 .text(() => formatter(values[i]))
                 .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
-                .attr('y', Math.max(12, allNegativeValues ? maxLabelYHeight + 12 : maxLabelY - 2))
+                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
@@ -451,7 +451,7 @@ export default BaseChartComponent.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
         // to indicate if chart has all negative values, so that max and min could be rendered at negative side of x -axis.
-        const allNegativeValues = this.get('yAxis').allNegative;
+        const bottomLabelPosition = this.get('yAxis').bottomLabelPosition;
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
@@ -481,7 +481,7 @@ export default BaseChartComponent.extend({
             gLabels.append('text')
                 .text(maxValue)
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', Math.max(12, allNegativeValues ? maxLabelYHeight + 12 : maxLabelY - 2))
+                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -494,7 +494,7 @@ export default BaseChartComponent.extend({
                     .attr('text-anchor', 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
                     .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                    .attr('y', allNegativeValues ? maxLabelYHeight + 24 : maxLabelY - 12);
+                    .attr('y', bottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
             }
         }
         b = bars[minIdx];
@@ -503,7 +503,7 @@ export default BaseChartComponent.extend({
             gLabels.append('text')
                 .text(minValue)
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', Math.max(12, allNegativeValues ? maxLabelYHeight + 12 : maxLabelY - 2))
+                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -515,7 +515,7 @@ export default BaseChartComponent.extend({
                 .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', 'middle')
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', allNegativeValues ? maxLabelYHeight + 24 : maxLabelY - 12);
+                .attr('y', bottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
         }
     },
 

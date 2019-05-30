@@ -6,7 +6,7 @@ import { A } from '@ember/array';
  * @param {*} domain the un-padded domain.
  * @param {*} otherTicks also add other ticks along with domain ticks because existing ticks are overwritten.
  */
-export function addDomainTicks(chart, domain, otherTicks = undefined) {
+export function addDomainTicks(chart, domain, otherTicks = []) {
     if (!chart || !domain) {
         return;
     }
@@ -22,7 +22,6 @@ export function addDomainTicks(chart, domain, otherTicks = undefined) {
         return;
     }
 
-    otherTicks = otherTicks || [];
     yAxisTicks.tickValues(A([...domain, ...otherTicks]).uniq());
 }
 
@@ -33,5 +32,5 @@ export function addDomainTicks(chart, domain, otherTicks = undefined) {
  */
 export function padDomain(domain) {
     const paddingFactor = 0.4;
-    return domain.map(d => d !== 0 ? d * (1 + paddingFactor) : 0);
+    return domain.map(d => d * (1 + paddingFactor));
 }
