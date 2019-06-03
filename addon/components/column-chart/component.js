@@ -306,12 +306,12 @@ export default BaseChartComponent.extend({
             labels.remove();
         }
 
-        if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
-            this.addMaxMinLabels(bars);
+        if (this.get('labelOptions.showDataValues') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+            this.addDataValues(bars);
         }
 
-        if (this.get('showDataValues') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
-            this.addDataValues(bars);
+        if (this.get('labelOptions.showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+            this.addMaxMinLabels(bars, chart);
         }
 
         if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
@@ -430,23 +430,52 @@ export default BaseChartComponent.extend({
             }
         });
 
-        for (let i = 0; i < bars.length; i++) {
-            if (!values[i]) {
-                continue;
-            }
+        if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
+            /* auto adjust when to hide data vlue of a bar
+            * if labels overlap
+            */
+            const barWidth = Number(d3.select(bars[0]).attr('width'));
+            // bar gap is differenct abscissa of one bar and  abscissa of next bar, minus the bar width.
+            const barGap = Math.abs(Number(d3.select(bars[0]).attr('x')) - Number(d3.select(bars[1]).attr('x'))) - barWidth;
 
-            gLabels.append('text')
-                .text(() => formatter(values[i]))
-                .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
-                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
-                .attr('class', 'data-text');
+            // how many iterations to skip.
+            let skipInterval = 1;
+            for (let i = 0; i < bars.length; i += skipInterval) {
+                if (!values[i]) {
+                    continue;
+                }
+
+                const label = gLabels.append('text')
+                    .text(() => formatter(values[i]))
+                    .attr('x', () => d3.select(bars[i]).attr('x'))
+                    .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
+                    .attr('font-size', '12px')
+                    .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
+                    .attr('class', 'data-text')
+                    .attr('id', `data-text-${i}`);
+                const labelWidth = label.node().getBoundingClientRect().width;
+                // if the label width swallows 'n' barwidth + bargap, then skip n iterations (or bars).
+                skipInterval = Math.ceil(labelWidth / (barWidth + barGap));
+            }
+        } else if (this.get('labelOptions.labelCollisionResolution') === 'default') {
+            for (let i = 0; i < bars.length; i++) {
+                if (!values[i]) {
+                    continue;
+                }
+                gLabels.append('text')
+                    .text(() => formatter(values[i]))
+                    .attr('x', () => d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
+                    .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
+                    .attr('class', 'data-text')
+                    .attr('id', `data-text-${i}`);
+            }
         }
     },
 
-    addMaxMinLabels(bars) {
+    addMaxMinLabels(bars, chart) {
         let formatter = this.get('xAxis.formatter') || (value => value);
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
@@ -477,11 +506,19 @@ export default BaseChartComponent.extend({
         const maxLabelY = Math.min(...yValues.y);
         const maxLabelYHeight = Math.max(...yValues.height);
 
+        // if label collision  detection is turned on, then raise the max and min labels slightly above data values.
+        let raiseLabelBy = 0;
+        if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
+            raiseLabelBy = 10;
+        } else if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
+            raiseLabelBy = 0;
+        }
         if (b) {
+            chart.select(`#data-text-${maxIdx}`).remove();
             gLabels.append('text')
                 .text(maxValue)
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
+                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 + raiseLabelBy : maxLabelY - 2 - raiseLabelBy))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -494,16 +531,17 @@ export default BaseChartComponent.extend({
                     .attr('text-anchor', 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
                     .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                    .attr('y', bottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
+                    .attr('y', bottomLabelPosition ? maxLabelYHeight + 24 + raiseLabelBy : maxLabelY - 12 - raiseLabelBy);
             }
         }
         b = bars[minIdx];
 
         if (b && !(maxIdx === minIdx)) {
+            chart.select(`#data-text-${minIdx}`).remove();
             gLabels.append('text')
                 .text(minValue)
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
+                .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 + raiseLabelBy : maxLabelY - 2 - raiseLabelBy))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -515,7 +553,7 @@ export default BaseChartComponent.extend({
                 .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', 'middle')
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', bottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
+                .attr('y', bottomLabelPosition ? maxLabelYHeight + 24 + raiseLabelBy : maxLabelY - 12 - raiseLabelBy);
         }
     },
 

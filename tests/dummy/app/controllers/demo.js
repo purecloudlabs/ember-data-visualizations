@@ -52,6 +52,12 @@ export default Controller.extend({
             this._createQueueGroups();
         }
     },
+    labelOptions: {
+        showMaxMin: true,
+        showDataValues: true,
+        labelCollisionResolution: 'auto'
+    },
+
     dimensions: [],
     domainString: '',
     groups: [],
