@@ -464,7 +464,7 @@ export default BaseChartComponent.extend({
                 }
                 gLabels.append('text')
                     .text(() => formatter(values[i]))
-                    .attr('x', () => d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
+                    .attr('x', () => Number(d3.select(bars[i]).attr('x')) + Number((d3.select(bars[i]).attr('width')) / 2))
                     .attr('y', Math.max(12, bottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                     .attr('text-anchor', 'middle')
                     .attr('font-size', '12px')
