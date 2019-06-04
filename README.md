@@ -119,6 +119,7 @@ The pie chart does *not* use an array of crossfilter groups. It uses a singular 
 * `donutChart` (boolean): whether or not this pie chart is a donut chart (has an inner radius)
 * `showTotal` (boolean): whether or not to show the total number in the center of the chart. Not recommended unless `donutChart` is `true`
 * `labels` (boolean): whether or not to show labels on the pie slices with the key value of the slice
+* `labelsWithValues` (boolean): whether or not to show values and labels both on the pie slices with the key value of the slice
 * `externalLabels` (boolean): whether or not the labels appear on the outside of the chart. Only if `labels` is `true`
 * `legend` (boolean): whether or not to show a legend for the pie chart
 
