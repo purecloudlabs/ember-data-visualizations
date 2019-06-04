@@ -53,13 +53,22 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(chart, tip) {
-        chart.select('g.pie-slice-group > .totalText').remove();
+        chart.select('g.pie-slice-group > .total-text-group').remove();
         if (this.get('showTotal')) {
-            chart.select('g.pie-slice-group')
+            const textLabel = chart.select('g.pie-slice-group').append('g')
+                .attr('class', 'total-text-group')
                 .append('text')
-                .attr('class', 'totalText')
-                .style('text-anchor', 'middle')
+                .attr('class', 'total-text')
                 .text(this.get('data').total);
+            const { x, y, width, height } = textLabel.node().getBBox(), padding = 6;
+            chart.select('g.total-text-group').insert('rect', 'text.total-text')
+                .attr('width', width + padding)
+                .attr('height', height + padding)
+                .attr('x', x - padding / 2)
+                .attr('y', y - padding / 2)
+                .attr('rx', '2')
+                .attr('ry', '2')
+                .attr('class', 'total-text-rect');
         }
 
         if (this.get('showLegend')) {
