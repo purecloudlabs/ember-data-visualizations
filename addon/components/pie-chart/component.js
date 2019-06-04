@@ -148,7 +148,6 @@ export default BaseChartComponent.extend({
 
                 tip.style('top', (`${centerOfChartY + centroidY + offsetY}px`));
                 tip.style('left', (`${centerOfChartX + centroidX + offsetX}px`));
-                tip.style('pointer-events', 'none');
             })
             .on('mouseout.tip', function (d) {
                 tip.hide(d, this);
