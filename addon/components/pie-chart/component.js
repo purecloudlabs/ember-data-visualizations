@@ -59,6 +59,7 @@ export default BaseChartComponent.extend({
                 .attr('class', 'total-text-group')
                 .append('text')
                 .attr('class', 'total-text')
+                .attr('text-anchor', 'middle')
                 .text(this.get('data').total);
             const { x, y, width, height } = textLabel.node().getBBox(), padding = 6;
             chart.select('g.total-text-group').insert('rect', 'text.total-text')
