@@ -426,7 +426,7 @@ export default BaseChartComponent.extend({
         const maxLabelY = Math.min(...yValues.y);
         const maxLabelYHeight = Math.max(...yValues.height);
         // to indicate if chart has all negative values, so that data labels could be rendered at negative side of x -axis.
-        const isBottomLabelPosition = this.get('yAxis').isisBottomLabelPosition;
+        const isBottomLabelPosition = this.get('yAxis').isBottomLabelPosition;
 
         let values = [];
         let groups = this.getWithDefault('group', []);
@@ -485,7 +485,7 @@ export default BaseChartComponent.extend({
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
         // to indicate if chart has all negative values, so that max and min could be rendered at negative side of x -axis.
-        const isBottomLabelPosition = this.get('yAxis').isisBottomLabelPosition;
+        const isBottomLabelPosition = this.get('yAxis').isBottomLabelPosition;
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
