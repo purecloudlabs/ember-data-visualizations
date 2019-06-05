@@ -439,7 +439,7 @@ export default BaseChartComponent.extend({
         /* auto adjust when to hide data value of a bar
          * if labels overlap.
          */
-        if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
+        if (this.get('labelOptions.labelCollisionResolution') === 'auto' && bars.length > 1) {
             const barWidth = Number(d3.select(bars[0]).attr('width'));
             const barGap = Math.abs(Number(d3.select(bars[0]).attr('x')) - Number(d3.select(bars[1]).attr('x'))) - barWidth;
 
@@ -462,7 +462,7 @@ export default BaseChartComponent.extend({
                 // if the label width swallows 'n' barwidth + bargap, then skip n iterations (or bars).
                 skipInterval = Math.ceil(labelWidth / (barWidth + barGap));
             }
-        } else if (this.get('labelOptions.labelCollisionResolution') === 'default') {
+        } else {
             for (let i = 0; i < bars.length; i++) {
                 if (!values[i]) {
                     continue;
