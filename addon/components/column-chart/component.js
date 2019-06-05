@@ -12,7 +12,7 @@ import {
     addComparisonLines,
     addComparisonLineTicks
 } from 'ember-data-visualizations/utils/comparison-lines';
-
+import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 /**
    @public
    @module column-chart
@@ -63,8 +63,8 @@ export default BaseChartComponent.extend({
             compositeChart.width(this.get('width'));
         }
 
-        if (this.get('yAxis') && this.get('yAxis').domain) {
-            compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
+        if (this.get('yAxis.domain')) {
+            compositeChart.y(d3.scaleLinear().domain(padDomain(this.get('yAxis').domain)));
         }
 
         if (this.get('currentInterval') && this.get('showCurrentIndicator') && this.get('xAxis') && this.get('xAxis').ticks) {
@@ -140,6 +140,7 @@ export default BaseChartComponent.extend({
         }
 
         addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
+        addDomainTicks(compositeChart, this.get('yAxis').domain, this.get('comparisonLines') ? this.get('comparisonLines').map(d => d.value) : undefined);
 
         compositeChart
             .on('pretransition', chart => this.onPretransition(chart, tip))
@@ -340,8 +341,14 @@ export default BaseChartComponent.extend({
                 }
             });
         }
-        if (negs && this.get('type') === 'GROUPED') {
-            const y0 = chart.selectAll('rect.bar').filter(d => d.y < 0).attr('y');
+        /*
+         * this chunk of code adjusts the x-axis and bars so that the bars appear x-axis if data has negative values.
+         * However, This was only done for 'GROUPED' column-chart, as a result, the 'LAYERED' column chart would not render negative values
+         * below the x-axis.
+         * Now, 'LAYERED' column-type is also added so that negative values are rendered in 'LAYERED' charts correctly.
+         */
+        if (negs && (['GROUPED', 'LAYERED'].indexOf(this.get('type').trim()) !== -1)) {
+            const y0 = chart.selectAll('rect.bar').filter(d => d.y <= 0).attr('y');
             chart.select('.axis.x path.domain')
                 .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
         }
@@ -411,11 +418,15 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the data labels above that.
         // Avoids label falling under any bar in the stack.
-        let yValues = [];
+        let yValues = { y: [], height: [] };
         this.get('chart').selectAll('.sub rect.bar').each(function () {
-            yValues.push(parseInt(d3.select(this).attr('y')));
+            yValues.y.push(parseInt(d3.select(this).attr('y')));
+            yValues.height.push(parseInt(d3.select(this).attr('height')));
         });
-        const maxLabelY = Math.min(...yValues);
+        const maxLabelY = Math.min(...yValues.y);
+        const maxLabelYHeight = Math.max(...yValues.height);
+        // to indicate if chart has all negative values, so that data labels could be rendered at negative side of x -axis.
+        const isBottomLabelPosition = this.get('yAxis').isBottomLabelPosition;
 
         let values = [];
         let groups = this.getWithDefault('group', []);
@@ -433,7 +444,7 @@ export default BaseChartComponent.extend({
             gLabels.append('text')
                 .text(() => formatter(values[i]))
                 .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
-                .attr('y', Math.max(12, maxLabelY - 2))
+                .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
@@ -445,6 +456,8 @@ export default BaseChartComponent.extend({
         let formatter = this.get('xAxis.formatter') || (value => value);
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
         let groups = this.get('group');
+        // to indicate if chart has all negative values, so that max and min could be rendered at negative side of x -axis.
+        const isBottomLabelPosition = this.get('yAxis').isBottomLabelPosition;
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
@@ -462,17 +475,19 @@ export default BaseChartComponent.extend({
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
         // Avoids label falling under any bar in the stack.
-        let yValues = [];
+        let yValues = { y: [], height: [] };
         this.get('chart').selectAll('.sub rect.bar').each(function () {
-            yValues.push(parseInt(d3.select(this).attr('y')));
+            yValues.y.push(parseInt(d3.select(this).attr('y')));
+            yValues.height.push(parseInt(d3.select(this).attr('height')));
         });
-        const maxLabelY = Math.min(...yValues);
+        const maxLabelY = Math.min(...yValues.y);
+        const maxLabelYHeight = Math.max(...yValues.height);
 
         if (b) {
             gLabels.append('text')
                 .text(maxValue)
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', Math.max(12, maxLabelY - 2))
+                .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -485,7 +500,7 @@ export default BaseChartComponent.extend({
                     .attr('text-anchor', 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
                     .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                    .attr('y', maxLabelY - 12);
+                    .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
             }
         }
         b = bars[minIdx];
@@ -494,7 +509,7 @@ export default BaseChartComponent.extend({
             gLabels.append('text')
                 .text(minValue)
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', Math.max(12, maxLabelY - 2))
+                .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -506,7 +521,7 @@ export default BaseChartComponent.extend({
                 .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', 'middle')
                 .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
-                .attr('y', maxLabelY - 12);
+                .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
         }
     },
 
