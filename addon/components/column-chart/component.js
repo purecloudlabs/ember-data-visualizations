@@ -306,11 +306,11 @@ export default BaseChartComponent.extend({
             labels.remove();
         }
 
-        if (this.get('labelOptions.showDataValues') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+        if ((this.get('showDataValues') || this.get('labelOptions.showDataValues')) && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addDataValues(bars);
         }
 
-        if (this.get('labelOptions.showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+        if ((this.get('showMaxMin') || this.get('labelOptions.showMaxMin')) && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
             this.addMaxMinLabels(bars, chart);
         }
 
@@ -430,12 +430,11 @@ export default BaseChartComponent.extend({
             }
         });
 
+        /* auto adjust when to hide data value of a bar
+         * if labels overlap.
+         */
         if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
-            /* auto adjust when to hide data vlue of a bar
-            * if labels overlap
-            */
             const barWidth = Number(d3.select(bars[0]).attr('width'));
-            // bar gap is differenct abscissa of one bar and  abscissa of next bar, minus the bar width.
             const barGap = Math.abs(Number(d3.select(bars[0]).attr('x')) - Number(d3.select(bars[1]).attr('x'))) - barWidth;
 
             // how many iterations to skip.
@@ -510,8 +509,6 @@ export default BaseChartComponent.extend({
         let raiseLabelBy = 0;
         if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
             raiseLabelBy = 10;
-        } else if (this.get('labelOptions.labelCollisionResolution') === 'auto') {
-            raiseLabelBy = 0;
         }
         if (b) {
             chart.select(`#data-text-${maxIdx}`).remove();

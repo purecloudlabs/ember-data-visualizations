@@ -47,10 +47,10 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `series` (Array):  Each object in the array has properties:
     * `title`: the name of `this.get('group')` at the same index (used in tooltip creation)
     * `hatch`: `pos` (for a hatch from bottom left to top right), `neg` (for a hatch from top left to bottom right), or `false` (for no hatch)
-* `LabelOptions`(Object): display options for labels on top of bars/columns.
+* `labelOptions`(Object): display options for labels on top of bars/columns.
     * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the column chart.
     * `showDataValues` (boolean): whether or not to display the y-value of each point above each bar.
-    * `labelCollisionResolution` (boolean): runs collision detection algorithm to determine if a label is too wide, and skips next labels accordingly.
+    * `labelCollisionResolution` (string) ['auto' | 'default']: runs collision detection algorithm to determine if a label is too wide, and skips next labels accordingly.
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 * `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `showComparisonLines` (boolean): whether or not to show the comparison lines
