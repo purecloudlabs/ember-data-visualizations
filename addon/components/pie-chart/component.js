@@ -40,26 +40,72 @@ export default BaseChartComponent.extend({
             chart.innerRadius(this.get('height') / 4);
         }
 
-        if (!this.get('labels')) {
-            chart.on('pretransition', (chart) => {
+        chart.on('pretransition', chart => {
+            if (!this.get('labels') && !this.get('labelsWithValues')) {
                 chart.selectAll('text.pie-slice').remove();
-            });
-        }
-
-        let tip = this.createTooltip();
-        chart.on('renderlet', chart => this.onRenderlet(chart, tip));
-
+            }
+        });
+        chart.on('renderlet', chart => this.onRenderlet(chart, this.createTooltip()));
+        chart.on('postRender', () => {
+            if (this.get('labelsWithValues')) {
+                this.showValuesOnPieSlice(chart);
+            }
+        });
         this.set('chart', chart);
     },
 
+    /**
+     * Generates labels with values from the data (crossfiltered).
+     * Copies attributes and classes from inbuilt labels so that they appear just like dc labels.
+     * @param {Object} chart - dc chart object.
+     */
+    showValuesOnPieSlice(chart) {
+        // select all labels
+        chart.selectAll('.pie-label-group text').nodes().forEach(n => {
+            const d3TextNode = d3.select(n),
+                parentNode = d3.select(n.parentNode), // get parent of text element.
+                datum = d3TextNode.datum().data; // get data associated with text element.
+
+            // create a new text element, copy classes and transform attrs from pre existing text nodes.
+            const newD3TextNode = parentNode.append('text'),
+                tspanKeyNode = newD3TextNode.attr('text-anchor', 'middle')
+                    .attr('class', d3TextNode.attr('class'))
+                    .attr('transform',  d3TextNode.attr('transform'))
+                    .append('tspan')
+                    .attr('text-anchor', 'middle')
+                    .text(datum.key),
+                tspanValueNode = newD3TextNode.append('tspan')
+                    .attr('text-anchor', 'middle')
+                    .text(datum.value);
+
+            // put the value tspan label centered below the key labels.
+            const { height, width } = tspanKeyNode.node().getBBox();
+            tspanValueNode.attr('dy', height + 2)
+                .attr('dx', -width / 2);
+
+            // remove pre existing labels
+            d3TextNode.remove();
+        });
+    },
+
     onRenderlet(chart, tip) {
-        chart.select('g.pie-slice-group > .totalText').remove();
+        chart.select('g.pie-slice-group > .total-text-group').remove();
         if (this.get('showTotal')) {
-            chart.select('g.pie-slice-group')
+            const textLabel = chart.select('g.pie-slice-group').append('g')
+                .attr('class', 'total-text-group')
                 .append('text')
-                .attr('class', 'totalText')
-                .style('text-anchor', 'middle')
+                .attr('class', 'total-text')
+                .attr('text-anchor', 'middle')
                 .text(this.get('data').total);
+            const { x, y, width, height } = textLabel.node().getBBox(), padding = 6;
+            chart.select('g.total-text-group').insert('rect', 'text.total-text')
+                .attr('width', width + padding)
+                .attr('height', height + padding)
+                .attr('x', x - padding / 2)
+                .attr('y', y - padding / 2)
+                .attr('rx', '2')
+                .attr('ry', '2')
+                .attr('class', 'total-text-rect');
         }
 
         if (this.get('showLegend')) {
