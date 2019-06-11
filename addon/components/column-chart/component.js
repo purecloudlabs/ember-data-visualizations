@@ -521,9 +521,10 @@ export default BaseChartComponent.extend({
         const maxLabelY = Math.min(...yValues.y);
         const maxLabelYHeight = Math.max(...yValues.height);
 
+        let maxLabel, minLabel, minLabelIndicator;
         if (b) {
             chart.select(`#data-text-${maxIdx}`).remove();
-            gLabels.append('text')
+            maxLabel = gLabels.append('text')
                 .text(maxValue)
                 .attr('x', +b.getAttribute('x') + (this.get('labelOptions.labelCollisionResolution') === 'auto' ? 0 : (b.getAttribute('width') / 2)))
                 .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12  : maxLabelY - 2))
@@ -546,7 +547,7 @@ export default BaseChartComponent.extend({
 
         if (b && !(maxIdx === minIdx)) {
             chart.select(`#data-text-${minIdx}`).remove();
-            gLabels.append('text')
+            minLabel = gLabels.append('text')
                 .text(minValue)
                 .attr('x', +b.getAttribute('x') + (this.get('labelOptions.labelCollisionResolution') === 'auto' ? 0 : (b.getAttribute('width') / 2)))
                 .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
@@ -555,13 +556,23 @@ export default BaseChartComponent.extend({
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
                 .attr('class', 'min-value-text');
 
-            gLabels.append('text')
+            minLabelIndicator = gLabels.append('text')
                 // unicode for font-awesome caret down
                 .html(() => '&#xf0d7')
                 .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', this.get('labelOptions.labelCollisionResolution') === 'auto' ? 'left' : 'middle')
                 .attr('x', +b.getAttribute('x') + (this.get('labelOptions.labelCollisionResolution') === 'auto' ? 0 : (b.getAttribute('width') / 2)))
                 .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
+        }
+
+        // if max and min labels collide, then remove the minLabel.
+        if (this.get('labelOptions.labelCollisionResolution') === 'auto' && maxLabel && !maxLabel.empty() && minLabel && !minLabel.empty()) {
+            const minLabelDomesions = minLabel.node().getBBox(), maxLabelDimensions = maxLabel.node().getBBox();
+            if (Math.abs(minLabelDomesions.x - maxLabelDimensions.x) < minLabelDomesions.width) {
+                minLabel.remove();
+                minLabelIndicator.remove();
+            }
+
         }
     },
 
