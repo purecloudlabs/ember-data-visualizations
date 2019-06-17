@@ -457,7 +457,7 @@ export default BaseChartComponent.extend({
 
                 const label = gLabels.append('text')
                     .text(() => formatter(values[i]))
-                    .attr('x', () => d3.select(bars[i]).attr('x'))
+                    .attr('x', () => +d3.select(bars[i]).attr('x'))
                     .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                     .attr('font-size', '12px')
                     .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
@@ -486,7 +486,7 @@ export default BaseChartComponent.extend({
                 }
                 gLabels.append('text')
                     .text(() => formatter(values[i]))
-                    .attr('x', () => Number(d3.select(bars[i]).attr('x')) + Number((d3.select(bars[i]).attr('width')) / 2))
+                    .attr('x', () => +d3.select(bars[i]).attr('x') + Number((d3.select(bars[i]).attr('width')) / 2))
                     .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                     .attr('text-anchor', 'middle')
                     .attr('font-size', '12px')
@@ -533,8 +533,8 @@ export default BaseChartComponent.extend({
         if (b) {
             maxLabel = gLabels.append('text')
                 .text(maxValue)
-                .attr('x', Number(b.getAttribute('x')) + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
-                .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12  : maxLabelY - 2))
+                .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
+                .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
@@ -546,7 +546,7 @@ export default BaseChartComponent.extend({
                     .html(() => '&#xf0d8')
                     .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
-                    .attr('x', Number(b.getAttribute('x')) + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
+                    .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                     .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
             }
         }
@@ -555,7 +555,7 @@ export default BaseChartComponent.extend({
         if (b && !(maxIdx === minIdx)) {
             minLabel = gLabels.append('text')
                 .text(minValue)
-                .attr('x', Number(b.getAttribute('x')) + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
+                .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                 .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
                 .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
                 .attr('font-size', '12px')
@@ -567,7 +567,7 @@ export default BaseChartComponent.extend({
                 .html(() => '&#xf0d7')
                 .attr('class', 'caret-icon min-value-indicator')
                 .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
-                .attr('x', Number(b.getAttribute('x')) + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
+                .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                 .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
         }
         const hasMaxLabel = maxLabel && !maxLabel.empty();
