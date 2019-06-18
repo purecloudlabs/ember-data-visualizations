@@ -348,9 +348,12 @@ export default BaseChartComponent.extend({
          * Now, 'LAYERED' column-type is also added so that negative values are rendered in 'LAYERED' charts correctly.
          */
         if (negs && (['GROUPED', 'LAYERED'].indexOf(this.get('type').trim()) !== -1)) {
-            const y0 = chart.selectAll('rect.bar').filter(d => d.y <= 0).attr('y');
-            chart.select('.axis.x path.domain')
-                .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+            const y0Chart = chart.selectAll('rect.bar').filter(d => d.y <= 0);
+            if (!y0Chart.empty()) {
+                const y0 = y0Chart.attr('y');
+                chart.select('.axis.x path.domain')
+                    .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+            }
         }
     },
 
