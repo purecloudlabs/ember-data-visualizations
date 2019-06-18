@@ -422,6 +422,7 @@ export default BaseChartComponent.extend({
         // min and max label elements
         const maxLabel = chart.select('.max-value-text');
         const minLabel = chart.select('.min-value-text');
+        const areMinMaxDefined = maxLabel.node() && minLabel.node();
 
         // Choose the tallest bar in the stack (lowest y value) and place the data labels above that.
         // Avoids label falling under any bar in the stack.
@@ -449,7 +450,6 @@ export default BaseChartComponent.extend({
         if (this.get('labelOptions.labelCollisionResolution') === 'auto' && bars.length > 1) {
             const barWidth = Number(d3.select(bars[0]).attr('width'));
             const barGap = Math.abs(Number(d3.select(bars[0]).attr('x')) - Number(d3.select(bars[1]).attr('x'))) - barWidth;
-
             // how many labels to skip.
             let skipLabels = 0;
             for (let i = 0; i < bars.length; i++) {
@@ -457,7 +457,10 @@ export default BaseChartComponent.extend({
                     skipLabels--; // !values[i] does not render the bar, the gap increases, it is equivalent to skipping a label.
                     continue;
                 }
-
+                // if min and max are rendered at i, dont overwrite them with data values.
+                if (this.minMaxIndices && this.minMaxIndices.indexOf(i) != -1) {
+                    continue;
+                }
                 const label = gLabels.append('text')
                     .text(() => formatter(values[i]))
                     .attr('x', () => +d3.select(bars[i]).attr('x'))
@@ -466,20 +469,20 @@ export default BaseChartComponent.extend({
                     .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
                     .attr('class', 'data-text')
                     .attr('id', `data-text-${i}`);
-
-                const labelDimensions = label.node().getBBox();
-                const maxLabelDimensions = maxLabel.node().getBBox();
-                const minLabelDimensions = minLabel.node().getBBox();
-                const leftMostAmongMaxAndCurrentLabel = labelDimensions.x - maxLabelDimensions.x < 0 ? labelDimensions : maxLabelDimensions;
-                const leftMostAmongMinAndCurrentLabel = labelDimensions.x - minLabelDimensions.x < 0 ? labelDimensions : minLabelDimensions;
-                
-                // check if label collides with min/max label
-                if (Math.abs(labelDimensions.x - maxLabelDimensions.x) < leftMostAmongMaxAndCurrentLabel.width
-                    || Math.abs(labelDimensions.x - minLabelDimensions.x) < leftMostAmongMinAndCurrentLabel.width) {
-                    label.remove();
-                } else {
-                    // if the label width swallows 'n' barwidth + bargap, then skip n labels.
-                    skipLabels = Math.ceil(labelDimensions.width / (barWidth + barGap)) - 1;
+                if (areMinMaxDefined) {
+                    const labelDimensions = label.node().getBBox();
+                    const maxLabelDimensions = maxLabel.node().getBBox();
+                    const minLabelDimensions = minLabel.node().getBBox();
+                    const leftMostAmongMaxAndCurrentLabel = labelDimensions.x - maxLabelDimensions.x < 0 ? labelDimensions : maxLabelDimensions;
+                    const leftMostAmongMinAndCurrentLabel = labelDimensions.x - minLabelDimensions.x < 0 ? labelDimensions : minLabelDimensions;
+                    // check if label collides with min/max label
+                    if (Math.abs(labelDimensions.x - maxLabelDimensions.x) < leftMostAmongMaxAndCurrentLabel.width
+                        || Math.abs(labelDimensions.x - minLabelDimensions.x) < leftMostAmongMinAndCurrentLabel.width) {
+                        label.remove();
+                    } else {
+                        // if the label width swallows 'n' barwidth + bargap, then skip n labels.
+                        skipLabels = Math.ceil(labelDimensions.width / (barWidth + barGap)) - 1;
+                    }
                 }
             }
         } else {
@@ -554,7 +557,7 @@ export default BaseChartComponent.extend({
             }
         }
         b = bars[minIdx];
-
+        this.minMaxIndices = [minIdx, maxIdx]; // internal use only
         if (b && !(maxIdx === minIdx)) {
             minLabel = gLabels.append('text')
                 .text(minValue)

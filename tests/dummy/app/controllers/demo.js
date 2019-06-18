@@ -3,12 +3,13 @@ import Controller from '@ember/controller';
 import moment from 'moment';
 import d3 from 'd3';
 import crossfilter from 'crossfilter';
+import { computed } from '@ember/object';
 
 export default Controller.extend({
     metrics: [
         { value: 'sighting', label: 'Sightings' }
     ],
-
+    showCollisionDemo: false,
     actions: {
         increaseData() {
             let content = get(this, 'content');
@@ -85,6 +86,15 @@ export default Controller.extend({
                     data[20].calls  = 100.1155225544522;
                     break;
                 }
+                case 'minMaxOverlap': {
+                    data = this.get('content').map(d => {
+                        d.calls = 100;
+                        return d;
+                    });
+                    data[4].calls  = 99.323232323232;
+                    data[5].calls  = 201;
+                    break;
+                }
                 default: {
                     data = JSON.parse(this.data);
                 }
@@ -92,13 +102,18 @@ export default Controller.extend({
             this.set('content', data);
             this._createDimensions();
             this._createGroups();
+        },
+        toggleCollisionResolution() {
+            this.toggleProperty('showCollisionDemo');
         }
     },
-    labelOptions: {
-        showMaxMin: true,
-        showDataValues: true,
-        labelCollisionResolution: 'auto'
-    },
+    labelOptions: computed('showCollisionDemo', function () {
+        return {
+            showMaxMin: true,
+            showDataValues: true,
+            labelCollisionResolution: this.get('showCollisionDemo') ? 'auto' : 'default'
+        };
+    }),
 
     dimensions: [],
     domainString: '',

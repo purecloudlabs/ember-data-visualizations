@@ -21,12 +21,16 @@
 <button {{action "decreaseData"}}>Decrease</button><br>
 {{input type="checkbox" checked=showColumnLegend}}Show Legend<br>
 
-<h3> labelCollisionResolution </h3>
+<input type="checkbox" onchange={{action "toggleCollisionResolution"}} id="labelCollisionResolution"/> <label for="labelCollisionResolution"> labelCollisionResolution.</label>
+
+<h2> below cases {{if this.showCollisionDemo "with" "without" }} collision resolution.</h2>
+
 <input {{action "doCollision" "default"}} name="collision" type="radio" id="default"/><label for="default">Default.</label> <br>
-<input value="regLabelOverlappingMaxLabelLeft" {{action "doCollision" "regLabelOverlappingMaxLabelLeft"}} name="collision" type="radio" id="regLabelOverlappingMaxLabel_left"/><label for="regLabelOverlappingMaxLabel_left">When regular label overlapping max label from left.</label> <br>
-<input value="regLabelNotOverlappingMaxLabelLeft" {{action "doCollision" "regLabelNotOverlappingMaxLabelLeft"}} name="collision" type="radio" id="regLabelNotOverlappingMaxLabel_left"/><label for="regLabelNotOverlappingMaxLabel_left">When regular label not overlapping max label from left.</label> <br>
-<input value="maxLabelOverlappingRegLabelLeft" {{action "doCollision" "maxLabelOverlappingRegLabelLeft"}} name="collision" type="radio" id="maxLabelOverlappingRegLabel_left"/><label for="maxLabelOverlappingRegLabel_left">When max label overlapping regular label from left.</label> <br>
-<input value="maxLabelNotOverlappingRegLabelLeft" {{action "doCollision" "maxLabelNotOverlappingRegLabelLeft"}} name="collision" type="radio" id="maxLabelNotOverlappingRegLabel_left"/><label for="maxLabelNotOverlappingRegLabel_left">When max label not overlapping regular label from left.</label> <br>
+<input {{action "doCollision" "regLabelOverlappingMaxLabelLeft"}} name="collision" type="radio" id="regLabelOverlappingMaxLabel_left"/><label for="regLabelOverlappingMaxLabel_left">When regular label overlapping max label from left.</label> <br>
+<input {{action "doCollision" "regLabelNotOverlappingMaxLabelLeft"}} name="collision" type="radio" id="regLabelNotOverlappingMaxLabel_left"/><label for="regLabelNotOverlappingMaxLabel_left">When regular label not overlapping max label from left.</label> <br>
+<input {{action "doCollision" "maxLabelOverlappingRegLabelLeft"}} name="collision" type="radio" id="maxLabelOverlappingRegLabel_left"/><label for="maxLabelOverlappingRegLabel_left">When max label overlapping regular label from left.</label> <br>
+<input {{action "doCollision" "maxLabelNotOverlappingRegLabelLeft"}} name="collision" type="radio" id="maxLabelNotOverlappingRegLabel_left"/><label for="maxLabelNotOverlappingRegLabel_left">When max label not overlapping regular label from left.</label> <br>
+<input {{action "doCollision" "minMaxOverlap"}} name="collision" type="radio" id="minMaxOverlap"/><label for="minMaxOverlap">When max and min label overlap.</label> <br>
 
 {{column-chart
   dimension=dimensions
