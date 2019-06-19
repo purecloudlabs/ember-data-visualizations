@@ -70,6 +70,6 @@ module('Integration | Component | pie chart', function (hooks) {
 
     test('it can show a total', async function (assert) {
         await render(hbs`{{pie-chart dimension=params.dimensions group=params.groups showTotal=true instantRun=true}}`);
-        assert.dom('text.totalText').exists();
+        assert.dom('.total-text-group').exists();
     });
 });
