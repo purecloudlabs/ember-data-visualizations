@@ -231,12 +231,11 @@ module('Integration | Component | column chart - collision', function (hooks) {
                     instantRun=true
                 }}`);
         assert.equal([...document.querySelectorAll('.data-text')].map(d => d.innerHTML).indexOf('40.23232323232323'), -1, 'Expected chart does not have regular label if it overlaps max.');
-        assert.dom('.data-text').exists({ count: 2 }, 'Expected 5 data values to be rendered');
     });
 
-    test('removes any regular label if max overlaps that from the left', async function (assert) {
-        rawData[3].fruits = 40.23232323232323;
-        rawData[4].fruits = 45;
+    test('if max label overlaps the regular label from the left, remove the regular label.', async function (assert) {
+        rawData[3].fruits = 45.23232323232323;
+        rawData[4].fruits = 40;
         const dimAndGrp = createDimensionAndGroup(rawData);
         this.set('params.dimension', dimAndGrp.dimension);
         this.set('params.group', dimAndGrp.group);
