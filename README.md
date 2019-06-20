@@ -39,7 +39,7 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `xAxis` (Object): `domain` (Array, probably of `moment` objects) and `ticks` (number of ticks to show)
 
 ##### Optional parameters
-* `yAxis` (Object): `domain` (Array, probably of numbers) (optional), `ticks` (number of ticks to show), and `formatter` (function to apply to every y-axis value for tick display)
+* `yAxis` (Object): `domain` (Array, probably of numbers) (optional): autofits bars, `ticks` (number of ticks to show), and `formatter` (function to apply to every y-axis value for tick display), `bottomLabelPosition` (boolean): whether to display labels on the top, or on the bottom of x-axis.
 * `type` (String) (defaults to `GROUPED`):
     * `GROUPED` is for "ordinary" data and is most likely what should be used if there is only one crossfilter group.
     * `LAYERED` is for "overlapping data: e.g. there are 10 fruits, 6 of which are citrus, 3 of which are oranges. If this chart is `LAYERED`, the `series` option tells the chart how to format the bars (hatching).
@@ -47,7 +47,10 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `series` (Array):  Each object in the array has properties:
     * `title`: the name of `this.get('group')` at the same index (used in tooltip creation)
     * `hatch`: `pos` (for a hatch from bottom left to top right), `neg` (for a hatch from top left to bottom right), or `false` (for no hatch)
-* `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the column chart
+* `labelOptions`(Object): display options for labels on top of bars/columns.
+    * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the column chart.
+    * `showDataValues` (boolean): whether or not to display the y-value of each point above each bar.
+    * `labelCollisionResolution` (string) ['auto' | 'default']: runs collision detection algorithm to determine if a label is too wide, and skips next labels accordingly.
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 * `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `showComparisonLines` (boolean): whether or not to show the comparison lines
@@ -58,7 +61,7 @@ The column chart uses an *array* of crossfilter groups to display different type
     * `alertColorIndex` (number): index of the `colors` array to use for color changes for this line.
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
-* `showDataValues` (boolean): whether or not to display the y-value of each point above each bar.
+
 
 ### Line chart
 The line chart uses an *array* of crossfilter groups to display different types of line charts. If there is only one group, *you must still pass an array of 1 group to the line chart*. This is true for many of the charts in this addon.

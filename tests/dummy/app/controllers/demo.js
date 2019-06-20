@@ -3,12 +3,13 @@ import Controller from '@ember/controller';
 import moment from 'moment';
 import d3 from 'd3';
 import crossfilter from 'crossfilter';
+import { computed } from '@ember/object';
 
 export default Controller.extend({
     metrics: [
         { value: 'sighting', label: 'Sightings' }
     ],
-
+    showCollisionDemo: false,
     actions: {
         increaseData() {
             let content = get(this, 'content');
@@ -50,8 +51,70 @@ export default Controller.extend({
             this.set('queueContent', content);
             this._createQueueDimensions();
             this._createQueueGroups();
+        },
+        doCollision(value) {
+            let data = [];
+            switch (value) {
+                case 'regLabelOverlappingMaxLabelLeft': {
+                    data = this.get('content').map(d => {
+                        d.calls = 100;
+                        return d;
+                    });
+                    data[18].calls  = 100.515151515151515151;
+                    break;
+                }
+                case 'regLabelNotOverlappingMaxLabelLeft': {
+                    data = this.get('content').map(d => {
+                        d.calls = 100;
+                        return d;
+                    });
+                    break;
+                }
+                case 'maxLabelOverlappingRegLabelLeft': {
+                    data = this.get('content').map(d => {
+                        d.calls = 100;
+                        return d;
+                    });
+                    data[19].calls  = 100.515151515151515151;
+                    break;
+                }
+                case 'maxLabelNotOverlappingRegLabelLeft': {
+                    data = this.get('content').map(d => {
+                        d.calls = 100;
+                        return d;
+                    });
+                    data[20].calls  = 100.1155225544522;
+                    break;
+                }
+                case 'minMaxOverlap': {
+                    data = this.get('content').map(d => {
+                        d.calls = 100;
+                        return d;
+                    });
+                    data[4].calls  = 99.323232323232;
+                    data[5].calls  = 201;
+                    break;
+                }
+                default: {
+                    data = JSON.parse(this.data);
+                }
+            }
+            this.set('content', data);
+            this._createDimensions();
+            this._createGroups();
+        },
+        toggleCollisionResolution() {
+            this.toggleProperty('showCollisionDemo');
         }
     },
+    labelOptions: computed('showCollisionDemo', function () {
+        return {
+            showMaxMin: true,
+            showDataValues: true,
+            labelCollisionResolution: this.get('showCollisionDemo') ? 'auto' : 'default'
+        };
+    }),
+
     dimensions: [],
     domainString: '',
     groups: [],
@@ -174,15 +237,7 @@ export default Controller.extend({
         content.forEach(function (d) {
             d.date = moment(d.date, 'YYYYMMDD').toDate();
         });
-
-        if (this._crossfilter) {
-            this._crossfilter.remove();
-            this._crossfilter.add(content);
-        } else {
-            this._crossfilter = crossfilter(content);
-        }
-
-        this.set('dimensions', this._crossfilter.dimension(d => d.date));
+        this.set('dimensions', crossfilter(content).dimension(d => d.date));
     },
 
     /**
@@ -208,6 +263,7 @@ export default Controller.extend({
 
         let self = this;
         d3.json('data.json').then(function (json) {
+            self.data = JSON.stringify(json);
             self.set('content', json);
             self._createDimensions();
             self._createGroups();
