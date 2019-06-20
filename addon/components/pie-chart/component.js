@@ -17,8 +17,12 @@ export default BaseChartComponent.extend({
     labels: true,
 
     buildChart() {
-        let chart = dc.pieChart(`#${this.get('elementId')}`);
+        if (this.get('group').all().length == 0) {
+            this.showChartNotAvailable();
+            return;
+        }
 
+        let chart = dc.pieChart(`#${this.get('elementId')}`);
         chart
             .radius(this.get('height') / 2)
             .ordinalColors(this.get('colors'))
