@@ -270,7 +270,7 @@ export default Controller.extend({
         });
 
         d3.json('agents.json').then(function (json) {
-            self.set('agentContent', json.map(d => { d.status = d.status === 'Available' ? d.status + 'ddddddddddddddddddfjohagafghfa' : d.status; return d}));
+            self.set('agentContent', json);
             self._createAgentDimensions();
             self._createAgentGroups();
         });
