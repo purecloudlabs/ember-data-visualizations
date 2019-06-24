@@ -45,6 +45,9 @@ export default BaseChartComponent.extend({
         }
         this.set('chart', chart);
 
+        // disable factory click handler.
+        chart.onClick = () => {};
+
         chart.on('pretransition', chart => {
             if (!this.get('labels') && !this.get('labelsWithValues')) {
                 chart.selectAll('text.pie-slice').remove();
