@@ -127,18 +127,18 @@ module('Integration | Component | pie chart - collision', function (hooks) {
 
         let midpoint = getMidpoint(0);
         let labelDimensions = document.querySelector('.pie-label._0 tspan:first-child').getBBox();
-        assert.ok(Math.round(midpoint.x) === Math.round(labelDimensions.x), 't renders the +X +Y long label outside the pie slice');
+        assert.ok(Math.round(midpoint.x) === Math.round(labelDimensions.x), 'it renders the +X +Y long label outside the pie slice');
 
         midpoint = getMidpoint(1);
         labelDimensions = document.querySelector('.pie-label._1 tspan:first-child').getBBox();
-        assert.ok(Math.round(midpoint.x) === Math.round(labelDimensions.x), 't renders the +X -Y long label outside the pie slice');
+        assert.ok(Math.round(midpoint.x) === Math.round(labelDimensions.x), 'it renders the +X -Y long label outside the pie slice');
 
         midpoint = getMidpoint(2);
         labelDimensions = document.querySelector('.pie-label._2 tspan:first-child').getBBox();
-        assert.ok(Math.round(midpoint.x - labelDimensions.width) === Math.round(labelDimensions.x), 't renders the -X +Y long label outside the pie slice');
+        assert.ok(Math.round(midpoint.x - labelDimensions.width) === Math.round(labelDimensions.x), 'it renders the -X +Y long label outside the pie slice');
         midpoint = getMidpoint(3);
 
         labelDimensions = document.querySelector('.pie-label._3 tspan:first-child').getBBox();
-        assert.ok(Math.round(midpoint.x - labelDimensions.width) === Math.round(labelDimensions.x), 't renders the -X -Y long label outside the pie slice');
+        assert.ok(Math.round(midpoint.x - labelDimensions.width) === Math.round(labelDimensions.x), 'it renders the -X -Y long label outside the pie slice');
     });
 });
