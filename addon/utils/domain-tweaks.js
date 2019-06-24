@@ -31,6 +31,6 @@ export function addDomainTicks(chart, domain, otherTicks = []) {
  * @returns {Array[number]} a list [paddedlowerbound, paddedupperbound] : moves upper bound up and lower bound down (leaves 0 as it is).
  */
 export function padDomain(domain) {
-    const paddingFactor = 0.4;
+    const paddingFactor = 0.6;
     return domain.map(d => d * (1 + paddingFactor));
 }

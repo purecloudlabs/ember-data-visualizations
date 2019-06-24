@@ -306,12 +306,12 @@ export default BaseChartComponent.extend({
             labels.remove();
         }
 
-        if (this.get('showMaxMin') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
-            this.addMaxMinLabels(bars);
+        if ((this.get('showMaxMin') || this.get('labelOptions.showMaxMin')) && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+            this.addMaxMinLabels(bars, chart);
         }
 
-        if (this.get('showDataValues') && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
-            this.addDataValues(bars);
+        if ((this.get('showDataValues') || this.get('labelOptions.showDataValues')) && typeof this.get('seriesMaxMin') === 'number' && bars.length > 0) {
+            this.addDataValues(bars, chart);
         }
 
         if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
@@ -348,9 +348,12 @@ export default BaseChartComponent.extend({
          * Now, 'LAYERED' column-type is also added so that negative values are rendered in 'LAYERED' charts correctly.
          */
         if (negs && (['GROUPED', 'LAYERED'].indexOf(this.get('type').trim()) !== -1)) {
-            const y0 = chart.selectAll('rect.bar').filter(d => d.y <= 0).attr('y');
-            chart.select('.axis.x path.domain')
-                .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+            const y0Chart = chart.selectAll('rect.bar').filter(d => d.y <= 0);
+            if (!y0Chart.empty()) {
+                const y0 = y0Chart.attr('y');
+                chart.select('.axis.x path.domain')
+                    .attr('transform', `translate(0,${-1 * (this.get('height') - chart.margins().top - chart.margins().bottom - y0)})`);
+            }
         }
     },
 
@@ -412,13 +415,18 @@ export default BaseChartComponent.extend({
         }
     },
 
-    addDataValues(bars = []) {
-        let formatter = this.get('xAxis.formatter') || (value => value);
-        let gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'data-labels');
+    addDataValues(bars = [], chart) {
+        const formatter = this.get('xAxis.formatter') || (value => value);
+        const gLabels = d3.select(bars[0].parentNode).append('g').attr('id', 'data-labels');
+
+        // min and max label elements
+        const maxLabel = chart.select('.max-value-text');
+        const minLabel = chart.select('.min-value-text');
+        const areMinMaxDefined = maxLabel.node() && minLabel.node();
 
         // Choose the tallest bar in the stack (lowest y value) and place the data labels above that.
         // Avoids label falling under any bar in the stack.
-        let yValues = { y: [], height: [] };
+        const yValues = { y: [], height: [] };
         this.get('chart').selectAll('.sub rect.bar').each(function () {
             yValues.y.push(parseInt(d3.select(this).attr('y')));
             yValues.height.push(parseInt(d3.select(this).attr('height')));
@@ -428,34 +436,78 @@ export default BaseChartComponent.extend({
         // to indicate if chart has all negative values, so that data labels could be rendered at negative side of x -axis.
         const isBottomLabelPosition = this.get('yAxis').isBottomLabelPosition;
 
-        let values = [];
-        let groups = this.getWithDefault('group', []);
+        let values;
+        const groups = this.getWithDefault('group', []);
         groups.forEach((g, index) => {
             if (index === this.get('seriesMaxMin')) {
                 values = g.all().map(gElem => gElem.value);
             }
         });
 
-        for (let i = 0; i < bars.length; i++) {
-            if (!values[i]) {
-                continue;
+        /* auto adjust when to hide data value of a bar
+         * if labels overlap.
+         */
+        if (this.get('labelOptions.labelCollisionResolution') === 'auto' && bars.length > 1) {
+            const barWidth = Number(d3.select(bars[0]).attr('width'));
+            const barGap = Math.abs(Number(d3.select(bars[0]).attr('x')) - Number(d3.select(bars[1]).attr('x'))) - barWidth;
+            // how many labels to skip.
+            let skipLabels = 0;
+            for (let i = 0; i < bars.length; i++) {
+                if (!values[i] || skipLabels > 0) {
+                    skipLabels--; // !values[i] does not render the bar, the gap increases, it is equivalent to skipping a label.
+                    continue;
+                }
+                // if min and max are rendered at i, dont overwrite them with data values.
+                if (this.minMaxIndices && this.minMaxIndices.indexOf(i) != -1) {
+                    continue;
+                }
+                const label = gLabels.append('text')
+                    .text(() => formatter(values[i]))
+                    .attr('x', () => +d3.select(bars[i]).attr('x'))
+                    .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
+                    .attr('font-size', '12px')
+                    .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
+                    .attr('class', 'data-text')
+                    .attr('id', `data-text-${i}`);
+                if (areMinMaxDefined) {
+                    const labelDimensions = label.node().getBBox();
+                    const maxLabelDimensions = maxLabel.node().getBBox();
+                    const minLabelDimensions = minLabel.node().getBBox();
+                    const leftMostAmongMaxAndCurrentLabel = labelDimensions.x - maxLabelDimensions.x < 0 ? labelDimensions : maxLabelDimensions;
+                    const leftMostAmongMinAndCurrentLabel = labelDimensions.x - minLabelDimensions.x < 0 ? labelDimensions : minLabelDimensions;
+                    // check if label collides with min/max label
+                    if (Math.abs(labelDimensions.x - maxLabelDimensions.x) < leftMostAmongMaxAndCurrentLabel.width
+                        || Math.abs(labelDimensions.x - minLabelDimensions.x) < leftMostAmongMinAndCurrentLabel.width) {
+                        label.remove();
+                    } else {
+                        // if the label width swallows 'n' barwidth + bargap, then skip n labels.
+                        skipLabels = Math.ceil(labelDimensions.width / (barWidth + barGap)) - 1;
+                    }
+                }
             }
-
-            gLabels.append('text')
-                .text(() => formatter(values[i]))
-                .attr('x', () => +d3.select(bars[i]).attr('x') + (d3.select(bars[i]).attr('width') / 2))
-                .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
-                .attr('class', 'data-text');
+        } else {
+            for (let i = 0; i < bars.length; i++) {
+                if (!values[i]) {
+                    continue;
+                }
+                gLabels.append('text')
+                    .text(() => formatter(values[i]))
+                    .attr('x', () => +d3.select(bars[i]).attr('x') + Number((d3.select(bars[i]).attr('width')) / 2))
+                    .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('fill', this.getWithDefault('colors', [])[this.get('seriesMaxMin')])
+                    .attr('class', 'data-text')
+                    .attr('id', `data-text-${i}`);
+            }
         }
     },
 
     addMaxMinLabels(bars) {
-        let formatter = this.get('xAxis.formatter') || (value => value);
+        const useAutoCollisionResolution = this.get('labelOptions.labelCollisionResolution') === 'auto';
+        const formatter = this.get('xAxis.formatter') || (value => value);
         let maxValue, maxIdx, minValue, minIdx, values, nonZeroValues;
-        let groups = this.get('group');
+        const groups = this.get('group');
         // to indicate if chart has all negative values, so that max and min could be rendered at negative side of x -axis.
         const isBottomLabelPosition = this.get('yAxis').isBottomLabelPosition;
         groups.forEach((g, index) => {
@@ -470,7 +522,7 @@ export default BaseChartComponent.extend({
                 minValue = formatter(minValue);
             }
         });
-        let gLabels = d3.select(bars[0].parentNode).append('g').attr('class', 'inline-labels');
+        const gLabels = d3.select(bars[0].parentNode).append('g').attr('class', 'inline-labels');
         let b = bars[maxIdx];
 
         // Choose the tallest bar in the stack (lowest y value) and place the max/min labels above that.
@@ -483,12 +535,13 @@ export default BaseChartComponent.extend({
         const maxLabelY = Math.min(...yValues.y);
         const maxLabelYHeight = Math.max(...yValues.height);
 
+        let maxLabel, minLabel, minLabelIndicator;
         if (b) {
-            gLabels.append('text')
+            maxLabel = gLabels.append('text')
                 .text(maxValue)
-                .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                 .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
-                .attr('text-anchor', 'middle')
+                .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
                 .attr('class', 'max-value-text');
@@ -497,31 +550,45 @@ export default BaseChartComponent.extend({
                 gLabels.append('text')
                     // unicode for font-awesome caret up
                     .html(() => '&#xf0d8')
-                    .attr('text-anchor', 'middle')
+                    .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
                     .attr('class', 'caret-icon max-value-indicator')
-                    .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                    .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                     .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
             }
         }
         b = bars[minIdx];
-
+        this.minMaxIndices = [minIdx, maxIdx]; // internal use only
         if (b && !(maxIdx === minIdx)) {
-            gLabels.append('text')
+            minLabel = gLabels.append('text')
                 .text(minValue)
-                .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                 .attr('y', Math.max(12, isBottomLabelPosition ? maxLabelYHeight + 12 : maxLabelY - 2))
-                .attr('text-anchor', 'middle')
+                .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
                 .attr('font-size', '12px')
                 .attr('fill', this.get('colors')[this.get('seriesMaxMin')])
                 .attr('class', 'min-value-text');
 
-            gLabels.append('text')
+            minLabelIndicator = gLabels.append('text')
                 // unicode for font-awesome caret down
                 .html(() => '&#xf0d7')
                 .attr('class', 'caret-icon min-value-indicator')
-                .attr('text-anchor', 'middle')
-                .attr('x', +b.getAttribute('x') + (b.getAttribute('width') / 2))
+                .attr('text-anchor', useAutoCollisionResolution ? 'left' : 'middle')
+                .attr('x', +b.getAttribute('x') + (useAutoCollisionResolution ? 0 : Number(b.getAttribute('width')) / 2))
                 .attr('y', isBottomLabelPosition ? maxLabelYHeight + 24 : maxLabelY - 12);
+        }
+        const hasMaxLabel = maxLabel && !maxLabel.empty();
+        const hasMinLabel = minLabel && !minLabel.empty();
+
+        // if max and min labels collide, then remove the minLabel.
+        if (useAutoCollisionResolution && hasMaxLabel && hasMinLabel) {
+            const minLabelDimensions = minLabel.node().getBBox();
+            const maxLabelDimensions = maxLabel.node().getBBox();
+            const leftMostAmongMaxAndMin = maxLabelDimensions.x - minLabelDimensions.x < 0 ? maxLabelDimensions : minLabelDimensions;
+            if (Math.abs(minLabelDimensions.x - maxLabelDimensions.x) < leftMostAmongMaxAndMin.width) {
+                minLabel.remove();
+                minLabelIndicator.remove();
+            }
+
         }
     },
 

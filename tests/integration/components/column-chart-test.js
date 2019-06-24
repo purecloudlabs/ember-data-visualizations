@@ -135,3 +135,193 @@ module('Integration | Component | column chart', function (hooks) {
         assert.dom('.legend-container > .legend-item').exists({ count: 3 });
     });
 });
+
+// collision detection test parameters
+const collisionTestParameters = function () {
+    return {
+        type: 'GROUPED',
+
+        series: [
+            {
+                title: 'Total Fruit Eaten'
+            }
+        ],
+
+        xAxis: {
+            domain: [
+                moment('2016-11-01'),
+                moment('2016-11-07')
+            ],
+            ticks: 5
+        },
+
+        yAxis: {
+            ticks: 3,
+            domain: [5, 55]
+        },
+
+        labelOptions: {
+            showMaxMin: true,
+            showDataValues: true,
+            labelCollisionResolution: 'auto'
+        }
+    };
+};
+
+const rawData = [
+    {
+        date: new Date('2016-11-02'),
+        fruits: 10
+    },
+    {
+        date: new Date('2016-11-03'),
+        fruits: 20
+    },
+    {
+        date: new Date('2016-11-04'),
+        fruits: 30
+    },
+    {
+        date: new Date('2016-11-05'),
+        fruits: 40
+    },
+    {
+        date: new Date('2016-11-06'),
+        fruits: 50
+    }
+];
+
+const createDimensionAndGroup = (data) => {
+    const dimension = crossfilter(data).dimension(d => d.date);
+    const group = [dimension.group().reduceSum(item => item.fruits)];
+    return {
+        dimension,
+        group
+    };
+};
+
+module('Integration | Component | column chart - collision', function (hooks) {
+    setupRenderingTest(hooks);
+    hooks.beforeEach(function () {
+        this.set('params', collisionTestParameters());
+        this.owner.register('service:resizeDetector', Service.extend({
+            setup(elementId, callback) {
+                callback();
+            },
+            teardown() {}
+        }));
+    });
+
+    test('removes any regular label that overlaps max from the left', async function (assert) {
+        rawData[3].fruits = 40.23232323232323;
+        const dimAndGrp = createDimensionAndGroup(rawData);
+        this.set('params.dimension', dimAndGrp.dimension);
+        this.set('params.group', dimAndGrp.group);
+        await render(
+            hbs `{{column-chart
+                    dimension=params.dimension
+                    group=params.group
+                    type=params.type
+                    seriesMaxMin=0
+                    series=params.series
+                    xAxis=params.xAxis
+                    yAxis=params.yAxis
+                    labelOptions=params.labelOptions
+                    height=200
+                    instantRun=true
+                }}`);
+        assert.equal([...document.querySelectorAll('.data-text')].map(d => d.innerHTML).indexOf('40.23232323232323'), -1, 'Expected chart does not have regular label if it overlaps max.');
+    });
+
+    test('if max label overlaps the regular label from the left, remove the regular label.', async function (assert) {
+        rawData[3].fruits = 45.23232323232323;
+        rawData[4].fruits = 40;
+        const dimAndGrp = createDimensionAndGroup(rawData);
+        this.set('params.dimension', dimAndGrp.dimension);
+        this.set('params.group', dimAndGrp.group);
+        await render(
+            hbs `{{column-chart
+                    dimension=params.dimension
+                    group=params.group
+                    type=params.type
+                    seriesMaxMin=0
+                    series=params.series
+                    xAxis=params.xAxis
+                    yAxis=params.yAxis
+                    labelOptions=params.labelOptions
+                    height=200
+                    instantRun=true
+                }}`);
+        assert.equal([...document.querySelectorAll('.data-text')].map(d => d.innerHTML).indexOf('40'), -1, 'Expected chart does not have regular label if max overlaps it.');
+    });
+
+    test('do not remove any regular label if it does not overlap max', async function (assert) {
+        rawData[3].fruits = 40;
+        rawData[4].fruits = 50;
+        const dimAndGrp = createDimensionAndGroup(rawData);
+        this.set('params.dimension', dimAndGrp.dimension);
+        this.set('params.group', dimAndGrp.group);
+        await render(
+            hbs `{{column-chart
+                    dimension=params.dimension
+                    group=params.group
+                    type=params.type
+                    seriesMaxMin=0
+                    series=params.series
+                    xAxis=params.xAxis
+                    yAxis=params.yAxis
+                    labelOptions=params.labelOptions
+                    height=200
+                    instantRun=true
+                }}`);
+        assert.notEqual([...document.querySelectorAll('.data-text')].map(d => d.innerHTML).indexOf('40'), -1, 'Expected regular label that does not overlap max ');
+    });
+
+    test('remove any regular label if some other regular label overlaps it from left.', async function (assert) {
+        rawData[2].fruits = 30.2323232323232;
+        rawData[3].fruits = 40;
+        const dimAndGrp = createDimensionAndGroup(rawData);
+        this.set('params.dimension', dimAndGrp.dimension);
+        this.set('params.group', dimAndGrp.group);
+        await render(
+            hbs `{{column-chart
+                    dimension=params.dimension
+                    group=params.group
+                    type=params.type
+                    seriesMaxMin=0
+                    series=params.series
+                    xAxis=params.xAxis
+                    yAxis=params.yAxis
+                    labelOptions=params.labelOptions
+                    height=200
+                    instantRun=true
+                }}`);
+        assert.equal([...document.querySelectorAll('.data-text')].map(d => d.innerHTML).indexOf('40'), -1, 'Expected no regular label to the right of long label.');
+    });
+
+    test('remove min label and indicator if it overlaps max.', async function (assert) {
+        rawData[0].fruits = 41;
+        rawData[1].fruits = 42;
+        rawData[2].fruits = 40.2323232323232;
+        rawData[3].fruits = 50;
+        rawData[4].fruits = 49;
+        const dimAndGrp = createDimensionAndGroup(rawData);
+        this.set('params.dimension', dimAndGrp.dimension);
+        this.set('params.group', dimAndGrp.group);
+        await render(
+            hbs `{{column-chart
+                    dimension=params.dimension
+                    group=params.group
+                    type=params.type
+                    seriesMaxMin=0
+                    series=params.series
+                    xAxis=params.xAxis
+                    yAxis=params.yAxis
+                    labelOptions=params.labelOptions
+                    height=200
+                    instantRun=true
+                }}`);
+        assert.dom('.min-value-text').doesNotExist('Expected no min label');
+        assert.dom('.min-value-indicator').doesNotExist('Expected no min label indicator');
+    });
+});
