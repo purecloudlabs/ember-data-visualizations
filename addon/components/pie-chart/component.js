@@ -18,7 +18,7 @@ export default BaseChartComponent.extend({
     formatter: d => d,
 
     buildChart() {
-        if (this.get('group').all().length == 0) {
+        if (this.get('group') && this.get('group') .all().length === 0) {
             this.showChartNotAvailable();
             return;
         }
