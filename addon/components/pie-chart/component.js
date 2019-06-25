@@ -15,6 +15,7 @@ export default BaseChartComponent.extend({
 
     externalLabels: false,
     labels: true,
+    formatter: d => d,
 
     buildChart() {
         if (this.get('group').all().length == 0) {
@@ -87,7 +88,7 @@ export default BaseChartComponent.extend({
                     .text(datum.key),
                 tspanValueNode = newD3TextNode.append('tspan')
                     .attr('text-anchor', 'middle')
-                    .text(datum.value);
+                    .text(this.get('formatter')(datum.value));
 
             // put the value tspan label centered below the key labels.
             const { height, width } = tspanKeyNode.node().getBBox();
@@ -107,7 +108,7 @@ export default BaseChartComponent.extend({
                 .append('text')
                 .attr('class', 'total-text')
                 .attr('text-anchor', 'middle')
-                .text(this.get('data').total);
+                .text(this.get('formatter')(this.get('data').total));
             const { x, y, width, height } = textLabel.node().getBBox(), padding = 6;
             chart.select('g.total-text-group').insert('rect', 'text.total-text')
                 .attr('width', width + padding)
@@ -153,7 +154,7 @@ export default BaseChartComponent.extend({
             .attr('id', this.get('elementId'))
             .style('text-align', 'center')
             .html(d => {
-                return `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${d.data.value}</span>`;
+                return `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${this.get('formatter')(d.data.value)}</span>`;
             });
     },
 
@@ -196,6 +197,7 @@ export default BaseChartComponent.extend({
 
                 tip.style('top', (`${centerOfChartY + centroidY + offsetY}px`));
                 tip.style('left', (`${centerOfChartX + centroidX + offsetX}px`));
+                tip.style('pointer-events', 'none');
             })
             .on('mouseout.tip', function (d) {
                 tip.hide(d, this);
@@ -280,7 +282,33 @@ export default BaseChartComponent.extend({
             return chart.selectAll('.pie-slice-group > .pie-slice').nodes().map(ps => {
                 const sliceDimensions = ps.getBBox();
                 const labelNodeDimensions = labelNode.getBBox();
-                return sliceDimensions.width < labelNodeDimensions.width || sliceDimensions.height < labelNodeDimensions.height;
+                /* collision in horizontal way:
+                 *     1. if pieslice bbox abscissa is less than label abscissa (overflow in left direction.)
+                 *     2. if pie slice bbox width is less than label bbox width (overflow in right direction.)
+                 * collision in vertical way:
+                 *      if pie slice label bbox bottom edge is deeper than pie slice bbox bottom edge.
+                 *
+                 *      ---------------
+                 *      |pieSlice bbox|
+                 *      |             |
+                 *      |   ----------------
+                 *      |   |  label bbox  |
+                 *      |   ----------------
+                 *      |_____________|
+                 *                                                      ---------------------
+                 *                                                      |  pieSlice bbox    |
+                 *              ---------------                         |                   |
+                 *              |pieSlice bbox|                         |                   |
+                 *              |             |                         |                   |
+                 *          --------------    |                         |   --------------- |
+                 *          | label bbox |    |                         |   | label bbox  | |
+                 *          --------------    |                         --- |_____________|--
+                 *              |_____________|
+                 *
+                 * factor to account for bbox curvature = 0.8.
+                 * The case when label overlaps from top edge will never arise because label values over flow from the bottom.
+                 */
+                return (labelNodeDimensions.x < sliceDimensions.x || labelNodeDimensions.width > sliceDimensions.width * 0.8) || (sliceDimensions.y + sliceDimensions.height * 0.8 < labelNodeDimensions.y + labelNodeDimensions.height);
             }).some(d => d);
         }
         chart.selectAll('.pie-label-group  text').nodes().forEach(n => {
