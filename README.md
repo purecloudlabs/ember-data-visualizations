@@ -125,6 +125,8 @@ The pie chart does *not* use an array of crossfilter groups. It uses a singular 
 * `labelsWithValues` (boolean): whether or not to show values and labels both on the pie slices with the key value of the slice
 * `externalLabels` (boolean): whether or not the labels appear on the outside of the chart. Only if `labels` is `true`
 * `legend` (boolean): whether or not to show a legend for the pie chart
+* `labelCollisionResolution` (string) [auto | default] : whether or not run collision detection algorithm to render labels outside of pie slices if they overlap.
+* `formatter` (function) : formats label values, total text and tooltips according to the function passed.
 
 ### Bubble chart
 The bubble chart does *not* use an array of crossfilter groups. It uses a singluar group.
