@@ -3,6 +3,8 @@ ember-data-visualizations
 
 Ember addon to support visualizations with dc.js (d3 & crossfiltering)
 
+[![Build Status](https://travis-ci.org/purecloudlabs/ember-data-visualizations.svg?branch=master)](https://travis-ci.org/purecloudlabs/ember-data-visualizations)
+
 Installation
 ------------------------------------------------------------------------------
 
