@@ -12,7 +12,7 @@
     "build": "ember build",
     "start": "ember serve",
     "test": "ember test",
-    "build-storybook": "ember build --environment=test && build-storybook -p 9001 -s dist",
+    "build-storybook": "ember build --environment=test && build-storybook -s dist",
     "storybook": "ember serve --environment=test & start-storybook -p 9001 -s dist"
   },
   "dependencies": {

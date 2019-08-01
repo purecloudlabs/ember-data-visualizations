@@ -14,7 +14,6 @@ cache:
     - $HOME/.npm
 
 install:
-  - yarn --version
   - yarn --pure-lockfile
 
 script:
