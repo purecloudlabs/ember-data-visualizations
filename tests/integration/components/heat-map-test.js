@@ -75,7 +75,7 @@ module('Integration | Component | heat map', function (hooks) {
 
     test('it renders correct number of x axis ticks', async function (assert) {
         await render(hbs`{{heat-map dimension=params.dimension group=params.group xAxis=params.xAxis yAxis=params.yAxis colorMap=params.colorMap keyFormat=params.keyFormat instantRun=true}}`);
-        assert.dom('.cols text.tickLabel:not(.hidden)').exists({ count: 2 });
+        assert.dom('.tickMark').exists({ count: 3 });
     });
 
     test('it renders a legend with the correct number of boxes', async function (assert) {
