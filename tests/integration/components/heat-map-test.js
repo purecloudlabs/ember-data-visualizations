@@ -45,7 +45,7 @@ const getTestParameters = function () {
             ticks: 3
         },
 
-        colorMap: [0.3, 0.4, 0.7, 0.8, 0.9],
+        colorMap: d => d,
         keyFormat: key => moment(key.toString()).format('MMM DD')
     };
 };

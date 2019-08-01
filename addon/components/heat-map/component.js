@@ -16,6 +16,8 @@ export default BaseChartComponent.extend({
 
     currentInterval: null,
     showCurrentIndicator: false,
+    valueFormat: v => v,
+    colorMap: v => v,
 
     buildChart() {
         let heatMap = dc.heatMap(`#${this.get('elementId')}`);
@@ -54,7 +56,7 @@ export default BaseChartComponent.extend({
             .keyAccessor(d => d.key[1])
             .valueAccessor(d => d.key[0])
             .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
-            .colorAccessor(d => colorMap.indexOf(d.value))
+            .colorAccessor(d => colorMap(d.value))
             .renderTitle(false)
             .height(this.get('height'))
             .colsLabel(d => this.get('keyFormat')(d))
@@ -93,7 +95,7 @@ export default BaseChartComponent.extend({
         return d3Tip().attr('class', 'd3-tip')
             .attr('id', this.get('elementId'))
             .style('text-align', 'center')
-            .html(d => `<span class='row-tip-key'>${d.key[0]}, ${this.get('keyFormat')(d.key[1])}</span><br/><span class='row-tip-value'>${d.value}</span>`);
+            .html(d => `<span class='row-tip-key'>${d.key[0] ? `${d.key[0]}, ` : ''} ${this.get('keyFormat')(d.key[1])}</span><br/><span class='row-tip-value'>${this.get('valueFormat')(d.value)}</span>`);
     },
 
     onPretransition(chart, labelWidth, numbRows, numbCols) {
@@ -121,13 +123,13 @@ export default BaseChartComponent.extend({
         let legendables = [];
         let alreadyDone = [];
         for (let i = 0; i < chart.data().length; i++) {
-            if (alreadyDone.indexOf(chart.data()[i].value) === -1) {
+            if (alreadyDone.indexOf(this.get('valueFormat')(chart.data()[i].value)) === -1) {
                 let legendable = {};
-                legendable.title = chart.data()[i].value;
+                legendable.title = this.get('valueFormat')(chart.data()[i].value);
                 legendable.color = chart.getColor(chart.data()[i]);
-                legendable.elements = chart.selectAll('.heat-box').filter(d => d.value === legendable.title);
+                legendable.elements = chart.selectAll('.heat-box').filter(d => this.get('valueFormat')(d.value) === legendable.title);
                 legendables.push(legendable);
-                alreadyDone.push(chart.data()[i].value);
+                alreadyDone.push(this.get('valueFormat')(chart.data()[i].value));
             }
         }
         return legendables;
