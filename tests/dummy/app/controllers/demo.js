@@ -349,7 +349,7 @@ export default Controller.extend({
                 j++;
             }
         }
-        this.set('heatColorMap', colorsArray);
+        this.set('heatColorMap', (color) => colorsMap[color]);
         this.set('heatGroup', dimensions.group().reduce(
             (p, v) => {
                 return v.value;

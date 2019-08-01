@@ -24,7 +24,7 @@ export const heatMapChartConfigOptions = () => {
             group: groups,
             type: 'GROUPED',
             colors,
-            colorMap,
+            colorMap: (color) => colorMap[color],
             height: 400,
             currentInterval: { start: moment('12/02/2016') },
             keyFormat: key => moment(key.toString()).format('MMM DD'),
@@ -87,7 +87,7 @@ const setColors = () => {
             j++;
         }
     }
-    colorMap = colorsArray;
+    colorMap = colorsMap;
 };
 
 createDimensions();

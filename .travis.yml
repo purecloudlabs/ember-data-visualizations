@@ -1,7 +1,7 @@
 ---
 language: node_js
 node_js:
-  - "6"
+  - "10"
 
 sudo: false
 dist: trusty
@@ -13,8 +13,8 @@ cache:
   directories:
     - $HOME/.npm
 
-before_install:
-  - yarn --version
+install:
+  - yarn --pure-lockfile
 
 script:
   - yarn test
