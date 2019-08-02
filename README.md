@@ -163,10 +163,11 @@ The heatmap does *not* use an array of crossfilter groups. It uses a singular gr
 
 ##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
+*  `colors` (Array): list of colors to use. 
 * `group`: crossfilter group to use for chart (not an array)
     * The `key` of each fact is an array that tells the heatmap the position of the fact on the chart. `key[0]` will tell the chart the y position, and `key[1]` the x position.
-    * The `value` property of each fact will be used to determine the color of the fact. All possible `value` properties should be included in the `colorMap` array (see below). This can be a string, number, whatever, as long as it is included in the `colorMap` object.
-* `colorMap` (Array): order in which to show the colors of the properties. Each element in the array is a string which matches one of the `value` types in the group. For example, if the color value on your heatmap represents intensity from 1 to 10, your `colorMap` might be `[1,2,3,4,5,6,7,8,9,10]` (or the numbers in any order). The heatmap will use the index of this array to determine the index of the `colors` property with which to use each number.
+    * The `value` property of each fact will be used to determine the color of the fact.
+* `colorMap` (function): a function that takes `value` as parameter and returns index of an element from `colors` list.
 * `xAxis` (Object) describes the x axis. Properties:
     * `domain` (Array): describes the domain of the x axis. This property is REQUIRED.
     * `ticks` (number): number of tick LABELS to show on the x axis. This property is optional, and if left out, the chart will automatically show as many labels as will comfortably fit based on the chart's width.
