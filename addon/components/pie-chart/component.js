@@ -23,7 +23,7 @@ export default BaseChartComponent.extend({
             return;
         }
 
-        let chart = dc.pieChart(`#${this.get('elementId')}`);
+        let chart = dc.pieChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         chart
             .radius(this.get('height') / 2)
             .ordinalColors(this.get('colors'))
@@ -209,7 +209,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let pieChart = dc.pieChart(`#${this.get('elementId')}`);
+        let pieChart = dc.pieChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', pieChart);
 
         const data = [{ key: '', value: 1 }];

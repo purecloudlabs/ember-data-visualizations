@@ -20,7 +20,7 @@ export default BaseChartComponent.extend({
     colorMap: v => v,
 
     buildChart() {
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`);
+        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         if (!this.get('xAxis') || !this.get('xAxis').domain) {
             return;
@@ -284,7 +284,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
 
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`);
+        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', heatMap);
         const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
 

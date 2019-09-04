@@ -1,9 +1,11 @@
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
+import { computed } from '@ember/object';
 import { A } from '@ember/array';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
+import dc from 'dc';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -34,6 +36,10 @@ export default Component.extend({
         ABOVE: 'above',
         BELOW: 'below'
     },
+
+    uniqueChartGroupName: computed('elementId', function () {
+        return `chart-group-${this.get('elementId')}`;
+    }),
 
     /**
        @desc Retrieves the color at the given index. Just returns the last available color if index is out of bounds of the array.
@@ -214,6 +220,7 @@ export default Component.extend({
         this._super(...arguments);
         this.tearDownResize();
         this.cancelTimers();
+        dc.chartRegistry.clear(this.get('uniqueChartGroupName'));
     },
 
     didReceiveAttrs() {

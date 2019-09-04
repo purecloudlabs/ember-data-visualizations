@@ -24,7 +24,7 @@ export default BaseChartComponent.extend({
     comparisonLine: null,
 
     buildChart() {
-        let rowChart = dc.rowChart(`#${this.get('elementId')}`);
+        let rowChart = dc.rowChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         let labels = [];
         this.get('group')[0].all().forEach(d => labels.push(d.key));
@@ -286,7 +286,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let rowChart = dc.rowChart(`#${this.get('elementId')}`);
+        let rowChart = dc.rowChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', rowChart);
 
         let data = [];

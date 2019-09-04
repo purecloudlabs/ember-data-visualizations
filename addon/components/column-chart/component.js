@@ -31,7 +31,7 @@ export default BaseChartComponent.extend({
     d3LocaleInfo: {},
 
     buildChart() {
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
         const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
@@ -94,7 +94,7 @@ export default BaseChartComponent.extend({
             groups.forEach((g, index) => {
                 // If we are hatching, we need to display a white bar behind the hatched bar
                 if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
-                    columnChart = dc.barChart(compositeChart);
+                    columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
 
                     columnChart
                         .centerBar(true)
@@ -107,7 +107,7 @@ export default BaseChartComponent.extend({
                     columnCharts.push(columnChart);
                 }
 
-                columnChart = dc.barChart(compositeChart);
+                columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
 
                 columnChart
                     .centerBar(true)
@@ -124,7 +124,7 @@ export default BaseChartComponent.extend({
                 columnCharts.push(columnChart);
             });
         } else {
-            columnChart = dc.barChart(compositeChart);
+            columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
             columnChart
                 .centerBar(true)
                 .barPadding(0.00)
@@ -599,7 +599,7 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let columnChart = dc.barChart(`#${this.get('elementId')}`);
+        let columnChart = dc.barChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', columnChart);
 
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));

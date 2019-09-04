@@ -30,7 +30,7 @@ export default BaseChartComponent.extend({
     d3LocaleInfo: {},
 
     buildChart() {
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
         const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
@@ -83,7 +83,7 @@ export default BaseChartComponent.extend({
         let tip = this.createTooltip();
 
         this.get('group').forEach((g, index) => {
-            lineChart = dc.lineChart(compositeChart);
+            lineChart = dc.lineChart(compositeChart, this.get('uniqueChartGroupName'));
 
             lineChart
                 .group(g)
@@ -283,7 +283,7 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         compositeChart
             .colors(chartNotAvailableColor)
@@ -332,7 +332,7 @@ export default BaseChartComponent.extend({
         let lineChart;
 
         groups.forEach((g) => {
-            lineChart = dc.lineChart(compositeChart);
+            lineChart = dc.lineChart(compositeChart, this.get('uniqueChartGroupName'));
 
             lineChart
                 .group(g)
