@@ -13,6 +13,7 @@ import d3 from 'd3';
 export default BaseChartComponent.extend({
     classNames: ['row-chart'],
 
+    elementToApplyTipSelector: 'g.row > rect',
     showMaxMin: false,
     showComparisonLine: false,
     currentInterval: null,
@@ -75,9 +76,8 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3Tip().attr('class', 'd3-tip')
+        return d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
             .style('text-align', 'center')
-            .attr('id', this.get('elementId'))
             .html(d => `<span class="row-tip-key">${d.key}</span><br/><span class="row-tip-value">${d.value}</span>`)
             .direction('e');
     },
@@ -104,7 +104,7 @@ export default BaseChartComponent.extend({
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
 
-        this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'g.row > rect');
+        this.addClickHandlersAndTooltips(chart.select('svg'), tip);
     },
 
     getLegendables(chart) {

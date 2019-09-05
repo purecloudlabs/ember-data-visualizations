@@ -150,8 +150,7 @@ export default BaseChartComponent.extend({
 
     createTooltip() {
         return d3Tip()
-            .attr('class', 'd3-tip pie-chart')
-            .attr('id', this.get('elementId'))
+            .attr('class', `d3-tip ${this.get('elementId')}`)
             .style('text-align', 'center')
             .html(d => {
                 return `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${this.get('formatter')(d.data.value)}</span>`;

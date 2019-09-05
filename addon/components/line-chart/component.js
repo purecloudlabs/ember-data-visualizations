@@ -7,11 +7,7 @@ import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
-
-import {
-    addComparisonLines,
-    addComparisonLineTicks
-} from 'ember-data-visualizations/utils/comparison-lines';
+import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 
 /**
    @public
@@ -22,6 +18,7 @@ import {
 export default BaseChartComponent.extend({
     classNames: ['line-chart'],
 
+    elementToApplyTipSelector: 'circle.dot',
     showMaxMin: false,
     showComparisonLines: false,
     currentInterval: null,
@@ -106,8 +103,7 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3Tip().attr('class', 'd3-tip')
-            .attr('id', this.get('elementId'))
+        let tip = d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
@@ -132,7 +128,7 @@ export default BaseChartComponent.extend({
             return;
         }
 
-        this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip, 'circle.dot');
+        this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip);
 
         let dots = chart.selectAll('.sub._0 circle.dot')._groups[0];
 

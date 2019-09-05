@@ -13,6 +13,7 @@ import bubbleCloud from 'dc-addons-bubble-chart';
 */
 export default BaseChartComponent.extend({
     classNames: ['bubble-chart'],
+    elementToApplyTipSelector: 'circle.bubble',
 
     buildChart() {
         let bubbleChart = bubbleCloud(`#${this.get('elementId')}`);
@@ -81,7 +82,7 @@ export default BaseChartComponent.extend({
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension);
         }
 
-        this.addClickHandlersAndTooltips(chart.select('svg'), tip, 'circle.bubble');
+        this.addClickHandlersAndTooltips(chart.select('svg'), tip);
     },
 
     getLegendables(chart) {
@@ -101,8 +102,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3Tip().attr('class', 'd3-tip')
-            .attr('id', this.get('elementId'))
+        return d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
             .style('text-align', 'center')
             .html(d => `<span class="tooltip-value">${d.key}</span><br/><span class="tooltip-label">${d.value.tooltip}</span>`);
     },

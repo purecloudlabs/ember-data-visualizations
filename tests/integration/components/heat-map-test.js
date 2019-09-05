@@ -35,8 +35,8 @@ const getTestParameters = function () {
         group,
         xAxis: {
             domain: [
-                moment('2016-11-01'),
-                moment('2016-11-05')
+                moment('2016-11-01', 'YYYY-MM-DD'),
+                moment('2016-11-05', 'YYYY-MM-DD')
             ],
             ticks: 3
         },
@@ -46,7 +46,7 @@ const getTestParameters = function () {
         },
 
         colorMap: d => d,
-        keyFormat: key => moment(key.toString()).format('MMM DD')
+        keyFormat: key => moment(key.toString(), 'YYYY-MM-DD').format('MMM DD')
     };
 };
 

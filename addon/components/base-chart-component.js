@@ -72,22 +72,31 @@ export default Component.extend({
         cancel(this.get('resizeTimer'));
     },
 
-    addClickHandlersAndTooltips(svg, tip, elementToApplyTip) {
+    addClickHandlersAndTooltips(svg, tip) {
         if (tip && !svg.empty()) {
             svg.call(tip);
         }
         // clicking actions
-        this.get('chart').selectAll(elementToApplyTip).on('click', d => {
+        this.get('chart').selectAll(this.elementToApplyTipSelector).on('click', d => {
             this.onClick(d);
         });
 
-        this.get('chart').selectAll(elementToApplyTip)
+        this.get('chart').selectAll(this.elementToApplyTipSelector)
             .on('mouseover.tip', function (d) {
                 tip.show(d, this);
             })
             .on('mouseout.tip', function (d) {
                 tip.hide(d, this);
             });
+    },
+
+    removeClickHandlersAndTooltips() {
+        // clicking actions
+        this.get('chart').selectAll(this.elementToApplyTipSelector).on('click', null);
+
+        this.get('chart').selectAll(this.elementToApplyTipSelector)
+            .on('mouseover.tip', null)
+            .on('mouseout.tip', null);
     },
 
     addLegend(chart, legendables, legendG, legendDimension, legendWidth) {
@@ -205,19 +214,22 @@ export default Component.extend({
 
     cleanupCurrentChart() {
         if (this.get('chart')) {
+            this.removeClickHandlersAndTooltips(this.elementToApplyTipSelector);
             this.get('chart')
                 .on('renderlet', null)
                 .on('postRender', null);
         }
-
-        let tooltips = document.querySelector(`.d3-tip#${this.get('elementId')}`);
-        if (tooltips) {
-            tooltips.remove();
+        let tooltips = document.querySelectorAll(`.d3-tip.${this.get('elementId')}`);
+        if (tooltips && tooltips.length) {
+            tooltips.forEach(tooltip => {
+                tooltip.remove();
+            });
         }
     },
 
     willDestroyElement() {
         this._super(...arguments);
+        this.cleanupCurrentChart();
         this.tearDownResize();
         this.cancelTimers();
         dc.chartRegistry.clear(this.get('uniqueChartGroupName'));
