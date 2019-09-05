@@ -23,7 +23,7 @@ export default BaseChartComponent.extend({
             return;
         }
 
-        let chart = dc.pieChart(`#${this.get('elementId')}`);
+        let chart = dc.pieChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         chart
             .radius(this.get('height') / 2)
             .ordinalColors(this.get('colors'))
@@ -150,8 +150,7 @@ export default BaseChartComponent.extend({
 
     createTooltip() {
         return d3Tip()
-            .attr('class', 'd3-tip pie-chart')
-            .attr('id', this.get('elementId'))
+            .attr('class', `d3-tip ${this.get('elementId')}`)
             .style('text-align', 'center')
             .html(d => {
                 return `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${this.get('formatter')(d.data.value)}</span>`;
@@ -209,7 +208,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let pieChart = dc.pieChart(`#${this.get('elementId')}`);
+        let pieChart = dc.pieChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', pieChart);
 
         const data = [{ key: '', value: 1 }];

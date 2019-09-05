@@ -7,11 +7,7 @@ import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
-
-import {
-    addComparisonLines,
-    addComparisonLineTicks
-} from 'ember-data-visualizations/utils/comparison-lines';
+import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 
 /**
    @public
@@ -22,6 +18,7 @@ import {
 export default BaseChartComponent.extend({
     classNames: ['line-chart'],
 
+    elementToApplyTipSelector: 'circle.dot',
     showMaxMin: false,
     showComparisonLines: false,
     currentInterval: null,
@@ -30,7 +27,7 @@ export default BaseChartComponent.extend({
     d3LocaleInfo: {},
 
     buildChart() {
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
         const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
@@ -83,7 +80,7 @@ export default BaseChartComponent.extend({
         let tip = this.createTooltip();
 
         this.get('group').forEach((g, index) => {
-            lineChart = dc.lineChart(compositeChart);
+            lineChart = dc.lineChart(compositeChart, this.get('uniqueChartGroupName'));
 
             lineChart
                 .group(g)
@@ -106,8 +103,7 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3Tip().attr('class', 'd3-tip')
-            .attr('id', this.get('elementId'))
+        let tip = d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
@@ -132,7 +128,7 @@ export default BaseChartComponent.extend({
             return;
         }
 
-        this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip, 'circle.dot');
+        this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip);
 
         let dots = chart.selectAll('.sub._0 circle.dot')._groups[0];
 
@@ -283,7 +279,7 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         compositeChart
             .colors(chartNotAvailableColor)
@@ -332,7 +328,7 @@ export default BaseChartComponent.extend({
         let lineChart;
 
         groups.forEach((g) => {
-            lineChart = dc.lineChart(compositeChart);
+            lineChart = dc.lineChart(compositeChart, this.get('uniqueChartGroupName'));
 
             lineChart
                 .group(g)

@@ -14,13 +14,14 @@ import d3 from 'd3';
 export default BaseChartComponent.extend({
     classNames: ['heat-map'],
 
+    elementToApplyTipSelector: 'rect.heat-box',
     currentInterval: null,
     showCurrentIndicator: false,
     valueFormat: v => v,
     colorMap: v => v,
 
     buildChart() {
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`);
+        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         if (!this.get('xAxis') || !this.get('xAxis').domain) {
             return;
@@ -92,8 +93,7 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
-        return d3Tip().attr('class', 'd3-tip')
-            .attr('id', this.get('elementId'))
+        return d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
             .style('text-align', 'center')
             .html(d => `<span class='row-tip-key'>${d.key[0] ? `${d.key[0]}, ` : ''} ${this.get('keyFormat')(d.key[1])}</span><br/><span class='row-tip-value'>${this.get('valueFormat')(d.value)}</span>`);
     },
@@ -275,7 +275,7 @@ export default BaseChartComponent.extend({
     },
 
     onRenderlet(tip) {
-        this.addClickHandlersAndTooltips(this.get('chart').select('svg'), tip, 'rect.heat-box');
+        this.addClickHandlersAndTooltips(this.get('chart').select('svg'), tip);
     },
 
     showChartNotAvailable() {
@@ -284,7 +284,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
 
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`);
+        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', heatMap);
         const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
 

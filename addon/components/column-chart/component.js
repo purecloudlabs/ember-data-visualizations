@@ -7,12 +7,9 @@ import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
-
-import {
-    addComparisonLines,
-    addComparisonLineTicks
-} from 'ember-data-visualizations/utils/comparison-lines';
+import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
+
 /**
    @public
    @module column-chart
@@ -29,9 +26,10 @@ export default BaseChartComponent.extend({
     maxMinSeries: null,
     type: 'GROUPED', // GROUPED, LAYERED, STACKED,
     d3LocaleInfo: {},
+    elementToApplyTipSelector: 'rect.bar',
 
     buildChart() {
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`);
+        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
         const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
@@ -94,7 +92,7 @@ export default BaseChartComponent.extend({
             groups.forEach((g, index) => {
                 // If we are hatching, we need to display a white bar behind the hatched bar
                 if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
-                    columnChart = dc.barChart(compositeChart);
+                    columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
 
                     columnChart
                         .centerBar(true)
@@ -107,7 +105,7 @@ export default BaseChartComponent.extend({
                     columnCharts.push(columnChart);
                 }
 
-                columnChart = dc.barChart(compositeChart);
+                columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
 
                 columnChart
                     .centerBar(true)
@@ -124,7 +122,7 @@ export default BaseChartComponent.extend({
                 columnCharts.push(columnChart);
             });
         } else {
-            columnChart = dc.barChart(compositeChart);
+            columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
             columnChart
                 .centerBar(true)
                 .barPadding(0.00)
@@ -152,8 +150,7 @@ export default BaseChartComponent.extend({
     createTooltip() {
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.getWithDefault('series', []).map(entry => entry.title);
-        let tip = d3Tip().attr('class', 'd3-tip')
-            .attr('id', this.get('elementId'))
+        let tip = d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
@@ -299,7 +296,7 @@ export default BaseChartComponent.extend({
         let svg = chart.select('svg > defs');
         let bars = chart.selectAll('.sub._0 rect.bar')._groups[0];
 
-        this.addClickHandlersAndTooltips(svg, tip, 'rect.bar');
+        this.addClickHandlersAndTooltips(svg, tip);
 
         let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
         if (labels) {
@@ -599,7 +596,7 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let columnChart = dc.barChart(`#${this.get('elementId')}`);
+        let columnChart = dc.barChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
         this.set('chart', columnChart);
 
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
