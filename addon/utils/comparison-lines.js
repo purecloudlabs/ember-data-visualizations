@@ -4,7 +4,7 @@
    @param comparisonLines - Array of comparison lines passed to the chart component.
 */
 export function addComparisonLines(chart, comparisonLines) {
-    if (!chart || !comparisonLines) {
+    if (!chart || !comparisonLines || !comparisonLines.length) {
         return;
     }
 
@@ -55,7 +55,7 @@ export function addComparisonLines(chart, comparisonLines) {
    @param {array} comparisonLines - Array of comparison lines passed to the chart component.
 */
 export function addComparisonLineTicks(chart, comparisonLines) {
-    if (!chart || !comparisonLines) {
+    if (!chart || !comparisonLines || !comparisonLines.length) {
         return;
     }
 
