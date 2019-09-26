@@ -1,10 +1,11 @@
+import { isEmpty } from '@ember/utils';
 /**
    @desc Adds comparison lines to a line or column chart.
    @param chart - DC chart instance.
    @param comparisonLines - Array of comparison lines passed to the chart component.
 */
 export function addComparisonLines(chart, comparisonLines) {
-    if (!chart || !comparisonLines) {
+    if (!chart || isEmpty(comparisonLines)) {
         return;
     }
 
@@ -55,7 +56,7 @@ export function addComparisonLines(chart, comparisonLines) {
    @param {array} comparisonLines - Array of comparison lines passed to the chart component.
 */
 export function addComparisonLineTicks(chart, comparisonLines) {
-    if (!chart || !comparisonLines) {
+    if (!chart || isEmpty(comparisonLines)) {
         return;
     }
 
