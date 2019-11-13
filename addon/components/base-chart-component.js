@@ -81,6 +81,17 @@ export default Component.extend({
             this.onClick(d);
         });
 
+        // when user navigates using tab key and uses enter button to drill-in the chart
+        const onClick = this.onClick;
+        this.get('chart').selectAll(this.elementToApplyTipSelector).each(function () {
+            const bar = d3.select(this);
+            this.addEventListener('keydown', function (e) {
+                if (e.keyCode == '13') {
+                    onClick(bar.datum());
+                }
+            });
+        });
+
         this.get('chart').selectAll(this.elementToApplyTipSelector)
             .on('mouseover.tip', function (d) {
                 tip.show(d, this);
