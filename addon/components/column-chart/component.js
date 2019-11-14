@@ -276,7 +276,12 @@ export default BaseChartComponent.extend({
                 position = position + (barWidth + gap);
             }
             chart.selectAll('rect.bar')
-                .attr('width', barWidth);
+                .attr('width', barWidth).each(function () {
+                    const bar = d3.select(this);
+                    if (bar.attr('height') !== '0') {
+                        bar.attr('tabindex', 0);
+                    }
+                });
         }
     },
 
@@ -285,14 +290,7 @@ export default BaseChartComponent.extend({
         if (this.get('isDestroyed') || this.get('isDestroying')) {
             return;
         }
-
-        chart.selectAll('rect.bar').each(function () {
-            const bar = d3.select(this);
-            if (bar.attr('height') !== '0') {
-                bar.attr('tabindex', 0);
-            }
-        });
-
+        
         if (this.get('type') === 'STACKED') {
             chart.selectAll('g.stack').selectAll('rect').attr('fill', (d) => this.get('colors')[d.layer]);
         }
