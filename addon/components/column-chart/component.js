@@ -277,7 +277,6 @@ export default BaseChartComponent.extend({
             }
             chart.selectAll('rect.bar')
                 .attr('width', barWidth).each(function () {
-                    // This is outside the Ember run loop so check if component is destroyed
                     const bar = d3.select(this);
                     if (bar.attr('height') !== '0') {
                         bar.attr('tabindex', 0);
@@ -287,6 +286,7 @@ export default BaseChartComponent.extend({
     },
 
     onPretransition(chart, tip) {
+        // This is outside the Ember run loop so check if component is destroyed
         if (this.get('isDestroyed') || this.get('isDestroying')) {
             return;
         }
