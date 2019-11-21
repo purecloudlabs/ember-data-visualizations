@@ -70,7 +70,6 @@ export default BaseChartComponent.extend({
         }
 
         compositeChart.xAxis().tickSizeOuter(0);
-        debugger;
         compositeChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
         if (this.get('xAxis') && this.get('xAxis').ticks) {
             compositeChart.xAxis().ticks(this.get('xAxis').ticks);
