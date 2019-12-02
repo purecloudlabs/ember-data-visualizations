@@ -8,6 +8,7 @@ import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
+import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 
 /**
    @public
@@ -92,6 +93,7 @@ export default BaseChartComponent.extend({
         });
 
         addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
+        addDomainTicks(compositeChart, this.get('yAxis').domain, this.get('comparisonLines') ? this.get('comparisonLines').map(d => d.value) : undefined);
 
         compositeChart
             .on('renderlet', chart => this.onRenderlet(chart, tip))
