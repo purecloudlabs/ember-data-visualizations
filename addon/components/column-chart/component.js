@@ -25,8 +25,12 @@ export default BaseChartComponent.extend({
     showCurrentIndicator: false,
     maxMinSeries: null,
     type: 'GROUPED', // GROUPED, LAYERED, STACKED,
-    d3LocaleInfo: {},
     elementToApplyTipSelector: 'rect.bar',
+
+    init() {
+        this._super(...arguments);
+        this.set('d3LocaleInfo', {});
+    },
 
     buildChart() {
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
