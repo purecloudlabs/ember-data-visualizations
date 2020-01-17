@@ -1,6 +1,6 @@
 {
   "name": "ember-data-visualizations",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "Ember addon to support visualizations with dc.js (d3 & crossfilter).",
   "keywords": [
     "ember-addon"
@@ -34,6 +34,7 @@
     "@storybook/ember": "^5.0.11",
     "babel-loader": "^8.0.6",
     "broccoli-less-single": "^1.0.1",
+    "ember-chromium": "^4.0.3",
     "ember-cli": "~3.4.3",
     "ember-cli-dependency-checker": "^3.0.0",
     "ember-cli-eslint": "^4.2.3",
