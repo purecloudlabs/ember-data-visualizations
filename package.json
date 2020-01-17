@@ -7,6 +7,9 @@
   ],
   "repository": "https://github.com/purecloudlabs/ember-data-visualizations",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "author": "Genesys",
   "scripts": {
     "build": "ember build",
