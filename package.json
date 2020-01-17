@@ -10,6 +10,7 @@
   "author": "Genesys",
   "scripts": {
     "build": "ember build",
+    "build-prod": "ember build -prod",
     "start": "ember serve",
     "test": "ember test",
     "build-storybook": "ember build --environment=test && build-storybook -s dist",
