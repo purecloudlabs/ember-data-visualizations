@@ -643,6 +643,8 @@ export default BaseChartComponent.extend({
             .dimension(dimension)
             .transitionDuration(0);
 
+        columnChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
+
         if (this.get('width')) {
             this.get('chart').effectiveWidth(this.get('width'));
         }
