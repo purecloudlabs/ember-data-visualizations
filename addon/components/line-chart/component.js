@@ -25,10 +25,10 @@ export default BaseChartComponent.extend({
     currentInterval: null,
     showCurrentIndicator: false,
     maxMinSeries: null,
+    d3LocaleInfo: {},
 
     init() {
         this._super(...arguments);
-        this.set('d3LocaleInfo', {});
     },
 
     buildChart() {

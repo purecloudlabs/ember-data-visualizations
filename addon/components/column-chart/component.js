@@ -26,10 +26,10 @@ export default BaseChartComponent.extend({
     maxMinSeries: null,
     type: 'GROUPED', // GROUPED, LAYERED, STACKED,
     elementToApplyTipSelector: 'rect.bar',
+    d3LocaleInfo: {},
 
     init() {
         this._super(...arguments);
-        this.set('d3LocaleInfo', {});
     },
 
     buildChart() {
