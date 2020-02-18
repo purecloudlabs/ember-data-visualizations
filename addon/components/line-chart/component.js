@@ -28,7 +28,9 @@ export default BaseChartComponent.extend({
 
     init() {
         this._super(...arguments);
-        this.set('d3LocaleInfo', {});
+        if (!this.get('d3LocaleInfo')) {
+            this.set('d3LocaleInfo', {});
+        }
     },
 
     buildChart() {
