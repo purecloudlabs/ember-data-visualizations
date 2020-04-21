@@ -9,7 +9,7 @@ export function getTickFormat({ periods = ['AM', 'PM'], dayFormat = '%a %d', wee
         periods,
         days: moment.weekdays(),
         shortDays: moment.weekdaysShort(),
-        months: moment.months(),
+        months: moment.localeData().months(),
         shortMonths: moment.monthsShort()
     });
 
