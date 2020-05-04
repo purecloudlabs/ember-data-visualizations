@@ -1,7 +1,7 @@
 import hbs from 'htmlbars-inline-precompile';
 import moment from 'moment';
 import crossfilter from 'crossfilter';
-import content from '../content/column-chart-data.json';
+import content from '../content/column-chart-data-1.json';
 
 export const lineChartConfigOptions = () => {
     return {

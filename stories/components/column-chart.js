@@ -1,7 +1,9 @@
 import hbs from 'htmlbars-inline-precompile';
 import moment from 'moment';
 import crossfilter from 'crossfilter';
-import content from '../content/column-chart-data.json';
+import columnChartData1 from '../content/column-chart-data-1.json';
+import columnChartData2 from '../content/column-chart-data-2.json';
+
 import { computed } from '@ember/object';
 
 /**
@@ -9,9 +11,9 @@ import { computed } from '@ember/object';
  *
  * @param {array} dataSet set of objects
  * @example [
- *  { date: "20101101", value: 100 },
- *  { date: "20101201", value: 150 },
- *  { date: "20110101", value: 200 }
+ *  { date: '20101101', value: 100 },
+ *  { date: '20101201', value: 150 },
+ *  { date: '20110101', value: 200 }
  * ]
  * @param {string} type either 'GROUPED' or 'STACKED'
  */
@@ -43,7 +45,17 @@ const buildConfigOptions = (dataset, options) => {
 
     const group = groupKeys.map(key => dimension.group().reduceSum(item => item[key] || 0));
     const series = groupKeys.map(key => ({ title: key, hatch: false }));
-    const colors = ['#3F8BA8', '#2A2C4F', '#558D6C', '#F4880B'];
+
+    const colors = [
+        '#3F8BA8', '#a759cd', '#61c049',
+        '#F4880B', '#a8b635', '#ca47a0',
+        '#4d9234', '#db436b', '#50c3ae',
+        '#c54436', '#46aed7', '#e27232',
+        '#6e8cd2', '#d29e3a', '#72589c',
+        '#aeae63', '#c988d3', '#4a7230',
+        '#dd81a0', '#499669', '#9d4667',
+        '#297b66', '#df8e6f', '#787228',
+    ];
 
     const startX = dataset.map(d => d.date).reduce((start, time) => start && moment(start).isBefore(time) ? moment(start) : moment(time), null);
     const endX = dataset.map(d => d.date).reduce((end, time) => end && moment(end).isAfter(time) ? moment(end) : moment(time), null);
@@ -69,15 +81,16 @@ const buildConfigOptions = (dataset, options) => {
     }, options);
 };
 
-const initialData = content;
+const initialData = columnChartData1;
 
 export const columnChartConfigOptions = () => {
     return {
         template: hbs`
             <h1>Column Chart</h1>
-            <button type="button" onclick={{action applyDataset nextDataset}}>Change dataset</button>
-            <button type="button" onclick={{action toggleLegend}}>Toggle Showing Legend</button>
-            <button type="button" onclick={{action reset}}>Reset</button>
+            <button type='button' onclick={{action applyDataset nextDataset}}>Change dataset</button>
+            <button type='button' onclick={{action toggleLegend}}>Toggle Showing Legend</button>
+            <button type='button' onclick={{action toggleStacking}}>Toggle Stacking</button>
+            <button type='button' onclick={{action reset}}>Reset</button>
 
             {{column-chart 
                 dimension=config.dimension
@@ -93,10 +106,10 @@ export const columnChartConfigOptions = () => {
         `,
         context: {
             dataset: initialData,
-            nextDataset: initialData,
-            overrides: { showLegend: true },
+            nextDataset: columnChartData2,
+            overrides: {},
 
-            config: computed('dataset', 'overrides.{showLegend}', function () {
+            config: computed('dataset', 'overrides.{type,showLegend}', function () {
                 const dataset = this.get('dataset');
                 const overrides = this.get('overrides');
 
@@ -105,14 +118,12 @@ export const columnChartConfigOptions = () => {
 
             reset() {
                 this.set('overrides', {});
+                this.set('dataset', initialData);
             },
 
-            applyDataset(dataset, overrides) {
+            applyDataset(dataset) {
                 const currentDataset = this.get('dataset');
-
-                if (overrides) {
-                    this.set('overrides', overrides);
-                }
+                this.set('dataset', dataset);
 
                 if (dataset !== currentDataset) {
                     this.set('nextDataset', currentDataset);
@@ -120,8 +131,14 @@ export const columnChartConfigOptions = () => {
             },
 
             toggleLegend() {
-                const showLegend = this.get('overrides.showLegend');
+                const showLegend = this.get('config.showLegend');
                 this.set('overrides.showLegend', !showLegend);
+            },
+
+            toggleStacking() {
+                debugger;
+                const isStacking = this.get('config.type') === 'STACKED';
+                this.set('overrides.type', isStacking ? 'GROUPED' : 'STACKED');
             }
         }
     };
