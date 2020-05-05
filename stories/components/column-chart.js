@@ -5,6 +5,7 @@ import columnChartData1 from '../content/column-chart-data-1.json';
 import columnChartData2 from '../content/column-chart-data-2.json';
 
 import { computed } from '@ember/object';
+import { reads } from '@ember/object/computed';
 
 /**
  * Configure the rendered chart
@@ -54,7 +55,7 @@ const buildConfigOptions = (dataset, options) => {
         '#6e8cd2', '#d29e3a', '#72589c',
         '#aeae63', '#c988d3', '#4a7230',
         '#dd81a0', '#499669', '#9d4667',
-        '#297b66', '#df8e6f', '#787228',
+        '#297b66', '#df8e6f', '#787228'
     ];
 
     const startX = dataset.map(d => d.date).reduce((start, time) => start && moment(start).isBefore(time) ? moment(start) : moment(time), null);
@@ -73,10 +74,13 @@ const buildConfigOptions = (dataset, options) => {
         dimension,
         series,
         colors,
-        showLegend: true,
         xAxis,
         yAxis: {
             ticks: 3
+        },
+        legendOptions: {
+            showLegend: true,
+            shouldAppendLegendBelow: true
         }
     }, options);
 };
@@ -86,6 +90,13 @@ const initialData = columnChartData1;
 export const columnChartConfigOptions = () => {
     return {
         template: hbs`
+            <style>
+                .chart.column-chart {
+                    margin-top: 10px;
+                    background-color: antiqueWhite;
+                }
+            </style>
+
             <h1>Column Chart</h1>
             <button type='button' onclick={{action applyDataset nextDataset}}>Change dataset</button>
             <button type='button' onclick={{action toggleLegend}}>Toggle Showing Legend</button>
@@ -99,7 +110,7 @@ export const columnChartConfigOptions = () => {
                 series=config.series
                 colors=config.colors
                 height=config.height
-                showLegend=config.showLegend
+                legendOptions=config.legendOptions
                 xAxis=config.xAxis
                 yAxis=config.yAxis
             }}
@@ -107,9 +118,11 @@ export const columnChartConfigOptions = () => {
         context: {
             dataset: initialData,
             nextDataset: columnChartData2,
-            overrides: {},
 
-            config: computed('dataset', 'overrides.{type,showLegend}', function () {
+            overrides: {},
+            _legendOptions: reads('config.legendOptions'),
+
+            config: computed('dataset', 'overrides.type', '_legendOptions.{showLegend,shouldAppendLegendBelow}', function () {
                 const dataset = this.get('dataset');
                 const overrides = this.get('overrides');
 
@@ -135,8 +148,16 @@ export const columnChartConfigOptions = () => {
                 this.set('overrides.showLegend', !showLegend);
             },
 
+            toggleLegendPosition() {
+                const showLegend = this.get('config.showLegend');
+                const shouldAppendLegendBelow = this.get('config.shouldAppendLegendBelow');
+
+                if (showLegend) {
+                    this.set('overrides.shouldAppendLegendBelow', !shouldAppendLegendBelow);
+                }
+            },
+
             toggleStacking() {
-                debugger;
                 const isStacking = this.get('config.type') === 'STACKED';
                 this.set('overrides.type', isStacking ? 'GROUPED' : 'STACKED');
             }

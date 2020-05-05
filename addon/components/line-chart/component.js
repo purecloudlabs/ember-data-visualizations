@@ -37,7 +37,7 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
 
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
-        const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
+        const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET_X + legendWidth : ChartSizes.RIGHT_MARGIN;
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
@@ -163,7 +163,7 @@ export default BaseChartComponent.extend({
             const legendDimension = 18;
             const legendG = chart.select('g')
                 .append('g')
-                .attr('transform', `translate(${chart.width() - chart.margins().right + ChartSizes.LEGEND_OFFSET})`);
+                .attr('transform', `translate(${chart.width() - chart.margins().right + ChartSizes.LEGEND_OFFSET_X})`);
             this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension, this.get('legendWidth'));
         }
     },
