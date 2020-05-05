@@ -5,7 +5,7 @@ import columnChartData1 from '../content/column-chart-data-1.json';
 import columnChartData2 from '../content/column-chart-data-2.json';
 
 import { computed } from '@ember/object';
-import { reads } from '@ember/object/computed';
+import { alias } from '@ember/object/computed';
 
 /**
  * Configure the rendered chart
@@ -99,8 +99,9 @@ export const columnChartConfigOptions = () => {
 
             <h1>Column Chart</h1>
             <button type='button' onclick={{action applyDataset nextDataset}}>Change dataset</button>
-            <button type='button' onclick={{action toggleLegend}}>Toggle Showing Legend</button>
             <button type='button' onclick={{action toggleStacking}}>Toggle Stacking</button>
+            <button type='button' onclick={{action toggleLegend}}>Toggle Showing Legend</button>
+            <button type='button' onclick={{action toggleLegendPosition}}>Toggle Legend Location</button>
             <button type='button' onclick={{action reset}}>Reset</button>
 
             {{column-chart 
@@ -120,9 +121,11 @@ export const columnChartConfigOptions = () => {
             nextDataset: columnChartData2,
 
             overrides: {},
-            _legendOptions: reads('config.legendOptions'),
 
-            config: computed('dataset', 'overrides.type', '_legendOptions.{showLegend,shouldAppendLegendBelow}', function () {
+            _legendOptions: alias('config.legendOptions'),
+            _legendOverrides: alias('overrides.legendOptions'),
+
+            config: computed('dataset', 'overrides.{type,legendOptions}', '_legendOptions.{showLegend,shouldAppendLegendBelow}', '_legendOverrides.{showLegend,shouldAppendLegendBelow}', function () {
                 const dataset = this.get('dataset');
                 const overrides = this.get('overrides');
 
@@ -144,16 +147,25 @@ export const columnChartConfigOptions = () => {
             },
 
             toggleLegend() {
-                const showLegend = this.get('config.showLegend');
-                this.set('overrides.showLegend', !showLegend);
+                const legendOptions = this.get('_legendOptions');
+                const legendOverrides = this.get('_legendOverrides');
+
+                const showLegend = legendOptions.showLegend;
+                const updatedOverrides = Object.assign({}, legendOptions, legendOverrides, { showLegend: !showLegend });
+
+                this.set('_legendOverrides', updatedOverrides);
             },
 
             toggleLegendPosition() {
-                const showLegend = this.get('config.showLegend');
-                const shouldAppendLegendBelow = this.get('config.shouldAppendLegendBelow');
+                const legendOptions = this.get('_legendOptions');
+                const legendOverrides = this.get('_legendOverrides');
+
+                const showLegend = legendOptions.showLegend;
+                const shouldAppendLegendBelow = legendOptions.shouldAppendLegendBelow;
+                const updatedOverrides = Object.assign({}, legendOptions, legendOverrides, { shouldAppendLegendBelow: !shouldAppendLegendBelow });
 
                 if (showLegend) {
-                    this.set('overrides.shouldAppendLegendBelow', !shouldAppendLegendBelow);
+                    this.set('_legendOverrides', updatedOverrides);
                 }
             },
 

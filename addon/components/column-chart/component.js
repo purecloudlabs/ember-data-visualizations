@@ -372,8 +372,14 @@ export default BaseChartComponent.extend({
             const shouldAppendLegendBelow = this.get('legendOptions.shouldAppendLegendBelow');
 
             if (!shouldAppendLegendBelow) {
-                const legendG = chart.select('g');
-                this.addLegend(chart, legendables, 18, legendG, chartWidth);
+                const margins = chart.margins();
+                const offsetX = chart.width() - margins.right + ChartSizes.LEGEND_OFFSET_X;
+
+                const legendG = chart.select('g')
+                    .append('g')
+                    .attr('transform', `translate(${offsetX})`);
+
+                this.addLegend(chart, legendables, legendG, 18, chartWidth);
             }
 
             if (shouldAppendLegendBelow) {

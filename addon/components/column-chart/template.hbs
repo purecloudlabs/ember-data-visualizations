@@ -1,5 +1,7 @@
 <div id={{chartId}}></div>
 
-{{#if legendOptions.shouldAppendLegendBelow}}
-    <svg class="legend" height="50"></svg>
+{{#if legendOptions.showLegend}}
+    {{#if legendOptions.shouldAppendLegendBelow}}
+        <svg class="legend" height="50"></svg>
+    {{/if}}
 {{/if}}
