@@ -141,9 +141,11 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
+        const chartId = this.get('chartId');
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.get('series').map(entry => entry.title);
-        let tip = d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
+
+        let tip = d3Tip().attr('class', `d3-tip ${chartId}`)
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
@@ -168,11 +170,13 @@ export default BaseChartComponent.extend({
             return;
         }
 
-        this.addClickHandlersAndTooltips(d3.select('.line-chart > svg > defs'), tip);
+        const chartId = this.get('chartId');
+        const chartDefs = this.get('chart').select('svg > defs')
+
+        this.addClickHandlersAndTooltips(chartDefs, tip);
 
         let dots = chart.selectAll('.sub._0 circle.dot')._groups[0];
 
-        const chartId = this.get('chartId');
         let labels = document.querySelector(`#${chartId} .inline-labels`);
         if (labels) {
             labels.remove();
@@ -408,9 +412,10 @@ export default BaseChartComponent.extend({
                 return;
             }
 
-            d3.select('.line-chart > svg > text').remove();
-            let svg = d3.select('.line-chart > svg');
-            let bbox = svg.node().getBBox();
+            this.get('chart').select('svg > text').remove();
+            const svg = this.get('chart').select('svg');
+            const bbox = svg.node().getBBox();
+
             svg
                 .append('text')
                 .text(chartNotAvailableMessage)
