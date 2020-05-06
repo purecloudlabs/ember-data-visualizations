@@ -397,6 +397,7 @@ export default BaseChartComponent.extend({
                 }
             });
         }
+
         /*
          * this chunk of code adjusts the x-axis and bars so that the bars appear x-axis if data has negative values.
          * However, This was only done for 'GROUPED' column-chart, as a result, the 'LAYERED' column chart would not render negative values
