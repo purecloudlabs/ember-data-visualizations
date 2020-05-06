@@ -134,7 +134,7 @@ module('Integration | Component | column chart', function (hooks) {
     test('it renders a legend even when there are no groups', async function (assert) {
         this.set('groups', []);
         await render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis legendOptions=legendOptions instantRun=true}}`);
-        assert.dom('.legend-container > .legend-item').exists({ count: 3 });
+        assert.dom('.dc-chart .legend-container > .legend-item').exists({ count: 3 });
     });
 
     test('it renders the legend below the chart when legend options position is bottom', async function (assert) {
