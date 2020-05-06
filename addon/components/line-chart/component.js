@@ -10,6 +10,7 @@ import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
+import { equal, bool } from '@ember/object/computed';
 
 import layout from './template';
 
@@ -35,6 +36,10 @@ export default BaseChartComponent.extend({
         return `line-chart-${elementId}`;
     }),
 
+    legendOptions: null,
+    showLegend: bool('legendOptions.showLegend'),
+    shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
+
     init() {
         this._super(...arguments);
         if (!this.get('d3LocaleInfo')) {
@@ -47,8 +52,8 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
 
         const height = this.get('height');
-        const showLegend = this.get('legendOptions.showLegend');
-        const shouldAppendLegendBelow = this.get('legendOptions.shouldAppendLegendBelow');
+        const showLegend = this.get('showLegend');
+        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
 
         // if the legend renders on the right, give the right margin enough room to render the legend
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
@@ -186,12 +191,12 @@ export default BaseChartComponent.extend({
             this.changeTickForCurrentInterval();
         }
 
-        const showLegend = this.get('legendOptions.showLegend');
+        const showLegend = this.get('showLegend');
 
         if (showLegend) {
             const chartWidth = this.get('chartWidth');
             const legendables = this.getLegendables(chart);
-            const shouldAppendLegendBelow = this.get('legendOptions.shouldAppendLegendBelow');
+            const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
 
             if (!shouldAppendLegendBelow) {
                 const margins = chart.margins();

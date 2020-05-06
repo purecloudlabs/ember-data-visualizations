@@ -80,7 +80,7 @@ const buildConfigOptions = (dataset, options) => {
         },
         legendOptions: {
             showLegend: true,
-            shouldAppendLegendBelow: true
+            position: 'bottom'
         }
     }, options);
 };
@@ -161,8 +161,8 @@ export const columnChartConfigOptions = () => {
                 const legendOverrides = this.get('_legendOverrides');
 
                 const showLegend = legendOptions.showLegend;
-                const shouldAppendLegendBelow = legendOptions.shouldAppendLegendBelow;
-                const updatedOverrides = Object.assign({}, legendOptions, legendOverrides, { shouldAppendLegendBelow: !shouldAppendLegendBelow });
+                const position = legendOptions.position === 'bottom' ? 'right' : 'bottom';
+                const updatedOverrides = Object.assign({}, legendOptions, legendOverrides, { position });
 
                 if (showLegend) {
                     this.set('_legendOverrides', updatedOverrides);
