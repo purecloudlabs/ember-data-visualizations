@@ -77,6 +77,8 @@ module('Integration | Component | column chart', function (hooks) {
 
     hooks.beforeEach(function () {
         this.set('params', getTestParameters());
+        this.set('legendOptions', { showLegend: true });
+
         this.owner.register('service:resizeDetector', Service.extend({
             setup(elementId, callback) {
                 callback();
@@ -125,14 +127,21 @@ module('Integration | Component | column chart', function (hooks) {
     });
 
     test('it renders a legend with the correct number of boxes', async function (assert) {
-        await render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
-        assert.dom('.legend-container > .legend-item').exists({ count: 3 });
+        await render(hbs`{{column-chart dimension=params.dimensions group=params.groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis legendOptions=legendOptions instantRun=true}}`);
+        assert.dom('.dc-chart .legend-container > .legend-item').exists({ count: 3 });
     });
 
     test('it renders a legend even when there are no groups', async function (assert) {
         this.set('groups', []);
-        await render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis showLegend=true instantRun=true}}`);
-        assert.dom('.legend-container > .legend-item').exists({ count: 3 });
+        await render(hbs`{{column-chart dimension=params.dimensions group=groups seriesData=params.seriesData type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis legendOptions=legendOptions instantRun=true}}`);
+        assert.dom('.dc-chart .legend-container > .legend-item').exists({ count: 3 });
+    });
+
+    test('it renders the legend below the chart when legend options position is bottom', async function (assert) {
+        this.set('legendOptions', { showLegend: true, position: 'bottom' });
+        await render(hbs`{{column-chart seriesMaxMin=2 showMaxMin=true dimension=params.dimensions group=params.groups type=params.type series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true legendOptions=legendOptions}}`);
+
+        assert.dom('.dc-chart + svg.legend').exists({ count: 1 }, 'legend is positioned after the column chart');
     });
 });
 

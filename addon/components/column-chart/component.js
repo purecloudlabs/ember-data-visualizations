@@ -9,6 +9,10 @@ import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
+import { computed } from '@ember/object';
+import { equal, bool } from '@ember/object/computed';
+
+import layout from './template';
 
 /**
    @public
@@ -17,6 +21,7 @@ import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domai
    @desc dc.js column chart
 */
 export default BaseChartComponent.extend({
+    layout,
     classNames: ['column-chart'],
 
     showMaxMin: false,
@@ -27,6 +32,20 @@ export default BaseChartComponent.extend({
     type: 'GROUPED', // GROUPED, LAYERED, STACKED,
     elementToApplyTipSelector: 'rect.bar',
 
+    chartId: computed('elementId', function () {
+        const elementId = this.get('elementId');
+        return `column-chart-${elementId}`;
+    }),
+
+    legendOptions: null,
+
+    showLegend: bool('legendOptions.showLegend'),
+    shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
+
+    legendHeight: computed('legendOptions.height', function () {
+        return this.get('legendOptions.height') || ChartSizes.LEGEND_HEIGHT;
+    }),
+
     init() {
         this._super(...arguments);
         if (!this.get('d3LocaleInfo')) {
@@ -35,21 +54,34 @@ export default BaseChartComponent.extend({
     },
 
     buildChart() {
-        let compositeChart = dc.compositeChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        const chartId = `#${this.get('chartId')}`;
+        let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
 
+        const height = this.get('height');
+        const showLegend = this.get('showLegend');
+        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
+
+        // if the legend renders on the right, give the right margin enough room to render the legend
         const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
-        const rightMargin = this.get('showLegend') ? ChartSizes.LEGEND_OFFSET + legendWidth : ChartSizes.RIGHT_MARGIN;
+        const legendInsetX = legendWidth + ChartSizes.LEGEND_OFFSET_X;
+
+        const rightMargin = showLegend && !shouldAppendLegendBelow ? legendInsetX : ChartSizes.RIGHT_MARGIN;
+
+        // if the legend renders below the chart, we want the chart as close to the bottom as possible
+        const bottomMargin = showLegend && !shouldAppendLegendBelow ? ChartSizes.BOTTOM_MARGIN : 20;
+
+        // let d3 handle scaling if not otherwise specified
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
             .transitionDuration(0)
             .renderTitle(false)
             .brushOn(false)
-            .height(this.get('height'))
+            .height(height)
             .margins({
                 top: 10,
                 right: rightMargin,
-                bottom: 50,
+                bottom: bottomMargin,
                 left: 100
             })
             .x(d3.scaleTime().domain(this.get('xAxis').domain))
@@ -154,9 +186,11 @@ export default BaseChartComponent.extend({
     },
 
     createTooltip() {
+        const chartId = this.get('chartId');
         const formatter = this.get('xAxis.formatter') || (value => value);
         const titles = this.getWithDefault('series', []).map(entry => entry.title);
-        let tip = d3Tip().attr('class', `d3-tip ${this.get('elementId')}`)
+
+        let tip = d3Tip().attr('class', `d3-tip ${chartId}`)
             .html(d => {
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
@@ -309,7 +343,8 @@ export default BaseChartComponent.extend({
 
         this.addClickHandlersAndTooltips(svg, tip);
 
-        let labels = document.querySelector(`#${this.get('elementId')} .inline-labels`);
+        const chartId = this.get('chartId');
+        let labels = document.querySelector(`#${chartId} .inline-labels`);
         if (labels) {
             labels.remove();
         }
@@ -330,14 +365,41 @@ export default BaseChartComponent.extend({
             this.changeTickForCurrentInterval();
         }
 
-        if (this.get('showLegend')) {
-            this.get('series').forEach((series, index) => chart.selectAll(`.sub._${this.getIndexForHatch(index)} rect.bar`).classed(series.title, true));
-            chart.select('g.legend').remove();
-            const legendDimension = 18;
-            const legendG = chart.select('g')
-                .append('g')
-                .attr('transform', `translate(${chart.width() - chart.margins().right + ChartSizes.LEGEND_OFFSET})`);
-            this.addLegend(chart, this.getLegendables(chart), legendG, legendDimension, this.get('legendWidth'));
+        const showLegend = this.get('showLegend');
+
+        if (showLegend) {
+            const series = this.get('series');
+            const chartWidth = this.get('chartWidth');
+
+            series.forEach((series, index) => {
+                const title = series.title;
+                const hatchIndex = this.getIndexForHatch(index);
+
+                chart.selectAll(`.sub._${hatchIndex} rect.bar`).classed(title, true);
+            });
+
+            const legendables = this.getLegendables(chart);
+            const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
+
+            if (!shouldAppendLegendBelow) {
+                // append to the right of the chart
+                const margins = chart.margins();
+                const offsetX = chart.width() - margins.right + ChartSizes.LEGEND_OFFSET_X;
+
+                const legendG = chart.select('g')
+                    .append('g')
+                    .attr('transform', `translate(${offsetX})`);
+
+                this.addLegend(chart, legendables, legendG, 18, chartWidth);
+            } else {
+                // append below the chart
+                const legendSvg = d3.select(this.element.querySelector('svg.legend'));
+
+                const height = this.get('legendHeight');
+                const fontSize = this.get('legendOptions.fontSize');
+
+                this.addLowerLegend(chart, legendables, legendSvg, { height, fontSize });
+            }
         }
 
         // account for negative y values
@@ -349,6 +411,7 @@ export default BaseChartComponent.extend({
                 }
             });
         }
+
         /*
          * this chunk of code adjusts the x-axis and bars so that the bars appear x-axis if data has negative values.
          * However, This was only done for 'GROUPED' column-chart, as a result, the 'LAYERED' column chart would not render negative values
@@ -607,7 +670,8 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let columnChart = dc.barChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        const chartId = this.get('chartId');
+        let columnChart = dc.barChart(`#${chartId}`, this.get('uniqueChartGroupName'));
         this.set('chart', columnChart);
 
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));

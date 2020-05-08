@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { bind, debounce, cancel, scheduleOnce } from '@ember/runloop';
@@ -110,6 +112,63 @@ export default Component.extend({
             .on('mouseout.tip', null);
     },
 
+    legendClickHandler(d, chart, legendables) {
+        const clicked = d3.select(this);
+        const clickedElements = d.elements;
+        const allOthers = chart.selectAll('span.legend-box').filter(legendD => legendD.color !== d.color);
+
+        let allOtherElements = [];
+        for (let i = 0; i < legendables.length; i++) {
+            if (legendables[i].color !== d.color) {
+                allOtherElements.push(legendables[i].elements);
+            }
+        }
+
+        // determine if any other groups are selected
+        let isAnyLegendRectSelected = false;
+        allOthers.each(function () {
+            if (d3.select(this).classed('selected')) {
+                isAnyLegendRectSelected = true;
+            }
+        });
+
+        // helper functions
+        function toggleSelection(element) {
+            element.classed('selected', !element.classed('selected'));
+            element.classed('deselected', !element.classed('deselected'));
+        }
+
+        function returnToNeutral(element) {
+            element.classed('selected', false);
+            element.classed('deselected', false);
+        }
+
+        // class the groups based on what is currently selected and what was clicked
+        if (clicked.classed('selected')) {
+            if (isAnyLegendRectSelected) {
+                toggleSelection(clicked);
+                toggleSelection(clickedElements);
+            } else {
+                returnToNeutral(clicked);
+                returnToNeutral(clickedElements);
+                returnToNeutral(allOthers);
+                for (let i = 0; i < allOtherElements.length; i++) {
+                    returnToNeutral(allOtherElements[i]);
+                }
+            }
+        } else if (clicked.classed('deselected')) {
+            toggleSelection(clicked);
+            toggleSelection(clickedElements);
+        } else {
+            clicked.classed('selected', true);
+            clickedElements.classed('selected', true);
+            allOthers.classed('deselected', true);
+            for (let i = 0; i < allOtherElements.length; i++) {
+                allOtherElements[i].classed('deselected', true);
+            }
+        }
+    },
+
     addLegend(chart, legendables, legendG, legendDimension, legendWidth) {
         legendG.attr('class', 'legend');
 
@@ -133,68 +192,74 @@ export default Component.extend({
             .append('span')
             .attr('class', 'legend-box')
             .attr('style', d => `height: ${legendDimension}px; width: ${legendDimension}px; background-color: ${d.color}`)
-            .on('click', legendClickHandler);
+            .on('click', function (d) {
+                return this.legendClickHandler.call(this, d, chart, legendables);
+            });
 
         legendItems
             .append('span')
             .attr('class', 'legend-text')
             .text(d => d.title);
+    },
 
-        function legendClickHandler(d) {
-            const clicked = d3.select(this);
-            const clickedElements = d.elements;
-            const allOthers = chart.selectAll('span.legend-box').filter(legendD => legendD.color !== d.color);
-            let allOtherElements = [];
-            for (let i = 0; i < legendables.length; i++) {
-                if (legendables[i].color !== d.color) {
-                    allOtherElements.push(legendables[i].elements);
-                }
-            }
+    addLowerLegend(chart, legendables, legendG, options) {
+        const legendHeight = options && options.height || ChartSizes.LEGEND_HEIGHT;
+        const legendFontSize = options && options.fontSize || ChartSizes.LEGEND_FONTSIZE;
 
-            // determine if any other groups are selected
-            let isAnyLegendRectSelected = false;
-            allOthers.each(function () {
-                if (d3.select(this).classed('selected')) {
-                    isAnyLegendRectSelected = true;
-                }
+        const legendClickHandler = this.legendClickHandler;
+
+        const margins = chart.margins();
+        legendG.select('foreignObject').remove();
+
+        const legend = legendG.append('svg:foreignObject')
+            .attr('class', 'legend-embed')
+            .attr('height', legendHeight)
+            .attr('width', chart.width() - margins.left - margins.right)
+            .attr('transform', `translate(${margins.left})`)
+            .attr('style', 'overflow-y: auto;');
+
+        const legendItems = legend
+            .append('xhtml:div')
+                .attr('class', 'legend-container')
+                .attr('style', 'height: 100%; width: 100%;')
+                .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .append('xhtml:div')
+                .attr('class', 'legend-container')
+                .attr('style', 'height: 100%; width: 100%;')
+                .attr('xmlns', 'http://www.w3.org/1999/xhtml')
+            .selectAll('g')
+                .data(legendables)
+                .enter()
+            .append('div')
+                .attr('class', 'legend-item')
+                .attr('style', () => {
+                    return 'display: inline-flex; margin-right: 5px;';
+                });
+
+        // legend item colors
+        legendItems
+            .append('span')
+            .attr('class', 'legend-box')
+            .attr('style', d => {
+                return `
+                    width: ${legendFontSize}px;
+                    height: ${legendFontSize}px;
+                    border: 1px solid black;
+                    display: inline-block;
+                    background-color: ${d.color};
+                    margin-right: 3px;
+                `;
+            })
+            .on('click', function (d) {
+                return legendClickHandler.call(this, d, chart, legendables);
             });
 
-            // helper functions
-            function toggleSelection(element) {
-                element.classed('selected', !element.classed('selected'));
-                element.classed('deselected', !element.classed('deselected'));
-            }
-
-            function returnToNeutral(element) {
-                element.classed('selected', false);
-                element.classed('deselected', false);
-            }
-
-            // class the groups based on what is currently selected and what was clicked
-            if (clicked.classed('selected')) {
-                if (isAnyLegendRectSelected) {
-                    toggleSelection(clicked);
-                    toggleSelection(clickedElements);
-                } else {
-                    returnToNeutral(clicked);
-                    returnToNeutral(clickedElements);
-                    returnToNeutral(allOthers);
-                    for (let i = 0; i < allOtherElements.length; i++) {
-                        returnToNeutral(allOtherElements[i]);
-                    }
-                }
-            } else if (clicked.classed('deselected')) {
-                toggleSelection(clicked);
-                toggleSelection(clickedElements);
-            } else {
-                clicked.classed('selected', true);
-                clickedElements.classed('selected', true);
-                allOthers.classed('deselected', true);
-                for (let i = 0; i < allOtherElements.length; i++) {
-                    allOtherElements[i].classed('deselected', true);
-                }
-            }
-        }
+        // legend item text
+        legendItems
+            .append('span')
+            .attr('class', 'legend-text')
+            .attr('style', `font-size: ${legendFontSize}px;`)
+            .text(d => d.title);
     },
 
     onClick() {},
