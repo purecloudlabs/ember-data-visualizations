@@ -395,8 +395,6 @@ export default BaseChartComponent.extend({
                 // append below the chart
                 const legendSvg = d3.select(this.element.querySelector('svg.legend'));
 
-                debugger;
-
                 const height = this.get('legendHeight');
                 const fontSize = this.get('legendOptions.fontSize');
 
