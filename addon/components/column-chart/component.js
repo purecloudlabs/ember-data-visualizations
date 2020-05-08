@@ -38,8 +38,13 @@ export default BaseChartComponent.extend({
     }),
 
     legendOptions: null,
+
     showLegend: bool('legendOptions.showLegend'),
     shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
+
+    legendHeight: computed('legendOptions.height', function () {
+        return this.get('legendOptions.height') || ChartSizes.LEGEND_HEIGHT;
+    }),
 
     init() {
         this._super(...arguments);
@@ -389,7 +394,13 @@ export default BaseChartComponent.extend({
             } else {
                 // append below the chart
                 const legendSvg = d3.select(this.element.querySelector('svg.legend'));
-                this.addLowerLegend(chart, legendables, legendSvg);
+
+                debugger;
+
+                const height = this.get('legendHeight');
+                const fontSize = this.get('legendOptions.fontSize');
+
+                this.addLowerLegend(chart, legendables, legendSvg, { height, fontSize });
             }
         }
 

@@ -1,14 +1,21 @@
 // All sizes are in pixels.
-const legendWidth = 250;
-const legendHeight = 50;
-const legendOffsetX = 35;
-const legendOffsetY = 10;
+const chart = {
+    marginRight: 100,
+    marginBottom: 50
+};
+
+const legend = {
+    width: 250,
+    height: 50,
+    offsetX: 35,
+    fontSize: 13
+};
 
 export default {
-    RIGHT_MARGIN: 100,
-    BOTTOM_MARGIN: 50,
-    LEGEND_WIDTH: legendWidth,
-    LEGEND_HEIGHT: legendHeight,
-    LEGEND_OFFSET_X: legendOffsetX,
-    LEGEND_OFFSET_Y: legendOffsetY
+    RIGHT_MARGIN: chart.marginRight,
+    BOTTOM_MARGIN: chart.marginBottom,
+    LEGEND_WIDTH: legend.width,
+    LEGEND_HEIGHT: legend.height,
+    LEGEND_OFFSET_X: legend.offsetX,
+    LEGEND_FONTSIZE: legend.fontSize
 };

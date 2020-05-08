@@ -80,7 +80,9 @@ const buildConfigOptions = (dataset, options) => {
         },
         legendOptions: {
             showLegend: true,
-            position: 'bottom'
+            position: 'bottom',
+            fontSize: 11,
+            height: 50
         }
     }, options);
 };

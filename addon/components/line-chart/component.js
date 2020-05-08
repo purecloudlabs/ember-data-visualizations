@@ -40,6 +40,10 @@ export default BaseChartComponent.extend({
     showLegend: bool('legendOptions.showLegend'),
     shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
 
+    legendHeight: computed('legendOptions.height', function () {
+        return this.get('legendOptions.height') || ChartSizes.LEGEND_HEIGHT;
+    }),
+
     init() {
         this._super(...arguments);
         if (!this.get('d3LocaleInfo')) {
@@ -171,7 +175,7 @@ export default BaseChartComponent.extend({
         }
 
         const chartId = this.get('chartId');
-        const chartDefs = this.get('chart').select('svg > defs')
+        const chartDefs = this.get('chart').select('svg > defs');
 
         this.addClickHandlersAndTooltips(chartDefs, tip);
 
@@ -215,7 +219,11 @@ export default BaseChartComponent.extend({
 
             if (shouldAppendLegendBelow) {
                 const legendSvg = d3.select(this.element.querySelector('svg.legend'));
-                this.addLowerLegend(chart, legendables, legendSvg);
+
+                const height = this.get('legendHeight');
+                const fontSize = this.get('legendOptions.fontSize');
+
+                this.addLowerLegend(chart, legendables, legendSvg, { height, fontSize });
             }
         }
     },

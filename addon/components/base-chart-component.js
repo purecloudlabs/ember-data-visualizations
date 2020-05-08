@@ -112,70 +112,6 @@ export default Component.extend({
             .on('mouseout.tip', null);
     },
 
-    buildLegend(chart, legendables) {
-        const margins = chart.margins();
-        const legendWidth = chart.width() - margins.left - margins.right;
-
-        const legendHeight = 50;
-        const legendFontSize = 13;
-        const colorBoxDimensions = 13;
-
-        const legendSVG = d3.create('svg:svg');
-        const clickHandler = this.legendClickHandler;
-
-        const legendContainer = legendSVG
-            .append('svg:foreignObject')
-            .attr('class', 'legend-embed')
-            .attr('height', legendHeight)
-            .attr('width', legendWidth)
-            .attr('style', 'overflow-y: auto;');
-
-        const embed = legendContainer
-            .append('xhtml:div')
-            .attr('class', 'legend-container')
-            .attr('style', 'height: 100%; width: 100%;')
-            .attr('xmlns', 'http://www.w3.org/1999/xhtml');
-
-        const legendItems = embed
-            .selectAll('g')
-            .data(legendables)
-            .enter()
-            .append('div')
-            .attr('class', 'legend-item')
-            .attr('style', () => {
-                return 'display: inline-flex; margin-right: 5px;';
-            });
-
-        // legend item colors
-        legendItems
-            .append('span')
-            .attr('class', 'legend-box')
-            .attr('style', d => {
-                return `
-                    width: ${colorBoxDimensions}px;
-                    height: ${colorBoxDimensions}px;
-                    border: 1px solid black;
-                    display: inline-block;
-                    background-color: ${d.color};
-                    margin-right: 3px;
-                `;
-            })
-            .on('click', function (d) {
-                clickHandler.call(this, chart, legendables, d);
-            });
-
-        // legend item text
-        legendItems
-            .append('span')
-            .attr('class', 'legend-text')
-            .attr('style', `font-size: ${legendFontSize}px;`)
-            .text(d => d.title);
-
-        return legendSVG;
-
-        // return legendContainer.node();
-    },
-
     legendClickHandler(d, chart, legendables) {
         const clicked = d3.select(this);
         const clickedElements = d.elements;
@@ -266,10 +202,10 @@ export default Component.extend({
             .text(d => d.title);
     },
 
-    addLowerLegend(chart, legendables, legendG) {
-        const legendHeight = 50;
-        const legendFontSize = 13;
-        const colorBoxDimensions = 13;
+    addLowerLegend(chart, legendables, legendG, options) {
+        const legendHeight = options && options.height || ChartSizes.LEGEND_HEIGHT;
+        const legendFontSize = options && options.fontSize || ChartSizes.LEGEND_FONTSIZE;
+
         const legendClickHandler = this.legendClickHandler;
 
         const margins = chart.margins();
@@ -306,8 +242,8 @@ export default Component.extend({
             .attr('class', 'legend-box')
             .attr('style', d => {
                 return `
-                    width: ${colorBoxDimensions}px;
-                    height: ${colorBoxDimensions}px;
+                    width: ${legendFontSize}px;
+                    height: ${legendFontSize}px;
                     border: 1px solid black;
                     display: inline-block;
                     background-color: ${d.color};
