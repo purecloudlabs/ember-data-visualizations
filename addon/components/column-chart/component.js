@@ -722,7 +722,7 @@ export default BaseChartComponent.extend({
             }
 
             // Set up any necessary hatching patterns
-            let svg = d3.select('.column-chart > svg > defs');
+            let svg = d3.select('.column-chart .dc-chart > .svg1 > defs');
 
             svg
                 .append('clippath')
