@@ -8,6 +8,7 @@ import { A } from '@ember/array';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import dc from 'dc';
+import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -286,6 +287,30 @@ export default Component.extend({
         this.buildChart();
 
         this.get('chart').render();
+    },
+
+    _getBaseChart(type) {
+        const chartId = `#${this.get('chartId')}`;
+        let chart = dc[type](chartId, this.get('uniqueChartGroupName'));
+        chart.transitionDuration(0)
+            .renderTitle(false);
+
+        if (typeof chart.xAxis === 'function' && this.get('xAxis') && this.get('xAxis').ticks) {
+            chart.xAxis().ticks(this.get('xAxis').ticks);
+            if (this.get('d3LocaleInfo')) {
+                chart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
+            }
+
+        }
+
+        if (typeof chart.yAxis === 'function' && this.get('yAxis') && this.get('yAxis').ticks) {
+            chart.yAxis().ticks(this.get('yAxis').ticks);
+            if (this.get('yAxis.formatter')) {
+                chart.yAxis().tickFormat(this.get('yAxis.formatter'));
+            }
+        }
+
+        return chart;
     },
 
     cleanupCurrentChart() {

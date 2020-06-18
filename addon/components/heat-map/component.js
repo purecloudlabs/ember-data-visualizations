@@ -4,6 +4,7 @@ import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
+import { reads } from '@ember/object/computed';
 
 /**
    @public
@@ -20,8 +21,17 @@ export default BaseChartComponent.extend({
     valueFormat: v => v,
     colorMap: v => v,
 
+    chartId: reads('elementId'),
+
+    _getBaseChart() {
+        const chart = this._super(...arguments);
+        chart.transitionDuration(0);
+
+        return chart;
+    },
+
     buildChart() {
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        const heatMap = this._getBaseChart('heatMap');
 
         if (!this.get('xAxis') || !this.get('xAxis').domain) {
             return;
@@ -58,7 +68,6 @@ export default BaseChartComponent.extend({
             .valueAccessor(d => d.key[0])
             .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => colorMap(d.value))
-            .renderTitle(false)
             .height(this.get('height'))
             .colsLabel(d => this.get('keyFormat')(d))
             .transitionDuration(0);

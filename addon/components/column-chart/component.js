@@ -53,11 +53,31 @@ export default BaseChartComponent.extend({
         }
     },
 
-    buildChart() {
-        const chartId = `#${this.get('chartId')}`;
-        let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
+    _getBaseChart() {
+        const chart = this._super(...arguments);
+        chart
+            .transitionDuration(0)
+            .height(this.get('height'))
+            .brushOn(false)
+            .x(d3.scaleTime().domain(this.get('xAxis').domain));
 
-        const height = this.get('height');
+        if (this.get('width')) {
+            chart.width(this.get('width'));
+        }
+
+        return chart;
+    },
+
+    _applyBaseColumnChartOptions(chart) {
+        chart.centerBar(true)
+            .barPadding(0.00)
+            .renderTitle(false)
+            .elasticY(true);
+    },
+
+    buildChart() {
+        let compositeChart = this._getBaseChart('compositeChart');
+
         const showLegend = this.get('showLegend');
         const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
 
@@ -74,17 +94,12 @@ export default BaseChartComponent.extend({
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
-            .transitionDuration(0)
-            .renderTitle(false)
-            .brushOn(false)
-            .height(height)
             .margins({
                 top: 10,
                 right: rightMargin,
                 bottom: bottomMargin,
                 left: 100
             })
-            .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => {
                 if (this.get('group.length')) {
                     return this.get('group')[0].size() * (this.get('group.length') + 1);
@@ -95,10 +110,6 @@ export default BaseChartComponent.extend({
             .elasticY(useElasticY)
             .yAxisPadding('40%');
 
-        if (this.get('width')) {
-            compositeChart.width(this.get('width'));
-        }
-
         if (this.get('yAxis.domain')) {
             compositeChart.y(d3.scaleLinear().domain(padDomain(this.get('yAxis').domain)));
         }
@@ -108,18 +119,7 @@ export default BaseChartComponent.extend({
         }
 
         compositeChart.xAxis().tickSizeOuter(0);
-        compositeChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
-        if (this.get('xAxis') && this.get('xAxis').ticks) {
-            compositeChart.xAxis().ticks(this.get('xAxis').ticks);
-        }
-
         compositeChart.yAxis().tickSizeOuter(0);
-        if (this.get('yAxis') && this.get('yAxis').ticks) {
-            compositeChart.yAxis().ticks(this.get('yAxis').ticks);
-            if (this.get('yAxis.formatter')) {
-                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
-            }
-        }
 
         let tip = this.createTooltip();
         let columnChart;
@@ -131,27 +131,19 @@ export default BaseChartComponent.extend({
                 // If we are hatching, we need to display a white bar behind the hatched bar
                 if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
                     columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-
+                    this._applyBaseColumnChartOptions(columnChart);
                     columnChart
-                        .centerBar(true)
-                        .barPadding(0.00)
                         .group(g)
-                        .colors('white')
-                        .renderTitle(false)
-                        .elasticY(true);
+                        .colors('white');
 
                     columnCharts.push(columnChart);
                 }
 
                 columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-
+                this._applyBaseColumnChartOptions(columnChart);
                 columnChart
-                    .centerBar(true)
-                    .barPadding(0.00)
                     .group(g)
                     .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
-                    .renderTitle(false)
-                    .elasticY(true)
                     .colorAccessor(d => {
                         const activeAlert = this.determineActiveAlertLine(d.value);
                         return activeAlert ? activeAlert.alertColorIndex : index;
@@ -161,12 +153,9 @@ export default BaseChartComponent.extend({
             });
         } else {
             columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
+            this._applyBaseColumnChartOptions(columnChart);
             columnChart
-                .centerBar(true)
-                .barPadding(0.00)
                 .group(groups[0])
-                .renderTitle(false)
-                .elasticY(true);
             groups.forEach((g, index) => {
                 if (index != 0) {
                     columnChart.stack(g);
@@ -668,10 +657,8 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
-        const yAxis = this.get('yAxis');
 
-        const chartId = this.get('chartId');
-        let columnChart = dc.barChart(`#${chartId}`, this.get('uniqueChartGroupName'));
+        let columnChart = this._getBaseChart('barChart');
         this.set('chart', columnChart);
 
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
@@ -693,27 +680,16 @@ export default BaseChartComponent.extend({
             .centerBar(true)
             .barPadding(0.00)
             .colors(chartNotAvailableColor)
-            .renderTitle(false)
-            .brushOn(false)
-            .height(this.get('height'))
             .margins({
                 top: 10,
                 right: 100,
                 bottom: 50,
                 left: 100
             })
-            .x(d3.scaleTime().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
             .y(d3.scaleLinear().domain([0, 1]))
             .group(group)
-            .dimension(dimension)
-            .transitionDuration(0);
-
-        columnChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
-
-        if (this.get('width')) {
-            this.get('chart').effectiveWidth(this.get('width'));
-        }
+            .dimension(dimension);
 
         columnChart.on('pretransition', chart => {
             // This is outside the Ember run loop so check if component is destroyed
@@ -771,12 +747,6 @@ export default BaseChartComponent.extend({
                 .attr('y', bbox.y + (bbox.height / 2))
                 .attr('x', bbox.x + (bbox.width / 2));
         });
-        if (xAxis && xAxis.ticks) {
-            this.get('chart').xAxis().ticks(xAxis.ticks);
-        }
-        if (yAxis && yAxis.ticks) {
-            this.get('chart').yAxis().ticks(yAxis.ticks);
-        }
 
         columnChart.render();
     }

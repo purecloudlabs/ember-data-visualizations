@@ -3,6 +3,7 @@ import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
+import { reads } from '@ember/object/computed';
 
 /**
    @public
@@ -24,8 +25,27 @@ export default BaseChartComponent.extend({
     // Ex. { value: 0.8, displayValue: '80%', color: '#2CD02C' }
     comparisonLine: null,
 
+    chartId: reads('elementId'),
+
+    _getBaseChart() {
+        const rowChart = this._super(...arguments);
+        rowChart
+            .transitionDuration(0)
+            .renderLabel(false)
+            .height(this.get('height'));
+
+        if (this.get('width')) {
+            rowChart.width(this.get('width'));
+        }
+
+        if (this.get('xAxis') && this.get('xAxis').ticks) {
+            rowChart.xAxis().ticks(this.get('xAxis').ticks);
+        }
+        return rowChart;
+    },
+
     buildChart() {
-        let rowChart = dc.rowChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        let rowChart = this._getBaseChart('rowChart');
 
         let labels = [];
         this.get('group')[0].all().forEach(d => labels.push(d.key));
@@ -35,15 +55,11 @@ export default BaseChartComponent.extend({
         const rightMargin = this.get('showLegend') ? legendWidth : 5;
 
         rowChart
-            .transitionDuration(0)
             .elasticX(true)
             .group(this.get('group')[0])
             .dimension(this.get('dimension'))
             .ordering(d => d.key)
             .colors(this.get('colors')[0])
-            .height(this.get('height'))
-            .renderLabel(false)
-            .renderTitle(false)
             .margins({
                 top: 5,
                 right: rightMargin,
@@ -51,13 +67,6 @@ export default BaseChartComponent.extend({
                 left: labelWidth + tickWidth
             });
 
-        if (this.get('width')) {
-            rowChart.width(this.get('width'));
-        }
-
-        if (this.get('xAxis') && this.get('xAxis').ticks) {
-            rowChart.xAxis().ticks(this.get('xAxis').ticks);
-        }
 
         rowChart.on('pretransition', chart => {
             // add x class to x axis
@@ -286,7 +295,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let rowChart = dc.rowChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        let rowChart = this._getBaseChart();
         this.set('chart', rowChart);
 
         let data = [];
@@ -299,25 +308,13 @@ export default BaseChartComponent.extend({
 
         rowChart
             .colors(chartNotAvailableColor)
-            .renderTitle(false)
-            .renderLabel(false)
-            .height(this.get('height'))
             .group(group)
             .dimension(dimension)
-            .transitionDuration(0);
-
-        if (this.get('width')) {
-            rowChart.width(this.get('width'));
-        }
 
         const labelWidth = 100;
         const totalWidth = rowChart.width();
         const chartWidth = totalWidth - labelWidth;
         rowChart.width(chartWidth);
-
-        if (this.get('xAxis') && this.get('xAxis').ticks) {
-            rowChart.xAxis().ticks(this.get('xAxis').ticks);
-        }
 
         rowChart.on('pretransition', chart => {
             // This is outside the Ember run loop so check if component is destroyed

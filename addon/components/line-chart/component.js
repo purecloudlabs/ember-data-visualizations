@@ -51,9 +51,15 @@ export default BaseChartComponent.extend({
         }
     },
 
+    _getBaseChart() {
+        const chart = this._super(...arguments);
+        chart.transitionDuration(0);
+
+        return chart;
+    },
+
     buildChart() {
-        const chartId = `#${this.get('chartId')}`;
-        let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
+        const compositeChart = this._getBaseChart('compositeChart');
 
         const height = this.get('height');
         const showLegend = this.get('showLegend');
@@ -351,9 +357,6 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(`#${chartId}`, this.get('uniqueChartGroupName'));
 
         compositeChart
-            .colors(chartNotAvailableColor)
-            .renderTitle(false)
-            .height(this.get('height'))
             .margins({
                 top: 10,
                 right: 100,

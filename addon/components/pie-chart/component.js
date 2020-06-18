@@ -3,6 +3,7 @@ import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
+import { reads } from '@ember/object/computed';
 
 /**
    @public
@@ -17,19 +18,25 @@ export default BaseChartComponent.extend({
     labels: true,
     formatter: d => d,
 
+    chartId: reads('elementId'),
+
+    _getBaseChart() {
+        return this._super(...arguments);
+    },
+
     buildChart() {
         if (this.get('group') && this.get('group') .all().length === 0) {
             this.showChartNotAvailable();
             return;
         }
 
-        let chart = dc.pieChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        let chart = this._getBaseChart('pieChart');
+
         chart
             .radius(this.get('height') / 2)
             .ordinalColors(this.get('colors'))
             .dimension(this.get('dimension'))
-            .group(this.get('group'))
-            .renderTitle(false);
+            .group(this.get('group'));
 
         if (this.get('colorMap')) {
             chart.colors(d3.scaleOrdinal().domain(this.get('colorMap')).range(this.get('colors')));
@@ -150,7 +157,7 @@ export default BaseChartComponent.extend({
 
     createTooltip() {
         return d3Tip()
-            .attr('class', `d3-tip ${this.get('elementId')}`)
+            .attr('class', `d3-tip ${this.get('chartId')}`)
             .style('text-align', 'center')
             .html(d => {
                 return `<span class="pie-tip-key">${d.data.key}</span><br/><span class="pie-tip-value">${this.get('formatter')(d.data.value)}</span>`;
@@ -186,7 +193,7 @@ export default BaseChartComponent.extend({
                 const centroidX = xbar * Math.cos(startAngle) - ybar * Math.sin(startAngle);
 
                 // coordinates of the center point of the chart
-                const currentElement = document.querySelector(`#${_this.get('elementId')}`);
+                const currentElement = document.querySelector(`#${_this.get('chartId')}`);
                 const centerOfChartY = currentElement.offsetTop + (_this.get('chart').height() / 2);
                 const centerOfChartX = currentElement.offsetLeft + (_this.get('chart').width() / 2);
 
@@ -208,7 +215,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let pieChart = dc.pieChart(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        const pieChart = this._getBaseChart();
         this.set('chart', pieChart);
 
         const data = [{ key: '', value: 1 }];
@@ -216,11 +223,10 @@ export default BaseChartComponent.extend({
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
 
+
         pieChart
             .group(group)
             .dimension(dimension)
-            .colors(chartNotAvailableColor)
-            .renderTitle(false)
             .renderLabel(false)
             .transitionDuration(0);
 
