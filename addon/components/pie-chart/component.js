@@ -215,7 +215,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        const pieChart = this._getBaseChart();
+        const pieChart = this._getBaseChart('pieChart');
         this.set('chart', pieChart);
 
         const data = [{ key: '', value: 1 }];

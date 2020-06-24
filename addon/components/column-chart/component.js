@@ -6,7 +6,6 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
@@ -56,9 +55,9 @@ export default BaseChartComponent.extend({
     _getBaseChart() {
         const chart = this._super(...arguments);
         chart
-            .transitionDuration(0)
             .height(this.get('height'))
             .brushOn(false)
+            .transitionDuration(0)
             .x(d3.scaleTime().domain(this.get('xAxis').domain));
 
         if (this.get('width')) {
@@ -71,8 +70,7 @@ export default BaseChartComponent.extend({
     _applyBaseColumnChartOptions(chart) {
         chart.centerBar(true)
             .barPadding(0.00)
-            .renderTitle(false)
-            .elasticY(true);
+            .renderTitle(false);
     },
 
     buildChart() {
@@ -134,6 +132,7 @@ export default BaseChartComponent.extend({
                     this._applyBaseColumnChartOptions(columnChart);
                     columnChart
                         .group(g)
+                        .elasticY(true)
                         .colors('white');
 
                     columnCharts.push(columnChart);
@@ -143,6 +142,7 @@ export default BaseChartComponent.extend({
                 this._applyBaseColumnChartOptions(columnChart);
                 columnChart
                     .group(g)
+                    .elasticY(true)
                     .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
                     .colorAccessor(d => {
                         const activeAlert = this.determineActiveAlertLine(d.value);
@@ -155,6 +155,7 @@ export default BaseChartComponent.extend({
             columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
             this._applyBaseColumnChartOptions(columnChart);
             columnChart
+                .elasticY(true)
                 .group(groups[0])
             groups.forEach((g, index) => {
                 if (index != 0) {
@@ -676,9 +677,9 @@ export default BaseChartComponent.extend({
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
 
+        this._applyBaseColumnChartOptions(columnChart);
+
         columnChart
-            .centerBar(true)
-            .barPadding(0.00)
             .colors(chartNotAvailableColor)
             .margins({
                 top: 10,

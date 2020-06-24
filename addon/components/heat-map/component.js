@@ -25,8 +25,12 @@ export default BaseChartComponent.extend({
 
     _getBaseChart() {
         const chart = this._super(...arguments);
-        chart.transitionDuration(0);
+        chart.height(this.get('height'))
+            .transitionDuration(0);
 
+        if (this.get('width')) {
+            chart.width(this.get('width'));
+        }
         return chart;
     },
 
@@ -68,13 +72,7 @@ export default BaseChartComponent.extend({
             .valueAccessor(d => d.key[0])
             .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => colorMap(d.value))
-            .height(this.get('height'))
             .colsLabel(d => this.get('keyFormat')(d))
-            .transitionDuration(0);
-
-        if (this.get('width')) {
-            heatMap.width(this.get('width'));
-        }
 
         const minBoxWidth = this.get('minBoxWidth') || 4;
         const minEffectiveWidth = minBoxWidth * numbCols;
@@ -293,7 +291,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
 
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        let heatMap = this._getBaseChart('heatMap');
         this.set('chart', heatMap);
         const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
 
@@ -328,14 +326,7 @@ export default BaseChartComponent.extend({
             .valueAccessor(d => d.key[0])
             .rowsLabel(() => '')
             .colors(chartNotAvailableColor)
-            .colorAccessor(() => 0)
-            .renderTitle(false)
-            .height(this.get('height'))
-            .transitionDuration(0);
-
-        if (this.get('width')) {
-            this.get('chart').width(this.get('width'));
-        }
+            .colorAccessor(() => 0);
 
         heatMap.on('pretransition', chart => {
             const g = chart.select('g.heatmap');

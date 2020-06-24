@@ -292,8 +292,7 @@ export default Component.extend({
     _getBaseChart(type) {
         const chartId = `#${this.get('chartId')}`;
         let chart = dc[type](chartId, this.get('uniqueChartGroupName'));
-        chart.transitionDuration(0)
-            .renderTitle(false);
+        chart.renderTitle(false);
 
         if (typeof chart.xAxis === 'function' && this.get('xAxis') && this.get('xAxis').ticks) {
             chart.xAxis().ticks(this.get('xAxis').ticks);

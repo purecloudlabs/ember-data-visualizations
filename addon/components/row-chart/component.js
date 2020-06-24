@@ -38,9 +38,6 @@ export default BaseChartComponent.extend({
             rowChart.width(this.get('width'));
         }
 
-        if (this.get('xAxis') && this.get('xAxis').ticks) {
-            rowChart.xAxis().ticks(this.get('xAxis').ticks);
-        }
         return rowChart;
     },
 
@@ -295,7 +292,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let rowChart = this._getBaseChart();
+        let rowChart = this._getBaseChart('rowChart');
         this.set('chart', rowChart);
 
         let data = [];
