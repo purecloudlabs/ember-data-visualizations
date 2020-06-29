@@ -58,17 +58,7 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
 
         const height = this.get('height');
-        const showLegend = this.get('showLegend');
-        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
-
-        // if the legend renders on the right, give the right margin enough room to render the legend
-        const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
-        const legendInsetX = legendWidth + ChartSizes.LEGEND_OFFSET_X;
-
-        const rightMargin = showLegend && !shouldAppendLegendBelow ? legendInsetX : ChartSizes.RIGHT_MARGIN;
-
-        // if the legend renders below the chart, we want the chart as close to the bottom as possible
-        const bottomMargin = showLegend && !shouldAppendLegendBelow ? ChartSizes.BOTTOM_MARGIN : 20;
+        const { top, right, bottom, left }  = this.get('chartMargins');
 
         // let d3 handle scaling if not otherwise specified
         const useElasticY = !this.get('yAxis.domain');
@@ -78,12 +68,7 @@ export default BaseChartComponent.extend({
             .renderTitle(false)
             .brushOn(false)
             .height(height)
-            .margins({
-                top: 10,
-                right: rightMargin,
-                bottom: bottomMargin,
-                left: 100
-            })
+            .margins({ top, right, bottom, left })
             .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => {
                 if (this.get('group.length')) {
@@ -176,7 +161,18 @@ export default BaseChartComponent.extend({
         }
 
         addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
-        addDomainTicks(compositeChart, this.get('yAxis').domain, this.get('comparisonLines') ? this.get('comparisonLines').map(d => d.value) : undefined);
+
+        const domainTicks = this.get('yAxis.domain') || [];
+
+        let otherDomainTicks = [];
+        const comparisonLines = this.get('comparisonLines');
+        const showComparisonLineYAxisLabels = this.get('comparisonLineOptions.showYAxisLabel');
+
+        if (showComparisonLineYAxisLabels) {
+            otherDomainTicks = comparisonLines.map(d => d.value);
+        }
+
+        addDomainTicks(compositeChart, domainTicks, otherDomainTicks);
 
         compositeChart
             .on('pretransition', chart => this.onPretransition(chart, tip))
@@ -359,6 +355,7 @@ export default BaseChartComponent.extend({
 
         if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
             addComparisonLines(chart, this.get('comparisonLines'));
+            // todo: comparison line should be hoverable to view value
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {

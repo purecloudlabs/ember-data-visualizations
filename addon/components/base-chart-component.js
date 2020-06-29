@@ -7,7 +7,7 @@ import { computed } from '@ember/object';
 import { A } from '@ember/array';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import dc from 'dc';
+import dc, { legend } from 'dc';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -52,6 +52,68 @@ export default Component.extend({
         const colors = this.get('colors');
         return colors[index] || colors[colors.length - 1];
     },
+
+    hasBottomLegend: computed('showLegend', 'shouldAppendLegendBelow', function () {
+        const showLegend = this.get('showLegend');
+        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
+
+        return showLegend && shouldAppendLegendBelow;
+    }),
+
+    hasRightLegend: computed('showLegend', 'legendOptions.position', function () {
+        const showLegend = this.get('showLegend');
+        const legendOptions = this.get('legendOptions');
+
+        return showLegend && legendOptions.position === 'right';
+    }),
+
+    chartMarginTop: computed('margins.top', function () {
+        const defaultTopMargin = ChartSizes.TOP_MARGIN;
+        const specifiedTopMargin = this.get('margins.top');
+
+        return specifiedTopMargin || defaultTopMargin;
+    }),
+
+    chartMarginBottom: computed('margins.bottom', function () {
+        const defaultBottomMargin = ChartSizes.BOTTOM_MARGIN;
+        const specifiedBottomMargin = this.get('margins.bottom');
+
+        return specifiedBottomMargin || defaultBottomMargin;
+    }),
+
+    chartMarginLeft: computed('margins.left', function () {
+        const defaultLeftMargin = ChartSizes.LEFT_MARGIN;
+        const specifiedLeftMargin = this.get('margins.left');
+
+        return specifiedLeftMargin || defaultLeftMargin;
+    }),
+
+    chartMarginRight: computed('margins.right', 'legendWidth', 'hasRightLegend', function () {
+        const hasRightLegend = this.get('hasRightLegend');
+        const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
+
+        const defaultRightMargin = ChartSizes.RIGHT_MARGIN;
+        const defaultRightMarginWithLegend = legendWidth + ChartSizes.LEGEND_OFFSET_X;
+
+        const defaultMargin = hasRightLegend ? defaultRightMarginWithLegend : defaultRightMargin;
+        const specifiedRightMargin = this.get('margins.right');
+
+        return specifiedRightMargin || defaultMargin;
+    }),
+
+    chartMargins: computed('chartMarginLeft', 'chartMarginRight', 'chartMarginTop', 'chartMarginBottom', function () {
+        const chartMarginLeft = this.get('chartMarginLeft');
+        const chartMarginRight = this.get('chartMarginRight');
+        const chartMarginTop = this.get('chartMarginTop');
+        const chartMarginBottom = this.get('chartMarginBottom');
+
+        return {
+            left: chartMarginLeft,
+            right: chartMarginRight,
+            top: chartMarginTop,
+            bottom: chartMarginBottom
+        };
+    }),
 
     setupResize() {
         this.set('onResizeDebounced', () => {

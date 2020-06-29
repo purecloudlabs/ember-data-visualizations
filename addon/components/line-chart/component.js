@@ -71,16 +71,13 @@ export default BaseChartComponent.extend({
         // let d3 handle scaling if not otherwise specified
         const useElasticY = !this.get('yAxis.domain');
 
+        const { top, right, bottom, left } = this.get('chartMargins');
+
         compositeChart
             .renderTitle(false)
             .brushOn(false)
             .height(height)
-            .margins({
-                top: 10,
-                right: rightMargin,
-                bottom: bottomMargin,
-                left: 100
-            })
+            .margins({ top, right, bottom, left })
             .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => {
                 if (this.get('group.length')) {
@@ -135,7 +132,18 @@ export default BaseChartComponent.extend({
         });
 
         addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
-        addDomainTicks(compositeChart, this.get('yAxis').domain, this.get('comparisonLines') ? this.get('comparisonLines').map(d => d.value) : undefined);
+
+        const domainTicks = this.get('yAxis.domain') || [];
+
+        let otherDomainTicks = [];
+        const comparisonLines = this.get('comparisonLines');
+        const showComparisonLineYAxisLabels = this.get('comparisonLineOptions.showYAxisLabel');
+
+        if (showComparisonLineYAxisLabels) {
+            otherDomainTicks = comparisonLines.map(d => d.value);
+        }
+
+        addDomainTicks(compositeChart, domainTicks, otherDomainTicks);
 
         compositeChart
             .on('renderlet', chart => this.onRenderlet(chart, tip))
@@ -193,6 +201,7 @@ export default BaseChartComponent.extend({
 
         if (this.get('showComparisonLines') && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
             addComparisonLines(chart, this.get('comparisonLines'));
+            // todo: add tooltip for comparison line
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
