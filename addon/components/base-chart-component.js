@@ -140,6 +140,7 @@ export default Component.extend({
         if (tip && !svg.empty()) {
             svg.call(tip);
         }
+
         // clicking actions
         this.get('chart').selectAll(this.elementToApplyTipSelector).on('click', d => {
             this.onClick(d);
@@ -170,6 +171,10 @@ export default Component.extend({
         this.get('chart').selectAll(this.elementToApplyTipSelector).on('click', null);
 
         this.get('chart').selectAll(this.elementToApplyTipSelector)
+            .on('mouseover.tip', null)
+            .on('mouseout.tip', null);
+
+        this.get('chart').selectAll('.comparison-line.tooltip-line')
             .on('mouseover.tip', null)
             .on('mouseout.tip', null);
     },

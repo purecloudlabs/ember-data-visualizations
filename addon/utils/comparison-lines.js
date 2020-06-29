@@ -1,4 +1,6 @@
+import d3Tip from 'd3-tip';
 import { isEmpty } from '@ember/utils';
+
 /**
    @desc Adds comparison lines to a line or column chart.
    @param chart - DC chart instance.
@@ -18,20 +20,35 @@ export function addComparisonLines(chart, comparisonLines) {
         return;
     }
 
-    comparisonLines.forEach(line => {
+    comparisonLines.forEach((line, index) => {
         const lineColor = line.color || '#2CD02C';
         const lineXStart = chart.margins().left;
         const lineXEnd = chart.width() - chart.margins().right;
         const lineY = chart.margins().top + chart.y()(line.value);
 
-        chartBody.append('svg:line')
+        // main comparison line
+        chartBody
+            .append('svg:line')
             .attr('x1', lineXStart)
             .attr('x2', lineXEnd)
             .attr('y1', lineY)
             .attr('y2', lineY)
-            .attr('class', 'comparison-line comparison-line-main')
+            .attr('class', `comparison-line comparison-line-main comparison-line-${index}`)
             .style('stroke', lineColor);
 
+        // hidden tooltip line
+        chartBody
+            .append('svg:line')
+            .data([{ value: line.value, lineIndex: index }])
+            .attr('class', 'comparison-line tooltip-line')
+            .attr('x1', lineXStart)
+            .attr('x2', lineXEnd)
+            .attr('y1', lineY)
+            .attr('y2', lineY)
+            .style('stroke', 'transparent')
+            .style('stroke-width', '10px');
+
+        // vertical bar on y-axis
         chartBody.append('svg:line')
             .attr('x1', lineXStart)
             .attr('x2', lineXStart)
@@ -40,6 +57,7 @@ export function addComparisonLines(chart, comparisonLines) {
             .attr('class', 'comparison-line comparison-line-left')
             .style('stroke', lineColor);
 
+        // vertical bar on chart righthand side
         chartBody.append('svg:line')
             .attr('x1', lineXEnd)
             .attr('x2', lineXEnd)
@@ -73,4 +91,28 @@ export function addComparisonLineTicks(chart, comparisonLines) {
     }
 
     yAxisTicks.tickValues(comparisonLines.map(line => line.value));
+}
+
+export function addComparisonLineTooltips(chart, formatter) {
+    if (chart) {
+        const chartDefs = chart.select('svg > defs');
+
+        const tip = d3Tip().attr('class', `d3-tip comparison-tooltip`).html(d => {
+            return formatter ? formatter(d.value) : d.value;
+        });
+
+        if (!chartDefs.empty()) {
+            chartDefs.call(tip);
+        }
+
+        chart.selectAll('.comparison-line.tooltip-line')
+            .on('mouseover.tip', function (d) {
+                const svgLine = chart.select(`.comparison-line-${d.lineIndex}`).node();
+                tip.show(d, svgLine);
+            })
+            .on('mouseout.tip', function (d) {
+                const svgLine = chart.select(`.comparison-line-${d.lineIndex}`).node();
+                tip.hide(d, svgLine);
+            });
+    }
 }

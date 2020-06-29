@@ -7,7 +7,7 @@ import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
-import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
+import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
 import { equal, bool } from '@ember/object/computed';
@@ -199,9 +199,11 @@ export default BaseChartComponent.extend({
             this.addMaxMinLabels(dots);
         }
 
-        if (this.get('showComparisonLines') && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
+        if (this.get('showComparisonLines') && this.get('comparisonLines.length') && !isEmpty(this.get('data'))) {
+            const comparisonLineFormatter = this.get('xAxis.formatter');
+
             addComparisonLines(chart, this.get('comparisonLines'));
-            // todo: add tooltip for comparison line
+            addComparisonLineTooltips(chart, comparisonLineFormatter);
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
@@ -423,7 +425,6 @@ export default BaseChartComponent.extend({
         this.set('chart', compositeChart);
 
         compositeChart.on('postRender', () => {
-
             // This is outside the Ember run loop so check if component is destroyed
             if (this.get('isDestroyed') || this.get('isDestroying')) {
                 return;
