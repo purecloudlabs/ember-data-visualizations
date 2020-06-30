@@ -41,8 +41,14 @@ export default BaseChartComponent.extend({
     shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
 
     comparisonLineOptions: null,
-    showComparisonLineTooltips: bool('comparisonLineOptions.showTooltips'),
-    showComparisonLineYAxisLabels: bool('comparisonLineOptions.showYAxisLabels'),
+
+    _comparisonLineOptions: computed('comparisonLineOptions.${showYAxisLabels,showTooltips}', function () {
+        const defaults = { showYAxisLabels: true, showTooltips: false };
+        return this.get('comparisonLineOptions') || defaults;
+    }),
+
+    showComparisonLineTooltips: bool('_comparisonLineOptions.showTooltips'),
+    showComparisonLineYAxisLabels: bool('_comparisonLineOptions.showYAxisLabels'),
 
     legendHeight: computed('legendOptions.height', function () {
         return this.get('legendOptions.height') || ChartSizes.LEGEND_HEIGHT;
