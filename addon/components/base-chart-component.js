@@ -55,9 +55,9 @@ export default Component.extend({
 
     hasRightLegend: computed('showLegend', 'legendOptions.position', function () {
         const showLegend = this.get('showLegend');
-        const legendOptions = this.get('legendOptions');
+        const isPositionRight = this.get('legendOptions.position') === 'right';
 
-        return showLegend && legendOptions.position === 'right';
+        return showLegend && isPositionRight;
     }),
 
     chartMarginTop: computed('margins.top', function () {
@@ -95,17 +95,12 @@ export default Component.extend({
     }),
 
     chartMargins: computed('chartMarginLeft', 'chartMarginRight', 'chartMarginTop', 'chartMarginBottom', function () {
-        const chartMarginLeft = this.get('chartMarginLeft');
-        const chartMarginRight = this.get('chartMarginRight');
-        const chartMarginTop = this.get('chartMarginTop');
-        const chartMarginBottom = this.get('chartMarginBottom');
+        const left = this.get('chartMarginLeft');
+        const right = this.get('chartMarginRight');
+        const top = this.get('chartMarginTop');
+        const bottom = this.get('chartMarginBottom');
 
-        return {
-            left: chartMarginLeft,
-            right: chartMarginRight,
-            top: chartMarginTop,
-            bottom: chartMarginBottom
-        };
+        return { top, right, bottom, left };
     }),
 
     setupResize() {
