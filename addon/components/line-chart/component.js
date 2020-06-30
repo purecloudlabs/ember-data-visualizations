@@ -10,7 +10,7 @@ import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
-import { equal, bool, reads } from '@ember/object/computed';
+import { equal, bool } from '@ember/object/computed';
 
 import layout from './template';
 
@@ -60,17 +60,6 @@ export default BaseChartComponent.extend({
         let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
 
         const height = this.get('height');
-        const showLegend = this.get('showLegend');
-        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
-
-        // if the legend renders on the right, give the right margin enough room to render the legend
-        const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
-        const legendInsetX = legendWidth + ChartSizes.LEGEND_OFFSET_X;
-
-        const rightMargin = showLegend && !shouldAppendLegendBelow ? legendInsetX : ChartSizes.RIGHT_MARGIN;
-
-        // if the legend renders below the chart, we want the chart as close to the bottom as possible
-        const bottomMargin = showLegend && !shouldAppendLegendBelow ? ChartSizes.BOTTOM_MARGIN : 20;
 
         // let d3 handle scaling if not otherwise specified
         const useElasticY = !this.get('yAxis.domain');

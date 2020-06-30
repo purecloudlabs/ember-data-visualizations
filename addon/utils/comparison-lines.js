@@ -97,7 +97,7 @@ export function addComparisonLineTooltips(chart, formatter) {
     if (chart) {
         const chartDefs = chart.select('svg > defs');
 
-        const tip = d3Tip().attr('class', `d3-tip comparison-tooltip`).html(d => {
+        const tip = d3Tip().attr('class', 'd3-tip comparison-tooltip').html(d => {
             return formatter ? formatter(d.value) : d.value;
         });
 
