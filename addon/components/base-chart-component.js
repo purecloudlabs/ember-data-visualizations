@@ -7,7 +7,7 @@ import { computed } from '@ember/object';
 import { A } from '@ember/array';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import dc, { legend } from 'dc';
+import dc from 'dc';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -52,13 +52,6 @@ export default Component.extend({
         const colors = this.get('colors');
         return colors[index] || colors[colors.length - 1];
     },
-
-    hasBottomLegend: computed('showLegend', 'shouldAppendLegendBelow', function () {
-        const showLegend = this.get('showLegend');
-        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
-
-        return showLegend && shouldAppendLegendBelow;
-    }),
 
     hasRightLegend: computed('showLegend', 'legendOptions.position', function () {
         const showLegend = this.get('showLegend');

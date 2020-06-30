@@ -108,11 +108,17 @@ export function addComparisonLineTooltips(chart, formatter) {
         chart.selectAll('.comparison-line.tooltip-line')
             .on('mouseover.tip', function (d) {
                 const svgLine = chart.select(`.comparison-line-${d.lineIndex}`).node();
-                tip.show(d, svgLine);
+
+                if (svgLine) {
+                    tip.show(d, svgLine);
+                }
             })
             .on('mouseout.tip', function (d) {
                 const svgLine = chart.select(`.comparison-line-${d.lineIndex}`).node();
-                tip.hide(d, svgLine);
+
+                if (svgLine) {
+                    tip.hide(d, svgLine);
+                }
             });
     }
 }

@@ -10,7 +10,7 @@ import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
 import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
-import { equal, bool } from '@ember/object/computed';
+import { equal, bool, reads } from '@ember/object/computed';
 
 import layout from './template';
 
@@ -39,6 +39,10 @@ export default BaseChartComponent.extend({
     legendOptions: null,
     showLegend: bool('legendOptions.showLegend'),
     shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
+
+    comparisonLineOptions: null,
+    showComparisonLineTooltips: bool('comparisonLineOptions.showTooltips'),
+    showComparisonLineYAxisLabels: bool('comparisonLineOptions.showYAxisLabels'),
 
     legendHeight: computed('legendOptions.height', function () {
         return this.get('legendOptions.height') || ChartSizes.LEGEND_HEIGHT;
@@ -131,13 +135,14 @@ export default BaseChartComponent.extend({
             lineCharts.push(lineChart);
         });
 
-        addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
-
         const domainTicks = this.get('yAxis.domain') || [];
+        const comparisonLines = this.get('comparisonLines') || [];
 
+        addComparisonLineTicks(compositeChart, comparisonLines);
+
+        // allow hiding comparison line labels on the y-axis
         let otherDomainTicks = [];
-        const comparisonLines = this.get('comparisonLines');
-        const showComparisonLineYAxisLabels = this.get('comparisonLineOptions.showYAxisLabel');
+        const showComparisonLineYAxisLabels = this.get('showComparisonLineYAxisLabels');
 
         if (showComparisonLineYAxisLabels) {
             otherDomainTicks = comparisonLines.map(d => d.value);
@@ -199,11 +204,19 @@ export default BaseChartComponent.extend({
             this.addMaxMinLabels(dots);
         }
 
-        if (this.get('showComparisonLines') && this.get('comparisonLines.length') && !isEmpty(this.get('data'))) {
+        const data = this.get('data');
+        const comparisonLines = this.get('comparisonLines') || [];
+        const showComparisonLines = this.get('showComparisonLines');
+        const showComparisonLineTooltips = this.get('showComparisonLineTooltips');
+
+        if (showComparisonLines && comparisonLines.length && !isEmpty(data)) {
             const comparisonLineFormatter = this.get('xAxis.formatter');
 
             addComparisonLines(chart, this.get('comparisonLines'));
-            addComparisonLineTooltips(chart, comparisonLineFormatter);
+
+            if (showComparisonLineTooltips) {
+                addComparisonLineTooltips(chart, comparisonLineFormatter);
+            }
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {
