@@ -1,6 +1,7 @@
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import { reads } from '@ember/object/computed';
@@ -20,8 +21,8 @@ export default BaseChartComponent.extend({
 
     chartId: reads('elementId'),
 
-    _getBaseChart() {
-        return this._super(...arguments);
+    _getBaseChart(type) {
+        return this._super(type);
     },
 
     buildChart() {
@@ -30,7 +31,7 @@ export default BaseChartComponent.extend({
             return;
         }
 
-        let chart = this._getBaseChart('pieChart');
+        let chart = this._getBaseChart(ChartTypes.PIE);
 
         chart
             .radius(this.get('height') / 2)
@@ -215,7 +216,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        const pieChart = this._getBaseChart('pieChart');
+        const pieChart = this._getBaseChart(ChartTypes.PIE);
         this.set('chart', pieChart);
 
         const data = [{ key: '', value: 1 }];
@@ -227,6 +228,7 @@ export default BaseChartComponent.extend({
         pieChart
             .group(group)
             .dimension(dimension)
+            .colors(chartNotAvailableColor)
             .renderLabel(false)
             .transitionDuration(0);
 

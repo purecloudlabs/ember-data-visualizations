@@ -2,6 +2,7 @@ import moment from 'moment';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import { reads } from '@ember/object/computed';
@@ -23,8 +24,8 @@ export default BaseChartComponent.extend({
 
     chartId: reads('elementId'),
 
-    _getBaseChart() {
-        const chart = this._super(...arguments);
+    _getBaseChart(type) {
+        const chart = this._super(type);
         chart.height(this.get('height'))
             .transitionDuration(0);
 
@@ -35,7 +36,7 @@ export default BaseChartComponent.extend({
     },
 
     buildChart() {
-        const heatMap = this._getBaseChart('heatMap');
+        const heatMap = this._getBaseChart(ChartTypes.HEAT_MAP);
 
         if (!this.get('xAxis') || !this.get('xAxis').domain) {
             return;
@@ -291,7 +292,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
 
-        let heatMap = this._getBaseChart('heatMap');
+        let heatMap = this._getBaseChart(ChartTypes.HEAT_MAP);
         this.set('chart', heatMap);
         const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
 

@@ -6,6 +6,7 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
@@ -52,8 +53,8 @@ export default BaseChartComponent.extend({
         }
     },
 
-    _getBaseChart() {
-        const chart = this._super(...arguments);
+    _getBaseChart(type) {
+        const chart = this._super(type);
         chart
             .height(this.get('height'))
             .brushOn(false)
@@ -74,7 +75,7 @@ export default BaseChartComponent.extend({
     },
 
     buildChart() {
-        let compositeChart = this._getBaseChart('compositeChart');
+        let compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         const showLegend = this.get('showLegend');
         const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
@@ -129,7 +130,6 @@ export default BaseChartComponent.extend({
                 // If we are hatching, we need to display a white bar behind the hatched bar
                 if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
                     columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-                    this._applyBaseColumnChartOptions(columnChart);
                     columnChart
                         .group(g)
                         .elasticY(true)
@@ -139,7 +139,6 @@ export default BaseChartComponent.extend({
                 }
 
                 columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-                this._applyBaseColumnChartOptions(columnChart);
                 columnChart
                     .group(g)
                     .elasticY(true)
@@ -153,7 +152,6 @@ export default BaseChartComponent.extend({
             });
         } else {
             columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-            this._applyBaseColumnChartOptions(columnChart);
             columnChart
                 .elasticY(true)
                 .group(groups[0])
@@ -164,6 +162,10 @@ export default BaseChartComponent.extend({
             });
             columnCharts.push(columnChart);
         }
+
+        columnCharts.forEach(chart => {
+            this._applyBaseColumnChartOptions(chart);
+        });
 
         addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
         addDomainTicks(compositeChart, this.get('yAxis').domain, this.get('comparisonLines') ? this.get('comparisonLines').map(d => d.value) : undefined);
@@ -659,7 +661,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
 
-        let columnChart = this._getBaseChart('barChart');
+        let columnChart = this._getBaseChart(ChartTypes.BAR);
         this.set('chart', columnChart);
 
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));

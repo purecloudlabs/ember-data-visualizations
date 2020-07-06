@@ -6,7 +6,7 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
@@ -51,8 +51,8 @@ export default BaseChartComponent.extend({
         }
     },
 
-    _getBaseChart() {
-        const chart = this._super(...arguments);
+    _getBaseChart(type) {
+        const chart = this._super(type);
         chart.height(this.get('height'))
             .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .transitionDuration(0);
@@ -65,7 +65,7 @@ export default BaseChartComponent.extend({
     },
 
     buildChart() {
-        const compositeChart = this._getBaseChart('compositeChart');
+        const compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         const showLegend = this.get('showLegend');
         const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
@@ -339,7 +339,7 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        let compositeChart = this._getBaseChart('compositeChart');
+        let compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         compositeChart
             .colors(chartNotAvailableColor)

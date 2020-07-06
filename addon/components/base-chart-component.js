@@ -294,7 +294,7 @@ export default Component.extend({
         let chart = dc[type](chartId, this.get('uniqueChartGroupName'));
         chart.renderTitle(false);
 
-        if (typeof chart.xAxis === 'function' && this.get('xAxis') && this.get('xAxis').ticks) {
+        if (typeof chart.xAxis === 'function' && this.get('xAxis.ticks')) {
             chart.xAxis().ticks(this.get('xAxis').ticks);
             if (this.get('d3LocaleInfo')) {
                 chart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
@@ -302,7 +302,7 @@ export default Component.extend({
 
         }
 
-        if (typeof chart.yAxis === 'function' && this.get('yAxis') && this.get('yAxis').ticks) {
+        if (typeof chart.yAxis === 'function' && this.get('yAxis.ticks')) {
             chart.yAxis().ticks(this.get('yAxis').ticks);
             if (this.get('yAxis.formatter')) {
                 chart.yAxis().tickFormat(this.get('yAxis.formatter'));

@@ -1,6 +1,7 @@
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import { reads } from '@ember/object/computed';
@@ -27,8 +28,8 @@ export default BaseChartComponent.extend({
 
     chartId: reads('elementId'),
 
-    _getBaseChart() {
-        const rowChart = this._super(...arguments);
+    _getBaseChart(type) {
+        const rowChart = this._super(type);
         rowChart
             .transitionDuration(0)
             .renderLabel(false)
@@ -42,7 +43,7 @@ export default BaseChartComponent.extend({
     },
 
     buildChart() {
-        let rowChart = this._getBaseChart('rowChart');
+        let rowChart = this._getBaseChart(ChartTypes.ROW);
 
         let labels = [];
         this.get('group')[0].all().forEach(d => labels.push(d.key));
@@ -292,7 +293,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
 
-        let rowChart = this._getBaseChart('rowChart');
+        let rowChart = this._getBaseChart(ChartTypes.ROW);
         this.set('chart', rowChart);
 
         let data = [];
