@@ -295,7 +295,7 @@ export default Component.extend({
                 .on('renderlet', null)
                 .on('postRender', null);
         }
-        let tooltips = document.querySelectorAll(`.d3-tip.${this.get('elementId')}`);
+        let tooltips = document.querySelectorAll(`.d3-tip.${this.get('chartId')}`);
         if (tooltips && tooltips.length) {
             tooltips.forEach(tooltip => {
                 tooltip.remove();
