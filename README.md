@@ -17,7 +17,7 @@ Usage
 ------------------------------------------------------------------------------
 
 ### All charts
-All charts must have a group and a dimension. All charts use `d3-tip` (an npm package which can be found [here](https://github.com/Caged/d3-tip)) to create and style tooltips. 
+All charts must have a group and a dimension. All charts use `d3-tip` (an npm package which can be found [here](https://github.com/Caged/d3-tip)) to create and style tooltips.
 See the dummy app for an example of each type of chart. The code for the dummy can be found in `tests/dummy`. In particular, `tests/dummy/controllers/application.js` and `tests/dummy/templates/application.hbs` will be useful in understanding the use of this addon.
 
 ##### Optional parameters
@@ -56,7 +56,7 @@ The column chart uses an *array* of crossfilter groups to display different type
 * `seriesMaxMin` (index): index of `this.get('group')` to use to determine the maximum and minimum values (only used if `showMaxMin` is `true`)
 * `width` (number): width in pixels of chart. If not specified, the chart will fill to the width of its container.
 * `showComparisonLines` (boolean): whether or not to show the comparison lines
-* `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties: 
+* `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties:
     * `value` (number): value on y axis on which to show line
     * `color` (Hex string): color of the comparison line
     * `alert` (String; acceptable values: `above`, `below`, `''`): whether to change the color of rectangles above or below this line. Use an empty string for no color changing.
@@ -80,7 +80,7 @@ The line chart uses an *array* of crossfilter groups to display different types 
 * `showCurrentIndicator` (boolean): whether or not to show diamond-shaped 'current' indicator on x axis
 * `currentInterval` (Object): MUST have a `start` property which contains a `moment` object that tells the chart where to display the current indicator.
 * `showComparisonLines` (boolean): whether or not to show the comparison lines
-* `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties: 
+* `comparisonLines` (Array of Objects): horizontal lines to mark a target, average, or any kind of comparison value. Properties:
     * `value` (number): value on y axis on which to show line
     * `color` (Hex string): color of the comparison line
 * `showMaxMin` (boolean): whether or not to show max/min indicators for the maximum and minimum values of one of the groups on the line chart
@@ -163,7 +163,7 @@ The heatmap does *not* use an array of crossfilter groups. It uses a singular gr
 
 ##### Required parameters
 * `dimension`: crossfilter dimension to use for chart
-*  `colors` (Array): list of colors to use. 
+*  `colors` (Array): list of colors to use.
 * `group`: crossfilter group to use for chart (not an array)
     * The `key` of each fact is an array that tells the heatmap the position of the fact on the chart. `key[0]` will tell the chart the y position, and `key[1]` the x position.
     * The `value` property of each fact will be used to determine the color of the fact.
@@ -204,10 +204,10 @@ Contributing
 * `ember test --server` – Runs the test suite in "watch mode"
 * `ember try:each` – Runs the test suite against multiple Ember versions
 
-### Running the dummy application
+### Running the example charts
 
-* `ember serve`
-* Visit the dummy application at [http://localhost:4200](http://localhost:4200).
+* `npm run storybook`
+* Visit the examples at [http://localhost:9001](http://localhost:9001).
 
 For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
 
