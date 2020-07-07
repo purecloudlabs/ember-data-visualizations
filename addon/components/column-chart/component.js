@@ -7,7 +7,7 @@ import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import ChartTypes from 'ember-data-visualizations/utils/chart-types';
-import { addComparisonLines, addComparisonLineTicks } from 'ember-data-visualizations/utils/comparison-lines';
+import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
 import { equal, bool } from '@ember/object/computed';
@@ -38,9 +38,18 @@ export default BaseChartComponent.extend({
     }),
 
     legendOptions: null,
-
     showLegend: bool('legendOptions.showLegend'),
     shouldAppendLegendBelow: equal('legendOptions.position', 'bottom'),
+
+    comparisonLineOptions: null,
+
+    _comparisonLineOptions: computed('comparisonLineOptions.${showYAxisLabels,showTooltips}', function () {
+        const defaults = { showYAxisLabels: true, showTooltips: false };
+        return this.get('comparisonLineOptions') || defaults;
+    }),
+
+    showComparisonLineTooltips: bool('_comparisonLineOptions.showTooltips'),
+    showComparisonLineYAxisLabels: bool('_comparisonLineOptions.showYAxisLabels'),
 
     legendHeight: computed('legendOptions.height', function () {
         return this.get('legendOptions.height') || ChartSizes.LEGEND_HEIGHT;
@@ -77,28 +86,14 @@ export default BaseChartComponent.extend({
     buildChart() {
         let compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
-        const showLegend = this.get('showLegend');
-        const shouldAppendLegendBelow = this.get('shouldAppendLegendBelow');
-
-        // if the legend renders on the right, give the right margin enough room to render the legend
-        const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
-        const legendInsetX = legendWidth + ChartSizes.LEGEND_OFFSET_X;
-
-        const rightMargin = showLegend && !shouldAppendLegendBelow ? legendInsetX : ChartSizes.RIGHT_MARGIN;
-
-        // if the legend renders below the chart, we want the chart as close to the bottom as possible
-        const bottomMargin = showLegend && !shouldAppendLegendBelow ? ChartSizes.BOTTOM_MARGIN : 20;
+        const height = this.get('height');
+        const { top, right, bottom, left }  = this.get('chartMargins');
 
         // let d3 handle scaling if not otherwise specified
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
-            .margins({
-                top: 10,
-                right: rightMargin,
-                bottom: bottomMargin,
-                left: 100
-            })
+            .margins({ top, right, bottom, left })
             .xUnits(() => {
                 if (this.get('group.length')) {
                     return this.get('group')[0].size() * (this.get('group.length') + 1);
@@ -167,8 +162,20 @@ export default BaseChartComponent.extend({
             this._applyBaseColumnChartOptions(chart);
         });
 
-        addComparisonLineTicks(compositeChart, this.get('comparisonLines'));
-        addDomainTicks(compositeChart, this.get('yAxis').domain, this.get('comparisonLines') ? this.get('comparisonLines').map(d => d.value) : undefined);
+        const domainTicks = this.get('yAxis.domain') || [];
+        const comparisonLines = this.get('comparisonLines') || [];
+
+        addComparisonLineTicks(compositeChart, comparisonLines);
+
+        // allow hiding comparison line labels on the y-axis
+        let otherDomainTicks = [];
+        const showComparisonLineYAxisLabels = this.get('showComparisonLineYAxisLabels');
+
+        if (showComparisonLineYAxisLabels) {
+            otherDomainTicks = comparisonLines.map(d => d.value);
+        }
+
+        addDomainTicks(compositeChart, domainTicks, otherDomainTicks);
 
         compositeChart
             .on('pretransition', chart => this.onPretransition(chart, tip))
@@ -349,8 +356,19 @@ export default BaseChartComponent.extend({
             this.addDataValues(bars, chart);
         }
 
-        if (!isEmpty(this.get('showComparisonLines')) && this.get('comparisonLines') && !isEmpty(this.get('data'))) {
-            addComparisonLines(chart, this.get('comparisonLines'));
+        const data = this.get('data');
+        const comparisonLines = this.get('comparisonLines') || [];
+        const showComparisonLines = this.get('showComparisonLines');
+        const showComparisonLineTooltips = this.get('showComparisonLineTooltips');
+
+        if (showComparisonLines && comparisonLines.length && !isEmpty(data)) {
+            const comparisonLineFormatter = this.get('xAxis.formatter');
+
+            addComparisonLines(chart, comparisonLines);
+
+            if (showComparisonLineTooltips) {
+                addComparisonLineTooltips(chart, comparisonLineFormatter);
+            }
         }
 
         if (this.get('showCurrentIndicator') && this.get('currentInterval')) {

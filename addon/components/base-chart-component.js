@@ -54,6 +54,56 @@ export default Component.extend({
         return colors[index] || colors[colors.length - 1];
     },
 
+    hasRightLegend: computed('showLegend', 'legendOptions.position', function () {
+        const showLegend = this.get('showLegend');
+        const isPositionRight = this.get('legendOptions.position') === 'right';
+
+        return showLegend && isPositionRight;
+    }),
+
+    chartMarginTop: computed('margins.top', function () {
+        const defaultTopMargin = ChartSizes.TOP_MARGIN;
+        const specifiedTopMargin = this.get('margins.top');
+
+        return specifiedTopMargin || defaultTopMargin;
+    }),
+
+    chartMarginBottom: computed('margins.bottom', function () {
+        const defaultBottomMargin = ChartSizes.BOTTOM_MARGIN;
+        const specifiedBottomMargin = this.get('margins.bottom');
+
+        return specifiedBottomMargin || defaultBottomMargin;
+    }),
+
+    chartMarginLeft: computed('margins.left', function () {
+        const defaultLeftMargin = ChartSizes.LEFT_MARGIN;
+        const specifiedLeftMargin = this.get('margins.left');
+
+        return specifiedLeftMargin || defaultLeftMargin;
+    }),
+
+    chartMarginRight: computed('margins.right', 'legendWidth', 'hasRightLegend', function () {
+        const hasRightLegend = this.get('hasRightLegend');
+        const legendWidth = this.get('legendWidth') || ChartSizes.LEGEND_WIDTH;
+
+        const defaultRightMargin = ChartSizes.RIGHT_MARGIN;
+        const defaultRightMarginWithLegend = legendWidth + ChartSizes.LEGEND_OFFSET_X;
+
+        const defaultMargin = hasRightLegend ? defaultRightMarginWithLegend : defaultRightMargin;
+        const specifiedRightMargin = this.get('margins.right');
+
+        return specifiedRightMargin || defaultMargin;
+    }),
+
+    chartMargins: computed('chartMarginLeft', 'chartMarginRight', 'chartMarginTop', 'chartMarginBottom', function () {
+        const left = this.get('chartMarginLeft');
+        const right = this.get('chartMarginRight');
+        const top = this.get('chartMarginTop');
+        const bottom = this.get('chartMarginBottom');
+
+        return { top, right, bottom, left };
+    }),
+
     setupResize() {
         this.set('onResizeDebounced', () => {
             // This is outside the Ember run loop so check if component is destroyed
@@ -79,6 +129,7 @@ export default Component.extend({
         if (tip && !svg.empty()) {
             svg.call(tip);
         }
+
         // clicking actions
         this.get('chart').selectAll(this.elementToApplyTipSelector).on('click', d => {
             this.onClick(d);
@@ -109,6 +160,10 @@ export default Component.extend({
         this.get('chart').selectAll(this.elementToApplyTipSelector).on('click', null);
 
         this.get('chart').selectAll(this.elementToApplyTipSelector)
+            .on('mouseover.tip', null)
+            .on('mouseout.tip', null);
+
+        this.get('chart').selectAll('.comparison-line.tooltip-line')
             .on('mouseover.tip', null)
             .on('mouseout.tip', null);
     },
