@@ -1,6 +1,6 @@
 {
   "name": "ember-data-visualizations",
-  "version": "3.10.1",
+  "version": "3.11.0",
   "description": "Ember addon to support visualizations with dc.js (d3 & crossfilter).",
   "keywords": [
     "ember-addon"
