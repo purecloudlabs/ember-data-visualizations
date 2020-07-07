@@ -6,7 +6,7 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { padDomain, addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
@@ -62,9 +62,29 @@ export default BaseChartComponent.extend({
         }
     },
 
+    _getBaseChart(type) {
+        const chart = this._super(type);
+        chart
+            .height(this.get('height'))
+            .brushOn(false)
+            .transitionDuration(0)
+            .x(d3.scaleTime().domain(this.get('xAxis').domain));
+
+        if (this.get('width')) {
+            chart.width(this.get('width'));
+        }
+
+        return chart;
+    },
+
+    _applyBaseColumnChartOptions(chart) {
+        chart.centerBar(true)
+            .barPadding(0.00)
+            .renderTitle(false);
+    },
+
     buildChart() {
-        const chartId = `#${this.get('chartId')}`;
-        let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
+        let compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         const height = this.get('height');
         const { top, right, bottom, left }  = this.get('chartMargins');
@@ -73,12 +93,7 @@ export default BaseChartComponent.extend({
         const useElasticY = !this.get('yAxis.domain');
 
         compositeChart
-            .transitionDuration(0)
-            .renderTitle(false)
-            .brushOn(false)
-            .height(height)
             .margins({ top, right, bottom, left })
-            .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => {
                 if (this.get('group.length')) {
                     return this.get('group')[0].size() * (this.get('group.length') + 1);
@@ -89,10 +104,6 @@ export default BaseChartComponent.extend({
             .elasticY(useElasticY)
             .yAxisPadding('40%');
 
-        if (this.get('width')) {
-            compositeChart.width(this.get('width'));
-        }
-
         if (this.get('yAxis.domain')) {
             compositeChart.y(d3.scaleLinear().domain(padDomain(this.get('yAxis').domain)));
         }
@@ -102,18 +113,7 @@ export default BaseChartComponent.extend({
         }
 
         compositeChart.xAxis().tickSizeOuter(0);
-        compositeChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
-        if (this.get('xAxis') && this.get('xAxis').ticks) {
-            compositeChart.xAxis().ticks(this.get('xAxis').ticks);
-        }
-
         compositeChart.yAxis().tickSizeOuter(0);
-        if (this.get('yAxis') && this.get('yAxis').ticks) {
-            compositeChart.yAxis().ticks(this.get('yAxis').ticks);
-            if (this.get('yAxis.formatter')) {
-                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
-            }
-        }
 
         let tip = this.createTooltip();
         let columnChart;
@@ -125,27 +125,19 @@ export default BaseChartComponent.extend({
                 // If we are hatching, we need to display a white bar behind the hatched bar
                 if (!isEmpty(this.get('series')) && !isEmpty(this.get('series')[index]) && this.get('series')[index].hatch) {
                     columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-
                     columnChart
-                        .centerBar(true)
-                        .barPadding(0.00)
                         .group(g)
-                        .colors('white')
-                        .renderTitle(false)
-                        .elasticY(true);
+                        .elasticY(true)
+                        .colors('white');
 
                     columnCharts.push(columnChart);
                 }
 
                 columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
-
                 columnChart
-                    .centerBar(true)
-                    .barPadding(0.00)
                     .group(g)
-                    .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
-                    .renderTitle(false)
                     .elasticY(true)
+                    .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
                     .colorAccessor(d => {
                         const activeAlert = this.determineActiveAlertLine(d.value);
                         return activeAlert ? activeAlert.alertColorIndex : index;
@@ -156,11 +148,8 @@ export default BaseChartComponent.extend({
         } else {
             columnChart = dc.barChart(compositeChart, this.get('uniqueChartGroupName'));
             columnChart
-                .centerBar(true)
-                .barPadding(0.00)
+                .elasticY(true)
                 .group(groups[0])
-                .renderTitle(false)
-                .elasticY(true);
             groups.forEach((g, index) => {
                 if (index != 0) {
                     columnChart.stack(g);
@@ -168,6 +157,10 @@ export default BaseChartComponent.extend({
             });
             columnCharts.push(columnChart);
         }
+
+        columnCharts.forEach(chart => {
+            this._applyBaseColumnChartOptions(chart);
+        });
 
         const domainTicks = this.get('yAxis.domain') || [];
         const comparisonLines = this.get('comparisonLines') || [];
@@ -685,10 +678,8 @@ export default BaseChartComponent.extend({
         const chartNotAvailableColor = this.get('chartNotAvailableColor');
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
-        const yAxis = this.get('yAxis');
 
-        const chartId = this.get('chartId');
-        let columnChart = dc.barChart(`#${chartId}`, this.get('uniqueChartGroupName'));
+        let columnChart = this._getBaseChart(ChartTypes.BAR);
         this.set('chart', columnChart);
 
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
@@ -706,31 +697,20 @@ export default BaseChartComponent.extend({
         const dimension = filter.dimension(d => d);
         const group = dimension.group().reduceCount(g => g);
 
+        this._applyBaseColumnChartOptions(columnChart);
+
         columnChart
-            .centerBar(true)
-            .barPadding(0.00)
             .colors(chartNotAvailableColor)
-            .renderTitle(false)
-            .brushOn(false)
-            .height(this.get('height'))
             .margins({
                 top: 10,
                 right: 100,
                 bottom: 50,
                 left: 100
             })
-            .x(d3.scaleTime().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
             .y(d3.scaleLinear().domain([0, 1]))
             .group(group)
-            .dimension(dimension)
-            .transitionDuration(0);
-
-        columnChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
-
-        if (this.get('width')) {
-            this.get('chart').effectiveWidth(this.get('width'));
-        }
+            .dimension(dimension);
 
         columnChart.on('pretransition', chart => {
             // This is outside the Ember run loop so check if component is destroyed
@@ -788,12 +768,6 @@ export default BaseChartComponent.extend({
                 .attr('y', bbox.y + (bbox.height / 2))
                 .attr('x', bbox.x + (bbox.width / 2));
         });
-        if (xAxis && xAxis.ticks) {
-            this.get('chart').xAxis().ticks(xAxis.ticks);
-        }
-        if (yAxis && yAxis.ticks) {
-            this.get('chart').yAxis().ticks(yAxis.ticks);
-        }
 
         columnChart.render();
     }

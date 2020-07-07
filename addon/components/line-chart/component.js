@@ -6,7 +6,7 @@ import { isEmpty } from '@ember/utils';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
-import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
 import { computed } from '@ember/object';
@@ -61,9 +61,21 @@ export default BaseChartComponent.extend({
         }
     },
 
+    _getBaseChart(type) {
+        const chart = this._super(type);
+        chart.height(this.get('height'))
+            .x(d3.scaleTime().domain(this.get('xAxis').domain))
+            .transitionDuration(0);
+
+        if (this.get('width')) {
+            chart.width(this.get('width'));
+        }
+
+        return chart;
+    },
+
     buildChart() {
-        const chartId = `#${this.get('chartId')}`;
-        let compositeChart = dc.compositeChart(chartId, this.get('uniqueChartGroupName'));
+        const compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         const height = this.get('height');
 
@@ -73,11 +85,8 @@ export default BaseChartComponent.extend({
         const { top, right, bottom, left } = this.get('chartMargins');
 
         compositeChart
-            .renderTitle(false)
             .brushOn(false)
-            .height(height)
             .margins({ top, right, bottom, left })
-            .x(d3.scaleTime().domain(this.get('xAxis').domain))
             .xUnits(() => {
                 if (this.get('group.length')) {
                     return this.get('group')[0].size() * (this.get('group.length') + 1);
@@ -86,11 +95,6 @@ export default BaseChartComponent.extend({
             })
             .elasticY(useElasticY)
             .yAxisPadding('20%')
-            .transitionDuration(0);
-
-        if (this.get('width')) {
-            compositeChart.width(this.get('width'));
-        }
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
             compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
@@ -101,18 +105,7 @@ export default BaseChartComponent.extend({
         }
 
         compositeChart.xAxis().tickSizeOuter(0);
-        compositeChart.xAxis().tickFormat(getTickFormat(this.get('d3LocaleInfo')));
-        if (this.get('xAxis') && this.get('xAxis').ticks) {
-            compositeChart.xAxis().ticks(this.get('xAxis').ticks);
-        }
-
         compositeChart.yAxis().tickSizeOuter(0);
-        if (this.get('yAxis') && this.get('yAxis').ticks) {
-            compositeChart.yAxis().ticks(this.get('yAxis').ticks);
-            if (this.get('yAxis.formatter')) {
-                compositeChart.yAxis().tickFormat(this.get('yAxis.formatter'));
-            }
-        }
 
         let lineCharts = [];
         let lineChart;
@@ -366,26 +359,18 @@ export default BaseChartComponent.extend({
         const xAxis = this.get('xAxis');
         const yAxis = this.get('yAxis');
 
-        const chartId = this.get('chartId');
-        let compositeChart = dc.compositeChart(`#${chartId}`, this.get('uniqueChartGroupName'));
+        let compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         compositeChart
             .colors(chartNotAvailableColor)
-            .renderTitle(false)
-            .height(this.get('height'))
             .margins({
                 top: 10,
                 right: 100,
                 bottom: 50,
                 left: 100
             })
-            .x(d3.scaleTime().domain(xAxis.domain))
             .xUnits(() => data.length + 1)
             .y(d3.scaleLinear().domain([0, 1]));
-
-        if (this.get('width')) {
-            compositeChart.width(this.get('width'));
-        }
 
         // determine number of ticks
         const duration = moment.duration(xAxis.domain[1].diff(xAxis.domain[0]));
@@ -422,8 +407,6 @@ export default BaseChartComponent.extend({
                 .group(g)
                 .dimension(dimension)
                 .colors(chartNotAvailableColor)
-                .renderTitle(false)
-                .x(d3.scaleTime().domain(this.get('xAxis').domain));
 
             lineCharts.push(lineChart);
         });
@@ -451,12 +434,7 @@ export default BaseChartComponent.extend({
                 .attr('y', bbox.y + (bbox.height / 2))
                 .attr('x', bbox.x + (bbox.width / 2));
         });
-        if (xAxis && xAxis.ticks) {
-            this.get('chart').xAxis().ticks(xAxis.ticks);
-        }
-        if (yAxis && yAxis.ticks) {
-            this.get('chart').yAxis().ticks(yAxis.ticks);
-        }
+
         compositeChart.render();
     }
 });

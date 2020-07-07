@@ -2,8 +2,10 @@ import moment from 'moment';
 import dc from 'dc';
 import crossfilter from 'crossfilter';
 import BaseChartComponent from '../base-chart-component';
+import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import d3Tip from 'd3-tip';
 import d3 from 'd3';
+import { reads } from '@ember/object/computed';
 
 /**
    @public
@@ -20,8 +22,21 @@ export default BaseChartComponent.extend({
     valueFormat: v => v,
     colorMap: v => v,
 
+    chartId: reads('elementId'),
+
+    _getBaseChart(type) {
+        const chart = this._super(type);
+        chart.height(this.get('height'))
+            .transitionDuration(0);
+
+        if (this.get('width')) {
+            chart.width(this.get('width'));
+        }
+        return chart;
+    },
+
     buildChart() {
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        const heatMap = this._getBaseChart(ChartTypes.HEAT_MAP);
 
         if (!this.get('xAxis') || !this.get('xAxis').domain) {
             return;
@@ -58,14 +73,7 @@ export default BaseChartComponent.extend({
             .valueAccessor(d => d.key[0])
             .colors(d3.scaleQuantize().domain([0, this.get('colors').length - 1]).range(this.get('colors')))
             .colorAccessor(d => colorMap(d.value))
-            .renderTitle(false)
-            .height(this.get('height'))
             .colsLabel(d => this.get('keyFormat')(d))
-            .transitionDuration(0);
-
-        if (this.get('width')) {
-            heatMap.width(this.get('width'));
-        }
 
         const minBoxWidth = this.get('minBoxWidth') || 4;
         const minEffectiveWidth = minBoxWidth * numbCols;
@@ -284,7 +292,7 @@ export default BaseChartComponent.extend({
         const chartNotAvailableTextColor = this.get('chartNotAvailableTextColor');
         const xAxis = this.get('xAxis');
 
-        let heatMap = dc.heatMap(`#${this.get('elementId')}`, this.get('uniqueChartGroupName'));
+        let heatMap = this._getBaseChart(ChartTypes.HEAT_MAP);
         this.set('chart', heatMap);
         const rightMargin = this.get('legend') && this.get('legendWidth') ? this.get('legendWidth') : 5;
 
@@ -319,14 +327,7 @@ export default BaseChartComponent.extend({
             .valueAccessor(d => d.key[0])
             .rowsLabel(() => '')
             .colors(chartNotAvailableColor)
-            .colorAccessor(() => 0)
-            .renderTitle(false)
-            .height(this.get('height'))
-            .transitionDuration(0);
-
-        if (this.get('width')) {
-            this.get('chart').width(this.get('width'));
-        }
+            .colorAccessor(() => 0);
 
         heatMap.on('pretransition', chart => {
             const g = chart.select('g.heatmap');
