@@ -289,6 +289,10 @@ export default Component.extend({
         this.get('chart').render();
     },
 
+    /**
+        @desc gets basic shared chart config
+        @param {String} type - Type of chart to create, from utils/chart-types
+     */
     _getBaseChart(type) {
         const chartId = `#${this.get('chartId')}`;
         let chart = dc[type](chartId, this.get('uniqueChartGroupName'));
