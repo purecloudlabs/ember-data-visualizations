@@ -94,7 +94,7 @@ export default BaseChartComponent.extend({
                 return 0;
             })
             .elasticY(useElasticY)
-            .yAxisPadding('20%')
+            .yAxisPadding('20%');
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
             compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
@@ -118,7 +118,17 @@ export default BaseChartComponent.extend({
                 .group(g)
                 .colors(this.get('colors')[index])
                 .renderTitle(false)
-                .elasticY(true);
+                .elasticY(true)
+                .defined(d => {
+                    const now = this.get('now');
+                    const isXDate = moment.isDate(d.x);
+
+                    if (isXDate) {
+                        return moment(d.x).isSameOrBefore(now);
+                    }
+
+                    return true;
+                });
 
             lineCharts.push(lineChart);
         });

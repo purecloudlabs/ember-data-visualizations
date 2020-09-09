@@ -9,6 +9,7 @@ import d3 from 'd3';
 import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import dc from 'dc';
 import { getTickFormat } from 'ember-data-visualizations/utils/d3-localization';
+import moment from 'moment';
 
 export default Component.extend({
     resizeDetector: service(),
@@ -396,7 +397,7 @@ export default Component.extend({
 
     didReceiveAttrs() {
         this._super(...arguments);
-        let data = {};
+        const data = {};
         if (Array.isArray(this.get('group'))) {
             A(this.get('group')).forEach(g => {
                 A(g.all()).forEach(datum => {
@@ -419,6 +420,8 @@ export default Component.extend({
                 }
             });
         }
+
+        this.set('now', moment());
         this.set('data', data);
 
         scheduleOnce('afterRender', this, this.setupResize);
