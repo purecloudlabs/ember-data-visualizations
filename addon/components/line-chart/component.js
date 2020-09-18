@@ -158,7 +158,9 @@ export default BaseChartComponent.extend({
                         const value = this.get('data')[d.data.key][i];
                         const formattedValue = formatter(value);
                         const secondaryClass = d.y === value ? 'primary-stat' : '';
-                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${title}</span><span class="tooltip-value ${secondaryClass}">${formattedValue}</span></span>`);
+                        const replaceTag = title.replace(/</g, '&lt;');
+                        const formattedTitle = replaceTag.replace(/>/g, '&gt;');
+                        str = str.concat(`<span class="tooltip-list-item"><span class="tooltip-label ${secondaryClass}">${formattedTitle}</span><span class="tooltip-value ${secondaryClass}">${formattedValue}</span></span>`);
                     });
                     return str;
                 }
