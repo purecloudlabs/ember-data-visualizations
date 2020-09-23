@@ -396,7 +396,7 @@ export default Component.extend({
 
     didReceiveAttrs() {
         this._super(...arguments);
-        let data = {};
+        const data = {};
         if (Array.isArray(this.get('group'))) {
             A(this.get('group')).forEach(g => {
                 A(g.all()).forEach(datum => {
@@ -419,6 +419,7 @@ export default Component.extend({
                 }
             });
         }
+
         this.set('data', data);
 
         scheduleOnce('afterRender', this, this.setupResize);

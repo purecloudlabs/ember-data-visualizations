@@ -78,6 +78,7 @@ export default BaseChartComponent.extend({
         const compositeChart = this._getBaseChart(ChartTypes.COMPOSITE);
 
         const height = this.get('height');
+        const datumExcluder = this.get('datumExcluder');
 
         // let d3 handle scaling if not otherwise specified
         const useElasticY = !this.get('yAxis.domain');
@@ -94,7 +95,7 @@ export default BaseChartComponent.extend({
                 return 0;
             })
             .elasticY(useElasticY)
-            .yAxisPadding('20%')
+            .yAxisPadding('20%');
 
         if (this.get('yAxis') && this.get('yAxis').domain) {
             compositeChart.y(d3.scaleLinear().domain(this.get('yAxis').domain));
@@ -119,6 +120,10 @@ export default BaseChartComponent.extend({
                 .colors(this.get('colors')[index])
                 .renderTitle(false)
                 .elasticY(true);
+
+            if (datumExcluder && typeof datumExcluder === 'function') {
+                lineChart.defined(d => datumExcluder(d));
+            }
 
             lineCharts.push(lineChart);
         });
