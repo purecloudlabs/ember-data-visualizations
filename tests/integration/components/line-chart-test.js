@@ -1,7 +1,8 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { render } from '@ember/test-helpers';
+import { htmlSafe } from '@ember/template';
+import { render, triggerEvent } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import moment from 'moment';
 import crossfilter from 'crossfilter';
@@ -40,7 +41,7 @@ const getTestParameters = function () {
 
         series: [
             {
-                title: 'Total Fruit Eaten',
+                title: htmlSafe('Total Fruit Eaten'),
                 hatch: 'pos'
             },
             {
@@ -136,5 +137,12 @@ module('Integration | Component | line chart', function (hooks) {
         assert.dom('.max-value-indicator').exists();
         assert.dom('.min-value-text').exists();
         assert.dom('.min-value-indicator').exists();
+    });
+
+    test('it renders tooltip if the title is an ember htmlSafe object', async function (assert) {
+        await render(hbs`{{line-chart dimension=params.dimensions group=params.groups series=params.series xAxis=params.xAxis yAxis=params.yAxis instantRun=true}}`);
+        await triggerEvent(document.querySelector('circle.dot'), 'mouseover');
+        const tooltip = document.querySelector('.d3-tip');
+        assert.ok(tooltip, 'Expect tooltip to show');
     });
 });

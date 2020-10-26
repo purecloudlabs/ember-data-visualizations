@@ -160,6 +160,10 @@ export default BaseChartComponent.extend({
                 if (!isEmpty(titles)) {
                     let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
                     titles.forEach((title, i) => {
+                        // if title is an ember htmlSafe object instead of string
+                        if (typeof title === 'object' && title.string) {
+                            title = title.string;
+                        }
                         const value = this.get('data')[d.data.key][i];
                         const formattedValue = formatter(value);
                         const secondaryClass = d.y === value ? 'primary-stat' : '';
