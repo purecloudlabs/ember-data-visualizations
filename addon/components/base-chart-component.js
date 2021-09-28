@@ -384,6 +384,8 @@ export default Component.extend({
                 tooltip.remove();
             });
         }
+
+        dc.chartRegistry.clear(this.get('uniqueChartGroupName'));
     },
 
     willDestroyElement() {
@@ -391,7 +393,6 @@ export default Component.extend({
         this.cleanupCurrentChart();
         this.tearDownResize();
         this.cancelTimers();
-        dc.chartRegistry.clear(this.get('uniqueChartGroupName'));
     },
 
     didReceiveAttrs() {
