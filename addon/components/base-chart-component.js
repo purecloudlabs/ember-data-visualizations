@@ -29,6 +29,7 @@ export default Component.extend({
     chartNotAvailableTextColor: '#888888',
     chartNotAvailableColor: '#b3b3b3',
     tooltipDateFormat: 'll LT',
+    timeZone: null,
     group: null,
     dimension: null,
     data: null,

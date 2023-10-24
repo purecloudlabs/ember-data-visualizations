@@ -9,6 +9,8 @@ import ChartSizes from 'ember-data-visualizations/utils/chart-sizes';
 import ChartTypes from 'ember-data-visualizations/utils/chart-types';
 import { addComparisonLines, addComparisonLineTicks, addComparisonLineTooltips } from 'ember-data-visualizations/utils/comparison-lines';
 import { addDomainTicks } from 'ember-data-visualizations/utils/domain-tweaks';
+import { convertTZ } from 'ember-data-visualizations/utils/d3-localization';
+
 import { computed } from '@ember/object';
 import { equal, bool } from '@ember/object/computed';
 
@@ -158,11 +160,17 @@ export default BaseChartComponent.extend({
         let tip = d3Tip().attr('class', `d3-tip ${chartId}`)
             .html(d => {
                 if (!isEmpty(titles)) {
-                    let str = `<span class="tooltip-time">${moment(d.data.key).format(this.get('tooltipDateFormat'))}</span>`;
+                    let date = moment(d.data.key);
+                    if (this.get('timeZone')) {
+                        const localTz = moment.tz.guess();
+                        date = moment(d.data.key).tz(localTz);
+                    }
+
+                    let str = `<span class="tooltip-time">${date.format(this.get('tooltipDateFormat'))}</span>`;
                     titles.forEach((title, i) => {
-                        // if title is an ember htmlSafe object instead of string,  use the String constructor to stringify the htmlSafe object. 
+                        // if title is an ember htmlSafe object instead of string,  use the String constructor to stringify the htmlSafe object.
                         title = String(title);
-                        
+
                         const value = this.get('data')[d.data.key][i];
                         const formattedValue = formatter(value);
                         const secondaryClass = d.y === value ? 'primary-stat' : '';
@@ -272,6 +280,10 @@ export default BaseChartComponent.extend({
         // if indicatorDate is in range but not already in the scale, add it.
         let xTimeScale = d3.scaleTime().domain(this.get('xAxis').domain);
         let indicatorDate = this.get('currentInterval') ? this.get('currentInterval.start._d') : null;
+        const timeZone = this.get('timeZone');
+        if (timeZone) {
+            indicatorDate = convertTZ(this.get('currentInterval.start').toISOString(), this.get('timeZone'));
+        }
         let ticks = xTimeScale.ticks(this.get('xAxis').ticks);
         if (!this.isIntervalIncluded(ticks, indicatorDate) && this.isIntervalInRange(xTimeScale, indicatorDate)) {
             ticks.push(indicatorDate);
@@ -282,6 +294,10 @@ export default BaseChartComponent.extend({
     changeTickForCurrentInterval() {
         // this method should be called on renderlet
         let indicatorDate = this.get('currentInterval.start._d');
+        const timeZone = this.get('timeZone');
+        if (timeZone) {
+            indicatorDate = convertTZ(this.get('currentInterval.start').toISOString(), this.get('timeZone'));
+        }
         let xTimeScale = d3.scaleTime().domain(this.get('xAxis').domain);
         if (this.isIntervalInRange(xTimeScale, indicatorDate)) {
             let currentTick = this.get('chart').select('svg > g > g.axis').selectAll('g.tick')
