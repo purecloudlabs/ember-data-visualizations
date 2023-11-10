@@ -26,3 +26,8 @@ export function getTickFormat({ periods = ['AM', 'PM'], dayFormat = '%a %d', wee
             : formatYear)(date);
     };
 }
+
+export function convertTZ(date, tzString) {
+    return new Date((typeof date === 'string' ? new Date(date) : date).toLocaleString('en-US', { timeZone: tzString }));
+}
+
